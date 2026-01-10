@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Agente del Clima</title>
+</head>
+<body>
+  <h1>Test API</h1>
+  
+  <div>
+    <input type="text" id="location" placeholder="Ciudad" value="Madrid">
+    <button onclick="test()">Probar</button>
+  </div>
+  
+  <div id="result"></div>
+  
+  <script>
+    async function test() {
+      const location = document.getElementById('location').value;
+      const resultDiv = document.getElementById('result');
+      
+      try {
+        const response = await fetch(`http://localhost:3001/api/weather?location=${location}`);
+        const data = await response.json();
+        resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
