@@ -6,9 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
-    "web": "node server.js",
-    "web:dev": "node --watch server.js"
+    "dev": "node --watch server.js"
   },
   "dependencies": {
     "axios": "^1.6.2",
@@ -19,5 +17,4 @@
   "engines": {
     "node": ">=18.0.0"
   }
-}
 }
