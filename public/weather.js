@@ -106,12 +106,12 @@ async function searchWeather() {
       await loadDailyForecast(location);
       await loadMap(location);
     } else {
-      alert(data.error);
+      showError(data.error, data.suggestion);
       showHome();
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('Error de conexión. Por favor, verifica que el servidor esté funcionando.');
+    showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando o intenta de nuevo en unos minutos.');
     showHome();
   } finally {
     loading.style.display = 'none';
