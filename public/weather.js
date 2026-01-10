@@ -97,7 +97,7 @@ async function searchWeather() {
   loading.style.display = 'flex';
   
   try {
-    const response = await fetch(`http://localhost:3001/api/weather?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
     const data = await response.json();
     
     if (data.success) {
@@ -122,7 +122,7 @@ function updateCurrentWeather(report) {
   const container = document.getElementById('current-weather');
   container.style.display = 'block';
   container.style.animation = 'pageFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-
+  
   const lines = report.split('\n');
   
   lines.forEach(line => {
@@ -135,10 +135,10 @@ function updateCurrentWeather(report) {
       const options = { weekday: 'long', day: 'numeric', month: 'long' };
       document.getElementById('current-date').textContent = date.toLocaleDateString('es-UY', options);
     } else if (line.includes('Promedio:')) {
-      const temp = line.split(': ')[1].replace('°C', '');
-      document.getElementById('current-temp').textContent = parseFloat(temp).toFixed(0);
+      const tempStr = line.split('Promedio: ')[1].replace('°C', '').trim();
+      document.getElementById('current-temp').textContent = parseFloat(tempStr).toFixed(0);
     } else if (line.includes('Velocidad promedio:')) {
-      const wind = line.split(': ')[1].replace('m/s', '');
+      const wind = line.split(': ')[1].replace('m/s', '').trim();
       document.getElementById('wind').textContent = `${(parseFloat(wind) * 3.6).toFixed(0)} km/h`;
     } else if (line.includes('HUMEDAD')) {
       const match = line.match(/Promedio:\s*([\d.]+)/);
@@ -201,11 +201,13 @@ function getWeatherIcon(description) {
 
 async function loadHourlyForecast(location) {
   try {
-    const response = await fetch(`http://localhost:3001/api/forecast-7days?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`);
     const data = await response.json();
 
     if (data.success) {
       displayHourlyForecast(data.forecast);
+    } else {
+      console.error('Error en pronóstico horario:', data.error);
     }
   } catch (error) {
     console.error('Error al cargar pronóstico horario:', error);
@@ -214,6 +216,11 @@ async function loadHourlyForecast(location) {
 
 function displayHourlyForecast(forecast) {
   const container = document.getElementById('hourly-forecast');
+  
+  if (!forecast || forecast.length === 0) {
+    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico horario</p>';
+    return;
+  }
   
   const todayData = forecast[0];
   const hours = [];
@@ -241,12 +248,14 @@ function displayHourlyForecast(forecast) {
 
 async function loadDailyForecast(location) {
   try {
-    const response = await fetch(`http://localhost:3001/api/forecast-7days?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`);
     const data = await response.json();
 
     if (data.success) {
       displayDailyForecast(data.forecast);
       updateWeatherDetails(data.forecast);
+    } else {
+      console.error('Error en pronóstico diario:', data.error);
     }
   } catch (error) {
     console.error('Error al cargar pronóstico diario:', error);
@@ -255,6 +264,11 @@ async function loadDailyForecast(location) {
 
 function displayDailyForecast(forecast) {
   const container = document.getElementById('daily-forecast');
+  
+  if (!forecast || forecast.length === 0) {
+    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico de 7 días</p>';
+    return;
+  }
   
   const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   
@@ -333,7 +347,7 @@ function easeOutQuart(x) {
 
 async function loadMap(location) {
   try {
-    const response = await fetch(`http://localhost:3001/api/coordinates?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`);
     const data = await response.json();
 
     if (data.success) {
