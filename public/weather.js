@@ -280,7 +280,6 @@ async function loadDailyForecast(location, retryCount = 0) {
     updateWeatherDetails(mockData);
     renderTempChart(mockData);
   }
-  }
 }
 
 function filterHours(hours, btn) {
