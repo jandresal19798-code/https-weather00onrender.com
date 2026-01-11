@@ -202,6 +202,7 @@ function filterHours(hours, btn) {
 
 function displayHourlyForecast(forecast) {
   const container = document.getElementById('hourly-forecast');
+  const containerWrapper = document.querySelector('.hourly-scroll-container');
   
   if (!forecast || forecast.length === 0) {
     container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico</p>';
@@ -349,6 +350,7 @@ async function loadSatelliteImage(location) {
   const satelliteContainer = document.getElementById('satellite-image');
   const satelliteTime = document.getElementById('satellite-time');
   
+  satelliteContainer.innerHTML = '<div class="satellite-loading">🛰️ Cargando imagen satelital...</div>';
   satelliteTime.innerHTML = '🛰️ Cargando...';
   
   try {
@@ -360,12 +362,16 @@ async function loadSatelliteImage(location) {
       const now = new Date();
       
       satelliteContainer.innerHTML = `
-        <div style="width: 100%; height: 280px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%); border-radius: 0;">
-          <img src="https://static-maps.yandex.ru/1.x/?lang=es&ll=${longitude},${latitude}&z=5&size=800,400&l=sat" 
-               alt="Imagen satelital de ${location}"
-               style="width: 100%; height: 100%; object-fit: cover; border-radius: 0;"
-               onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'width:100%;height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a237e,#0d47a1);\\'><div style=\\'font-size:48px;\\'>🛰️</div><p style=\\'color:white;margin-top:12px;\\'>Imagen satelital en vivo</p><p style=\\'color:rgba(255,255,255,0.7);font-size:12px;\\'>${data.location || location}</p><p style=\\'color:rgba(255,255,255,0.5);font-size:11px;\\'>Lat: ${latitude.toFixed(2)}, Lon: ${longitude.toFixed(2)}</p></div>'"
-               crossorigin="anonymous">
+        <img src="https://static-maps.yandex.ru/1.x/?lang=es&ll=${longitude},${latitude}&z=4&size=600,400&l=sat" 
+             alt="Imagen satelital de ${location}"
+             class="satellite-img"
+             onload="this.style.opacity=1"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="satellite-fallback" style="display:none">
+          <div class="satellite-icon">🛰️</div>
+          <p class="satellite-title">Imagen Satelital</p>
+          <p class="satellite-location">${data.location || location}</p>
+          <p class="satellite-coords">Lat: ${latitude.toFixed(2)}° | Lon: ${longitude.toFixed(2)}°</p>
         </div>
       `;
       
@@ -374,13 +380,13 @@ async function loadSatelliteImage(location) {
   } catch (error) {
     console.error('Error al cargar imagen satelital:', error);
     satelliteContainer.innerHTML = `
-      <div style="width: 100%; height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a237e, #0d47a1);">
-        <div style="font-size: 48px;">🛰️</div>
-        <p style="color: white; margin-top: 12px;">No se pudo cargar la imagen satelital</p>
-        <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Intenta de nuevo más tarde</p>
+      <div class="satellite-error">
+        <div class="satellite-icon">🛰️</div>
+        <p>Imagen satelital</p>
+        <p style="opacity: 0.7; font-size: 11px;">${location}</p>
       </div>
     `;
-    satelliteTime.innerHTML = '❌ Error al cargar';
+    satelliteTime.innerHTML = '⚠️ No disponible';
   }
 }
 
@@ -480,11 +486,11 @@ function updateMap(type) {
   if (type === 'satellite') {
     url = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${lat}LjM4NzAy!5e0!3m2!1ses!2sus!4v1234567890!5m2!1ses!2sus&maptype=satellite`;
   } else if (type === 'weather') {
-    url = `https://embed.windy.com/embed.html?type=map&location=${lat},${lng}&zoom=10&level=surface&lat=${lat}&lon=${lng}&detailLat=${lat}&detailLon=${lng}&metricWind=default&metricTemp=%C2%B0C&radar=on&satellite=on`;
+    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&windstream=true&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
   } else if (type === 'precipitation') {
-    url = `https://embed.windy.com/embed.html?type=map&location=${lat},${lng}&zoom=10&level=precipitation&lat=${lat}&lon=${lng}&detailLat=${lat}&detailLon=${lng}`;
+    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&overlay=rain&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
   } else if (type === 'wind') {
-    url = `https://embed.windy.com/embed.html?type=map&location=${lat},${lng}&zoom=10&level=wind&lat=${lat}&lon=${lng}&detailLat=${lat}&detailLon=${lng}`;
+    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
   }
   
   mapFrame.src = url;
