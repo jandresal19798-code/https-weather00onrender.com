@@ -505,14 +505,22 @@ function getWeatherAnimation(condition) {
 
 async function loadWeatherNews(location) {
   const newsContainer = document.getElementById('news-container');
-  newsContainer.innerHTML = '<p class="loading-text">🔍 Buscando noticias...</p>';
   
   try {
+    newsContainer.innerHTML = '<p class="loading-text">🔍 Buscando noticias...</p>';
+    
     const keywords = ['tormenta', 'lluvia', 'inundación', 'huracán', 'clima extremo', 'temporal'];
     const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
     const query = `${location} ${randomKeyword}`;
     
-    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=es&gl=ES&ceid=ES:es`)}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    
+    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=es&gl=ES&ceid=ES:es`)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
     
     if (!response.ok) throw new Error('No se pudo obtener noticias');
     
@@ -541,12 +549,7 @@ async function loadWeatherNews(location) {
     });
     
     if (news.length === 0) {
-      newsContainer.innerHTML = `
-        <div class="no-news">
-          <p>📰 No se encontraron noticias para ${location}</p>
-        </div>
-      `;
-      return;
+      throw new Error('No se encontraron noticias');
     }
     
     const weatherEmojis = ['⛈️', '🌧️', '🌪️', '🌊'];
@@ -565,10 +568,10 @@ async function loadWeatherNews(location) {
     `).join('');
     
   } catch (error) {
-    console.error('Error al cargar noticias:', error);
+    console.warn('Noticias no disponibles:', error.message);
     newsContainer.innerHTML = `
       <div class="no-news">
-        <p>📰 No se pudieron cargar las noticias</p>
+        <p>📰 Las noticias temporales no están disponibles en este momento.</p>
       </div>
     `;
   }
@@ -1295,6 +1298,18 @@ const API_CONFIG = {
     model: 'llama3.2'
   }
 };
+
+function updateChatbotStatus() {
+  const statusEl = document.getElementById('chatbot-status-text');
+  if (API_CONFIG.groq.apiKey) {
+    statusEl.textContent = 'Groq IA';
+    statusEl.style.color = '#00c853';
+  } else {
+    statusEl.textContent = 'IA Gratuita';
+    statusEl.style.color = '#fff';
+  }
+}
+document.addEventListener('DOMContentLoaded', updateChatbotStatus);
 
 async function getAIResponse(userMessage) {
   const systemMessage = WEATHER_CONTEXT;
