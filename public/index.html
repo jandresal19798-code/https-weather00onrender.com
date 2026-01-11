@@ -20,15 +20,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <script>
+    // Force service worker update and cache clear
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log('Zeus Meteo SW registrado:', registration.scope);
-          })
-          .catch(error => {
-            console.log('Zeus Meteo SW error:', error);
-          });
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      }).then(function() {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('Zeus Meteo SW registrado:', registration.scope);
+            })
+            .catch(error => {
+              console.log('Zeus Meteo SW error:', error);
+            });
+        });
       });
     }
   </script>

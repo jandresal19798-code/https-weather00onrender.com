@@ -1,6 +1,6 @@
-const CACHE_NAME = 'zeus-meteo-v1';
-const STATIC_CACHE = 'zeus-meteo-static-v1';
-const RUNTIME_CACHE = 'zeus-meteo-runtime-v1';
+const CACHE_NAME = 'zeus-meteo-v2';
+const STATIC_CACHE = 'zeus-meteo-static-v2';
+const RUNTIME_CACHE = 'zeus-meteo-runtime-v2';
 
 const STATIC_URLS = [
   '/',
@@ -28,9 +28,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames
-          .filter(name => name !== STATIC_CACHE && name !== RUNTIME_CACHE)
-          .map(name => caches.delete(name))
+        cacheNames.map(name => caches.delete(name))
       );
     }).then(() => self.clients.claim())
   );
