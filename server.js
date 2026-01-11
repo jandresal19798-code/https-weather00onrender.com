@@ -6,8 +6,8 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // límite de 100 solicitudes por ventana de 15 minutos
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Demasiadas solicitudes. Por favor, espera un momento.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -19,7 +19,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 const cache = new Map();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const CACHE_DURATION = 5 * 60 * 1000;
 
 function getCached(key) {
   const cached = cache.get(key);
@@ -33,7 +33,6 @@ function getCached(key) {
 function setCached(key, data) {
   cache.set(key, { data, timestamp: Date.now() });
   
-  // Limpiar caché antiguo periódicamente
   setTimeout(() => {
     const keysToDelete = [];
     for (const [key, value] of cache.entries()) {
@@ -42,7 +41,7 @@ function setCached(key, data) {
       }
     }
     keysToDelete.forEach(key => cache.delete(key));
-  }, 60000); // Cada minuto
+  }, 60000);
 }
 
 function getCacheKey(endpoint, params) {
@@ -80,7 +79,7 @@ app.get('/api/weather', async (req, res) => {
     console.error('Error en API:', error);
     res.status(500).json({ 
       error: error.message,
-      suggestion: 'Intenta con el nombre de la ciudad en español o inglés, o sin incluir el país'
+      suggestion: 'Intenta con el nombre de la ciudad en español o inglés'
     });
   }
 });
@@ -110,7 +109,7 @@ app.get('/api/forecast-7days', async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error('Error en forecast 7 días:', error);
-    res.status(500).json({ error: error.message, suggestion: 'Usa el caché integrado. Intenta de nuevo en 5 minutos.' });
+    res.status(500).json({ error: error.message, suggestion: 'Intenta de nuevo en 5 minutos.' });
   }
 });
 
@@ -172,6 +171,5 @@ app.listen(port, () => {
   console.log(`📊 API: http://localhost:${port}/api/weather?location=Madrid`);
   console.log(`📅 Forecast: http://localhost:${port}/api/forecast-7days?location=Madrid`);
   console.log(`🗺️ Coordinates: http://localhost:${port}/api/coordinates?location=Madrid`);
-  console.log(`💾 Cache stats: http://localhost:${port}/api/cache/stats`);
-  console.log(`⚡ Rate limit: 100 solicitudes / 15 minutos`);
+  console.log(`💾 Cache: 5 minutos | Rate limit: 100/15min`);
 });

@@ -111,11 +111,22 @@ async function searchWeather() {
     }
   } catch (error) {
     console.error('Error:', error);
-    showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando o intenta de nuevo en unos minutos.');
+    showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
     showHome();
   } finally {
     loading.style.display = 'none';
   }
+}
+
+function showError(message, suggestion = '') {
+  const result = document.getElementById('result');
+  result.innerHTML = `
+    <div class="error">
+      <strong>⚠️ ${message}</strong>
+      ${suggestion ? `<br><br><strong>💡 Sugerencia:</strong><br>${suggestion}` : ''}
+    </div>
+  `;
+  result.style.display = 'block';
 }
 
 function updateCurrentWeather(report) {
