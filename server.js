@@ -134,9 +134,14 @@ app.get('/api/forecast-7days', async (req, res) => {
       lastError = error;
       
       try {
-        const { WttrIn } = await import('./src/weatherSources.js');
+        const { OpenMeteo, WttrIn } = await import('./src/weatherSources.js');
+        const openMeteo = new OpenMeteo();
         const wttr = new WttrIn();
-        const wttrForecast = await wttr.getForecast(location, 7);
+        
+        const coords = await openMeteo.getCoordinates(location);
+        console.log('📍 Coordenadas:', coords.latitude, coords.longitude);
+        
+        const wttrForecast = await wttr.getForecastByCoords(coords.latitude, coords.longitude, 7);
         
         forecast = wttrForecast.map(day => ({
           date: day.date,
@@ -146,7 +151,7 @@ app.get('/api/forecast-7days', async (req, res) => {
           weatherCode: 0,
           precipitation: day.precipitation || 0
         }));
-        console.log('✅ Forecast desde WttrIn');
+        console.log('✅ Forecast desde WttrIn (por coordenadas)');
       } catch (wttrError) {
         console.log('⚠️ WttrIn también falló:', wttrError.message);
         lastError = wttrError;

@@ -519,13 +519,26 @@ export class WttrIn extends WeatherSource {
 
   async getCurrentWeather(location) {
     try {
-      const response = await axios.get(`${this.baseUrl}/${encodeURIComponent(location)}.json`, {
-        params: {
-          m: '',
-          M: '',
-          q: '',
-          lang: 'es'
-        },
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/${coords.latitude},${coords.longitude}.json`, {
+        params: { m: '', lang: 'es' },
+        timeout: 10000
+      });
+
+      if (!response.data || !response.data.current_condition) {
+        throw new Error('Invalid wttr.in response');
+      }
+
+      return this.formatData(response.data.current_condition[0]);
+    } catch (error) {
+      throw new Error(`wttr.in no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async getCurrentWeatherByCoords(lat, lon) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/${lat},${lon}.json`, {
+        params: { m: '', lang: 'es' },
         timeout: 10000
       });
 
@@ -541,12 +554,17 @@ export class WttrIn extends WeatherSource {
 
   async getForecast(location, days = 3) {
     try {
-      const response = await axios.get(`${this.baseUrl}/${encodeURIComponent(location)}.json`, {
-        params: {
-          m: '',
-          q: '',
-          lang: 'es'
-        },
+      const coords = await this.getCoordinates(location);
+      return await this.getForecastByCoords(coords.latitude, coords.longitude, days);
+    } catch (error) {
+      throw new Error(`wttr.in forecast no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async getForecastByCoords(lat, lon, days = 7) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/${lat},${lon}.json`, {
+        params: { m: '', lang: 'es' },
         timeout: 15000
       });
 
@@ -558,19 +576,42 @@ export class WttrIn extends WeatherSource {
         date: day.date,
         temperatureMax: parseFloat(day.maxtempC),
         temperatureMin: parseFloat(day.mintempC),
-        description: day.hourly[Math.floor(day.hourly.length / 2)].weatherDesc[0].value,
+        description: day.hourly?.[Math.floor(day.hourly?.length / 2)]?.weatherDesc?.[0]?.value || 'desconocido',
         weatherCode: 0,
         precipitation: parseFloat(day.precipMM) || 0,
-        sunrise: day.astronomy[0]?.sunrise || '06:00',
-        sunset: day.astronomy[0]?.sunset || '18:00'
+        sunrise: day.astronomy?.[0]?.sunrise || '06:00',
+        sunset: day.astronomy?.[0]?.sunset || '18:00'
       }));
     } catch (error) {
       throw new Error(`wttr.in forecast no disponible: ${error.message}`);
     }
   }
 
+  async getCoordinates(location) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/${encodeURIComponent(location)}.png`, {
+        params: { format: 'json' },
+        timeout: 5000,
+        maxRedirects: 0,
+        validateStatus: status => status < 500
+      });
+      
+      const url = response.request?.res?.responseUrl || response.config?.url;
+      if (url && url.includes('?') && url.includes('lat=')) {
+        const latMatch = url.match(/lat=([0-9.-]+)/);
+        const lonMatch = url.match(/lon=([0-9.-]+)/);
+        if (latMatch && lonMatch) {
+          return { latitude: parseFloat(latMatch[1]), longitude: parseFloat(lonMatch[1]) };
+        }
+      }
+      throw new Error('Could not extract coordinates from URL');
+    } catch (error) {
+      throw new Error(`No se pudo geocodificar "${location}": ${error.message}`);
+    }
+  }
+
   formatData(data) {
-    const desc = data.weatherDesc?.[0]?.value || 'desconocido';
+    const desc = data.weatherDesc?.[0]?.value || data.weatherDesc || 'desconocido';
     return {
       source: 'WttrIn',
       timestamp: data.localObsDateTime || new Date().toISOString(),
