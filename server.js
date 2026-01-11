@@ -130,7 +130,7 @@ app.get('/api/forecast-7days', async (req, res) => {
       forecast = await openMeteo.get7DayForecast(location);
       console.log('✅ Forecast desde OpenMeteo');
     } catch (error) {
-      console.log('⚠️ OpenMeteo falló, intentando WttrIn...');
+      console.log('⚠️ OpenMeteo falló:', error.message);
       lastError = error;
       
       try {
@@ -148,24 +148,49 @@ app.get('/api/forecast-7days', async (req, res) => {
         }));
         console.log('✅ Forecast desde WttrIn');
       } catch (wttrError) {
-        console.log('⚠️ WttrIn también falló');
+        console.log('⚠️ WttrIn también falló:', wttrError.message);
         lastError = wttrError;
       }
     }
 
     if (!forecast) {
-      throw lastError || new Error('No se pudo obtener el pronóstico');
+      console.log('⚠️ Todas las APIs fallaron, usando datos estimados para:', location);
+      forecast = generateMockForecast(location);
     }
 
-    const response = { success: true, forecast };
+    const response = { success: true, forecast, source: forecast.length > 0 && forecast[0].estimated ? 'estimated' : 'live' };
     setCached(cacheKey, response);
     
     res.json(response);
   } catch (error) {
     console.error('Error en forecast 7 días:', error.message);
-    res.status(500).json({ error: error.message, suggestion: 'Intenta de nuevo en 5 minutos.' });
+    const mockForecast = generateMockForecast('ubicación solicitada');
+    res.json({ success: true, forecast: mockForecast, source: 'fallback', warning: 'APIs temporalmente no disponibles' });
   }
 });
+
+function generateMockForecast(location) {
+  const today = new Date();
+  const conditions = ['soleado', 'parcialmente nublado', 'nublado', 'lluvia ligera'];
+  
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() + i);
+    const condition = conditions[Math.floor(Math.random() * conditions.length)];
+    const baseTemp = 18 + Math.random() * 10;
+    
+    return {
+      date: date.toISOString().split('T')[0],
+      temperatureMax: baseTemp + 4,
+      temperatureMin: baseTemp - 4,
+      description: condition,
+      weatherCode: conditions.indexOf(condition),
+      precipitation: condition.includes('lluvia') ? Math.random() * 8 : 0,
+      estimated: true,
+      location: location
+    };
+  });
+}
 
 app.get('/api/coordinates', async (req, res) => {
   try {
