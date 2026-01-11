@@ -6,7 +6,6 @@ function initTheme() {
   if (savedTheme === 'dark') {
     document.body.classList.add('dark-mode');
   }
-  createParticles();
 }
 
 function toggleTheme() {
@@ -14,66 +13,22 @@ function toggleTheme() {
   const isDark = document.body.classList.contains('dark-mode');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   
-  const particles = document.getElementById('particles');
-  particles.innerHTML = '';
-  createParticles();
+  const themeBtn = document.querySelector('.theme-btn');
+  themeBtn.textContent = isDark ? '☀️' : '🌙';
 }
-
-function createParticles() {
-  const container = document.getElementById('particles');
-  const particleCount = 50;
-  
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particle.style.cssText = `
-      position: absolute;
-      width: ${Math.random() * 4 + 2}px;
-      height: ${Math.random() * 4 + 2}px;
-      background: ${Math.random() > 0.5 ? 'var(--primary)' : 'var(--secondary)'};
-      border-radius: 50%;
-      left: ${Math.random() * 100}%;
-      top: ${Math.random() * 100}%;
-      opacity: ${Math.random() * 0.5 + 0.1};
-      animation: particleFloat ${Math.random() * 20 + 10}s linear infinite;
-      animation-delay: ${Math.random() * 10}s;
-    `;
-    container.appendChild(particle);
-  }
-}
-
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes particleFloat {
-    0%, 100% {
-      transform: translate(0, 0) scale(1);
-      opacity: var(--opacity);
-    }
-    25% {
-      transform: translate(100px, -100px) scale(1.2);
-    }
-    50% {
-      transform: translate(-50px, 50px) scale(0.8);
-    }
-    75% {
-      transform: translate(-100px, -100px) scale(1.1);
-    }
-  }
-`;
-document.head.appendChild(style);
 
 function showHome() {
   document.getElementById('home-page').classList.add('active');
   document.getElementById('forecasts-page').classList.remove('active');
-  document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-  document.querySelector('.nav-link:first-child').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelector('.nav-tab:first-child').classList.add('active');
 }
 
 function showForecasts() {
   document.getElementById('home-page').classList.remove('active');
   document.getElementById('forecasts-page').classList.add('active');
-  document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-  document.querySelector('.nav-link:nth-child(2)').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelector('.nav-tab:nth-child(2)').classList.add('active');
 }
 
 function quickSearch(city) {
@@ -86,7 +41,7 @@ async function searchWeather() {
   const location = document.getElementById('location-input').value.trim();
   
   if (!location) {
-    alert('Por favor, ingresa una ciudad o ubicación');
+    alert('Por favor, ingresa una ciudad');
     return;
   }
 
@@ -94,7 +49,7 @@ async function searchWeather() {
   showForecasts();
   
   const loading = document.getElementById('loading');
-  loading.style.display = 'flex';
+  loading.classList.add('active');
   
   try {
     const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
@@ -107,14 +62,12 @@ async function searchWeather() {
       await loadMap(location);
     } else {
       showError(data.error, data.suggestion);
-      showHome();
     }
   } catch (error) {
     console.error('Error:', error);
     showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
-    showHome();
   } finally {
-    loading.style.display = 'none';
+    loading.classList.remove('active');
   }
 }
 
@@ -132,7 +85,6 @@ function showError(message, suggestion = '') {
 function updateCurrentWeather(report) {
   const container = document.getElementById('current-weather');
   container.style.display = 'block';
-  container.style.animation = 'pageFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
   
   const lines = report.split('\n');
   
@@ -229,7 +181,7 @@ function displayHourlyForecast(forecast) {
   const container = document.getElementById('hourly-forecast');
   
   if (!forecast || forecast.length === 0) {
-    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico horario</p>';
+    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico</p>';
     return;
   }
   
@@ -243,13 +195,12 @@ function displayHourlyForecast(forecast) {
     hours.push({
       time: `${displayHour}:00`,
       temp: todayData.temperatureMax - (i * 0.3) + (Math.random() * 2 - 1),
-      icon: getWeatherIcon(todayData.description),
-      delay: i * 0.1
+      icon: getWeatherIcon(todayData.description)
     });
   }
 
   container.innerHTML = hours.map(hour => `
-    <div class="hourly-card" style="animation: pageFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${hour.delay}s both;">
+    <div class="hourly-card">
       <div class="hourly-time">${hour.time}</div>
       <div class="hourly-icon">${hour.icon}</div>
       <div class="hourly-temp">${hour.temp.toFixed(0)}°</div>
@@ -277,7 +228,7 @@ function displayDailyForecast(forecast) {
   const container = document.getElementById('daily-forecast');
   
   if (!forecast || forecast.length === 0) {
-    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico de 7 días</p>';
+    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico</p>';
     return;
   }
   
@@ -289,11 +240,11 @@ function displayDailyForecast(forecast) {
     const icon = getWeatherIcon(day.description);
     
     return `
-      <div class="daily-card" style="animation: pageFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.1}s both;">
+      <div class="daily-card">
         <div class="daily-date">${dayName}</div>
         <div class="daily-icon">${icon}</div>
         <div class="daily-temps">
-          <span>${day.temperatureMax.toFixed(0)}°</span>
+          <span class="high">${day.temperatureMax.toFixed(0)}°</span>
           <span class="low">${day.temperatureMin.toFixed(0)}°</span>
         </div>
       </div>
