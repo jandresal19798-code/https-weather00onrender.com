@@ -199,7 +199,7 @@ function generateMockForecast(location) {
 
 app.get('/api/coordinates', async (req, res) => {
   try {
-    const { location } = req.query;
+    let location = req.query.location;
     
     if (!location) {
       return res.status(400).json({ error: 'Ubicación requerida' });
@@ -214,7 +214,27 @@ app.get('/api/coordinates', async (req, res) => {
 
     const { OpenMeteo } = await import('./src/weatherSources.js');
     const openMeteo = new OpenMeteo();
-    const coords = await openMeteo.getCoordinates(location);
+    
+    let coords = null;
+    const variations = [
+      location,
+      location.replace(/^[a-z]{2}\s+/i, ''),
+      location.replace(/,\s*[a-z]{2}$/i, ''),
+      location.replace(/\s+[a-z]{2}$/i, '')
+    ];
+    
+    for (const loc of variations) {
+      try {
+        coords = await openMeteo.getCoordinates(loc);
+        if (coords) break;
+      } catch (e) {
+        continue;
+      }
+    }
+    
+    if (!coords) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
 
     const response = { 
       success: true, 
