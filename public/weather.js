@@ -49,6 +49,7 @@ async function searchWeather() {
   }
 
   currentLocation = location;
+  saveRecentSearch(location);
   showForecasts();
   
   const loading = document.getElementById('loading');
@@ -137,6 +138,17 @@ function updateCurrentWeather(report) {
   const weatherDescription = extractWeatherDescription(report);
   document.getElementById('weather-description').textContent = weatherDescription;
   document.getElementById('weather-icon').textContent = getWeatherIcon(weatherDescription);
+  
+  setWeatherBackground(weatherDescription);
+  
+  const aiInsight = generateAIInsight(report, weatherDescription);
+  const existingInsight = document.querySelector('.ai-insight');
+  const weatherCard = document.querySelector('.weather-card');
+  
+  if (existingInsight) existingInsight.remove();
+  if (aiInsight && weatherCard) {
+    weatherCard.insertAdjacentHTML('beforeend', aiInsight);
+  }
 }
 
 function extractWeatherDescription(report) {
@@ -255,6 +267,7 @@ async function loadDailyForecast(location) {
     if (data.success) {
       displayDailyForecast(data.forecast);
       updateWeatherDetails(data.forecast);
+      renderTempChart(data.forecast);
     } else {
       console.error('Error en pronóstico diario:', data.error);
     }
@@ -751,3 +764,359 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
   installBannerShown = true;
   console.log('Zeus Meteo running as PWA');
 }
+
+// ==================== NEW FEATURES ====================
+
+// Recent Searches (LocalStorage)
+const RECENT_SEARCHES_KEY = 'zeus_recent_searches';
+const MAX_RECENT_SEARCHES = 5;
+
+function getRecentSearches() {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentSearch(city) {
+  let searches = getRecentSearches();
+  searches = searches.filter(s => s.toLowerCase() !== city.toLowerCase());
+  searches.unshift(city);
+  if (searches.length > MAX_RECENT_SEARCHES) {
+    searches = searches.slice(0, MAX_RECENT_SEARCHES);
+  }
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
+  displayRecentSearches();
+}
+
+function displayRecentSearches() {
+  const container = document.getElementById('recent-searches');
+  if (!container) return;
+  
+  const searches = getRecentSearches();
+  if (searches.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  
+  container.innerHTML = searches.map(city => `
+    <div class="recent-search-item" onclick="quickSearch('${city}')">
+      <span>📍</span>
+      <span>${city}</span>
+      <span class="remove" onclick="event.stopPropagation(); removeRecentSearch('${city}')">✕</span>
+    </div>
+  `).join('');
+}
+
+function removeRecentSearch(city) {
+  let searches = getRecentSearches();
+  searches = searches.filter(s => s.toLowerCase() !== city.toLowerCase());
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
+  displayRecentSearches();
+}
+
+// GPS Location
+async function getCurrentLocation() {
+  const gpsBtn = document.querySelector('.gps-btn');
+  if (gpsBtn) gpsBtn.classList.add('active');
+  
+  if (!navigator.geolocation) {
+    alert('Tu navegador no soporta geolocalización');
+    if (gpsBtn) gpsBtn.classList.remove('active');
+    return;
+  }
+  
+  try {
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000
+      });
+    });
+    
+    const { latitude, longitude } = position.coords;
+    const response = await fetch(`/api/coordinates?lat=${latitude}&lon=${longitude}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      document.getElementById('location-input').value = data.location || 'Tu ubicación';
+      searchWeather();
+    }
+  } catch (error) {
+    console.error('GPS Error:', error);
+    alert('No se pudo obtener tu ubicación. Asegúrate de haber dado permiso.');
+  } finally {
+    if (gpsBtn) gpsBtn.classList.remove('active');
+  }
+}
+
+// Location Autocomplete
+const CITIES = [
+  { name: 'Montevideo', country: 'Uruguay', flag: '🇺🇾' },
+  { name: 'Buenos Aires', country: 'Argentina', flag: '🇦🇷' },
+  { name: 'Madrid', country: 'España', flag: '🇪🇸' },
+  { name: 'Barcelona', country: 'España', flag: '🇪🇸' },
+  { name: 'Ciudad de México', country: 'México', flag: '🇲🇽' },
+  { name: 'Lima', country: 'Perú', flag: '🇵🇪' },
+  { name: 'Santiago', country: 'Chile', flag: '🇨🇱' },
+  { name: 'Bogotá', country: 'Colombia', flag: '🇨🇴' },
+  { name: 'Caracas', country: 'Venezuela', flag: '🇻🇪' },
+  { name: 'Asunción', country: 'Paraguay', flag: '🇵🇾' },
+  { name: 'La Paz', country: 'Bolivia', flag: '🇧🇴' },
+  { name: 'Quito', country: 'Ecuador', flag: '🇪🇨' },
+  { name: 'Panama', country: 'Panamá', flag: '🇵🇦' },
+  { name: 'San José', country: 'Costa Rica', flag: '🇨🇷' },
+  { name: 'San Salvador', country: 'El Salvador', flag: '🇸🇻' },
+  { name: 'Tegucigalpa', country: 'Honduras', flag: '🇭🇳' },
+  { name: 'Managua', country: 'Nicaragua', flag: '🇳🇮' },
+  { name: 'Belmopan', country: 'Belice', flag: '🇧🇿' },
+  { name: 'Guatemala City', country: 'Guatemala', flag: '🇬🇹' },
+  { name: 'Havana', country: 'Cuba', flag: '🇨🇺' },
+  { name: 'Santo Domingo', country: 'República Dominicana', flag: '🇩🇴' },
+  { name: 'San Juan', country: 'Puerto Rico', flag: '🇵🇷' },
+  { name: 'New York', country: 'Estados Unidos', flag: '🇺🇸' },
+  { name: 'Los Angeles', country: 'Estados Unidos', flag: '🇺🇸' },
+  { name: 'Miami', country: 'Estados Unidos', flag: '🇺🇸' },
+  { name: 'Chicago', country: 'Estados Unidos', flag: '🇺🇸' },
+  { name: 'Toronto', country: 'Canadá', flag: '🇨🇦' },
+  { name: 'Vancouver', country: 'Canadá', flag: '🇨🇦' },
+  { name: 'Londres', country: 'Reino Unido', flag: '🇬🇧' },
+  { name: 'París', country: 'Francia', flag: '🇫🇷' },
+  { name: 'Berlín', country: 'Alemania', flag: '🇩🇪' },
+  { name: 'Roma', country: 'Italia', flag: '🇮🇹' },
+  { name: 'Lisboa', country: 'Portugal', flag: '🇵🇹' },
+  { name: 'Amsterdam', country: 'Países Bajos', flag: '🇳🇱' },
+  { name: 'Bruselas', country: 'Bélgica', flag: '🇧🇪' },
+  { name: 'Viena', country: 'Austria', flag: '🇦🇹' },
+  { name: 'Zúrich', country: 'Suiza', flag: '🇨🇭' },
+  { name: 'Estocolmo', country: 'Suecia', flag: '🇸🇪' },
+  { name: 'Oslo', country: 'Noruega', flag: '🇳🇴' },
+  { name: 'Copenhague', country: 'Dinamarca', flag: '🇩🇰' },
+  { name: 'Helsinki', country: 'Finlandia', flag: '🇫🇮' },
+  { name: 'Varsovia', country: 'Polonia', flag: '🇵🇱' },
+  { name: 'Moscú', country: 'Rusia', flag: '🇷🇺' },
+  { name: 'Estambul', country: 'Turquía', flag: '🇹🇷' },
+  { name: 'Dubai', country: 'Emiratos Árabes', flag: '🇦🇪' },
+  { name: 'Tokio', country: 'Japón', flag: '🇯🇵' },
+  { name: 'Seúl', country: 'Corea del Sur', flag: '🇰🇷' },
+  { name: 'Pekín', country: 'China', flag: '🇨🇳' },
+  { name: 'Shanghái', country: 'China', flag: '🇨🇳' },
+  { name: 'Hong Kong', country: 'China', flag: '🇭🇰' },
+  { name: 'Singapur', country: 'Singapur', flag: '🇸🇬' },
+  { name: 'Sídney', country: 'Australia', flag: '🇦🇺' },
+  { name: 'Melbourne', country: 'Australia', flag: '🇦🇺' },
+  { name: 'Auckland', country: 'Nueva Zelanda', flag: '🇳🇿' },
+  { name: 'São Paulo', country: 'Brasil', flag: '🇧🇷' },
+  { name: 'Río de Janeiro', country: 'Brasil', flag: '🇧🇷' },
+  { name: 'Recife', country: 'Brasil', flag: '🇧🇷' },
+  { name: 'Buenos Aires', country: 'Argentina', flag: '🇦🇷' }
+];
+
+function setupAutocomplete() {
+  const input = document.getElementById('location-input');
+  const container = document.getElementById('autocomplete-container');
+  
+  if (!input || !container) return;
+  
+  input.addEventListener('input', (e) => {
+    const value = e.target.value.trim().toLowerCase();
+    
+    if (value.length < 2) {
+      container.classList.remove('active');
+      return;
+    }
+    
+    const matches = CITIES.filter(city => 
+      city.name.toLowerCase().includes(value) ||
+      city.country.toLowerCase().includes(value)
+    ).slice(0, 6);
+    
+    if (matches.length === 0) {
+      container.classList.remove('active');
+      return;
+    }
+    
+    container.innerHTML = matches.map(city => `
+      <div class="autocomplete-item" onclick="selectCity('${city.name}')">
+        <span class="flag">${city.flag}</span>
+        <div>
+          <div class="city">${city.name}</div>
+          <div class="country">${city.country}</div>
+        </div>
+      </div>
+    `).join('');
+    
+    container.classList.add('active');
+  });
+  
+  input.addEventListener('blur', () => {
+    setTimeout(() => container.classList.remove('active'), 200);
+  });
+  
+  input.addEventListener('focus', () => {
+    if (input.value.trim().length >= 2) {
+      input.dispatchEvent(new Event('input'));
+    }
+  });
+}
+
+function selectCity(cityName) {
+  document.getElementById('location-input').value = cityName;
+  document.getElementById('autocomplete-container').classList.remove('active');
+  searchWeather();
+}
+
+// Dynamic Weather Background
+function setWeatherBackground(condition) {
+  const body = document.body;
+  body.classList.remove('weather-sunny', 'weather-cloudy', 'weather-rainy', 'weather-stormy', 'weather-night');
+  
+  const c = condition.toLowerCase();
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour > 20;
+  
+  if (isNight) {
+    body.classList.add('weather-night');
+  } else if (c.includes('lluvia') || c.includes('rain') || c.includes('shower')) {
+    body.classList.add('weather-rainy');
+  } else if (c.includes('tormenta') || c.includes('thunder') || c.includes('storm')) {
+    body.classList.add('weather-stormy');
+  } else if (c.includes('nublado') || c.includes('cloudy') || c.includes('overcast')) {
+    body.classList.add('weather-cloudy');
+  } else if (c.includes('despejado') || c.includes('soleado') || c.includes('clear') || c.includes('sunny')) {
+    body.classList.add('weather-sunny');
+  }
+}
+
+// Temperature Chart with ApexCharts
+let tempChart = null;
+
+function renderTempChart(forecast) {
+  const container = document.getElementById('temp-chart-container');
+  if (!container) return;
+  
+  if (!forecast || forecast.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  container.style.display = 'block';
+  
+  const labels = forecast.slice(0, 24).map((day, i) => {
+    const date = new Date(day.date);
+    return i === 0 ? 'Hoy' : date.toLocaleDateString('es', { weekday: 'short', day: 'numeric' });
+  });
+  
+  const tempsMax = forecast.slice(0, 24).map(day => day.temperatureMax);
+  const tempsMin = forecast.slice(0, 24).map(day => day.temperatureMin);
+  
+  if (tempChart) {
+    tempChart.destroy();
+  }
+  
+  const options = {
+    series: [
+      { name: 'Máxima', data: tempsMax },
+      { name: 'Mínima', data: tempsMin }
+    ],
+    chart: {
+      type: 'area',
+      height: 200,
+      toolbar: { show: false },
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 800
+      },
+      fontFamily: 'Inter, sans-serif'
+    },
+    colors: ['#4285f4', '#fbbc04'],
+    stroke: { curve: 'smooth', width: 3 },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.4,
+        opacityTo: 0.1,
+        stops: [0, 90, 100]
+      }
+    },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: labels,
+      labels: {
+        style: { colors: '#5f6368', fontSize: '11px' }
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false }
+    },
+    yaxis: {
+      labels: {
+        style: { colors: '#5f6368', fontSize: '11px' },
+        formatter: (val) => `${val.toFixed(0)}°`
+      }
+    },
+    grid: {
+      borderColor: '#f1f3f4',
+      strokeDashArray: 4
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'right',
+      markers: { radius: 12 },
+      itemMargin: { horizontal: 12 }
+    },
+    tooltip: {
+      y: { formatter: (val) => `${val.toFixed(1)}°C` }
+    }
+  };
+  
+  tempChart = new ApexCharts(document.querySelector('#tempChart'), options);
+  tempChart.render();
+}
+
+// AI Insight
+function generateAIInsight(report, condition) {
+  const insights = [
+    { condition: 'lluvia', text: '💡 La IA sugiere llevar paraguas y ropa impermeable. La humedad alta puede hacer que la sensación térmica sea más fría.' },
+    { condition: 'tormenta', text: '⚠️ Alerta de IA: Se esperan tormentas. Mantente en interiores y evita zonas abiertas.' },
+    { condition: 'nieve', text: '❄️ La IA recomienda usar ropa térmica muy abrigada. Las carreteras pueden estar resbaladizas.' },
+    { condition: 'despejado', text: '☀️ ¡Día perfecto! La IA recomienda aprovechar para actividades al aire libre. No olvides protector solar.' },
+    { condition: 'soleado', text: '🌞 Alto índice UV esperado. La IA sugiere usar gafas de sol y protector solar SPF 30+.' },
+    { condition: 'viento', text: '💨 Mucho viento hoy. La IA recomienda asegurar objetos ligeros y usar ropa que no vole fácilmente.' },
+    { condition: 'nublado', text: '☁️ Día nublado. La IA dice que no lloverá, pero ten un jacket a mano por si baja la temperatura.' },
+    { condition: 'humedad', text: '💧 Alta humedad detectada. La IA sugiere evitar ejercicio intenso al aire libre y mantenerse hidratado.' }
+  ];
+  
+  const c = condition.toLowerCase();
+  const match = insights.find(i => c.includes(i.condition));
+  
+  if (match) {
+    return `<div class="ai-insight">
+      <div class="ai-insight-header">
+        <span class="icon">🤖</span>
+        <span class="title">Insight de IA</span>
+      </div>
+      <p>${match.text}</p>
+    </div>`;
+  }
+  
+  return '';
+}
+
+// Initialize new features
+document.addEventListener('DOMContentLoaded', () => {
+  displayRecentSearches();
+  setupAutocomplete();
+  
+  const searchBox = document.querySelector('.search-box');
+  if (searchBox) {
+    searchBox.insertAdjacentHTML('afterend', '<div id="autocomplete-container" class="location-autocomplete"></div>');
+  }
+  
+  const gpsBtn = document.querySelector('.gps-btn');
+  if (gpsBtn) {
+    gpsBtn.addEventListener('click', getCurrentLocation);
+  }
+});
