@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zeus Meteo - Clima</title>
+  <title>Zeus Meteo - Clima en tiempo real</title>
   <link rel="stylesheet" href="weather.css">
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -39,7 +39,7 @@
       <div class="container">
         <div class="hero-content">
           <h1 class="hero-title">Clima en tu ciudad</h1>
-          <p class="hero-subtitle">Pronósticos precisos actualizados en tiempo real</p>
+          <p class="hero-subtitle">Pronósticos precisos con inteligencia artificial</p>
           
           <div class="search-container">
             <div class="search-box">
@@ -69,25 +69,25 @@
           <div class="feature-card">
             <div class="feature-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8);">🤖</div>
             <h3>Inteligencia Artificial</h3>
-            <p>Análisis predictivo con algoritmos de aprendizaje automático para mayor precisión.</p>
+            <p>Algoritmos predictivos avanzados para pronósticos más precisos.</p>
           </div>
           
           <div class="feature-card">
             <div class="feature-icon" style="background: linear-gradient(135deg, #34a853, #1e8e3e);">🌐</div>
             <h3>3 APIs Gratuitas</h3>
-            <p>Datos de OpenMeteo, US NWS y MetNorway combinados para máxima exactitud.</p>
+            <p>OpenMeteo, US NWS y MetNorway combinadas para máxima exactitud.</p>
           </div>
           
           <div class="feature-card">
             <div class="feature-icon" style="background: linear-gradient(135deg, #8ab4f8, #4285f4);">🛰️</div>
             <h3>Satélite en Vivo</h3>
-            <p>Imágenes satelitales actualizadas de tu ubicación para condiciones reales.</p>
+            <p>Imágenes satelitales actualizadas de tu ubicación.</p>
           </div>
           
           <div class="feature-card">
             <div class="feature-icon" style="background: linear-gradient(135deg, #fbbc04, #f9a825);">📄</div>
             <h3>Reportes PDF</h3>
-            <p>Genera y descarga informes detallados del clima para guardar o compartir.</p>
+            <p>Genera informes detallados del clima para guardar o compartir.</p>
           </div>
         </div>
       </div>
@@ -103,155 +103,252 @@
     </div>
 
     <div class="container">
-      <div class="weather-section">
-        <div class="weather-card" id="current-weather" style="display: none;">
-          <div class="weather-header">
-            <div class="location-info">
-              <h2 id="city-name">Montevideo</h2>
-              <p id="current-date">Domingo, 11 de enero</p>
+      <div class="content-with-sidebar">
+        <div class="main-content">
+          <div class="weather-section">
+            <div class="weather-card" id="current-weather" style="display: none;">
+              <div class="weather-header">
+                <div class="location-info">
+                  <h2 id="city-name">Montevideo</h2>
+                  <p id="current-date">Domingo, 11 de enero</p>
+                </div>
+              </div>
+
+              <div class="weather-main-enhanced">
+                <div class="weather-icon-animated-container">
+                  <span class="weather-icon-animated" id="weather-icon">☀️</span>
+                </div>
+                <div class="temperature-enhanced">
+                  <span class="temp-value" id="current-temp">26</span>
+                  <span class="temp-unit">°C</span>
+                </div>
+                <div class="weather-condition-enhanced">
+                  <span id="weather-description">Soleado</span>
+                </div>
+              </div>
+
+              <div class="weather-details-row">
+                <div class="weather-detail-item">
+                  <span class="detail-icon-small">💧</span>
+                  <span class="detail-text">
+                    <span class="detail-label">Humedad</span>
+                    <span id="humidity" class="detail-value">65%</span>
+                  </span>
+                </div>
+                <div class="weather-detail-item">
+                  <span class="detail-icon-small">💨</span>
+                  <span class="detail-text">
+                    <span class="detail-label">Viento</span>
+                    <span id="wind" class="detail-value">12 km/h</span>
+                  </span>
+                </div>
+                <div class="weather-detail-item">
+                  <span class="detail-icon-small">🌡️</span>
+                  <span class="detail-text">
+                    <span class="detail-label">Sensación</span>
+                    <span id="feels-like" class="detail-value">28°</span>
+                  </span>
+                </div>
+                <div class="weather-detail-item">
+                  <span class="detail-icon-small">📊</span>
+                  <span class="detail-text">
+                    <span class="detail-label">Presión</span>
+                    <span id="pressure" class="detail-value">1015 hPa</span>
+                  </span>
+                </div>
+              </div>
             </div>
+
+            <div id="result"></div>
           </div>
 
-          <div class="weather-main">
-            <span class="weather-icon-large" id="weather-icon">☀️</span>
-            <div class="temperature-display">
-              <span class="temp-value" id="current-temp">26</span>
-              <span class="temp-unit">°C</span>
+          <section class="satellite-section">
+            <div class="satellite-card">
+              <div class="satellite-header">
+                <h3 class="satellite-title">
+                  <span>🛰️</span> Imagen Satelital - Ahora
+                </h3>
+                <span class="satellite-meta" id="satellite-time">Actualizando...</span>
+              </div>
+              <div class="satellite-image" id="satellite-image">
+                <div class="satellite-placeholder">
+                  <div class="icon">🛰️</div>
+                  <p>Busca una ciudad para ver la imagen satelital</p>
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <p id="weather-description" class="weather-condition">Soleado</p>
+          <section class="section">
+            <div class="section-header">
+              <h3 class="section-title">Pronóstico por hora</h3>
+              <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterHours(12, this)">12 horas</button>
+                <button class="filter-tab" onclick="filterHours(24, this)">24 horas</button>
+              </div>
+            </div>
+            <div class="hourly-scroll" id="hourly-forecast"></div>
+          </section>
 
-          <div class="weather-details-grid">
-            <div class="weather-detail">
-              <span class="weather-detail-label">💧 Humedad</span>
-              <span id="humidity" class="weather-detail-value">65%</span>
+          <section class="section">
+            <h3 class="section-title">Próximos 7 días</h3>
+            <div class="daily-list" id="daily-forecast"></div>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">Detalles adicionales</h3>
+            <div class="details-grid">
+              <div class="detail-card">
+                <div class="detail-icon uv">☀️</div>
+                <div class="detail-info">
+                  <h4>Índice UV</h4>
+                  <p id="uv-value">Alto (7)</p>
+                </div>
+              </div>
+              
+              <div class="detail-card">
+                <div class="detail-icon rain">💧</div>
+                <div class="detail-info">
+                  <h4>Lluvia</h4>
+                  <p id="rain-value">0 mm</p>
+                </div>
+              </div>
+              
+              <div class="detail-card">
+                <div class="detail-icon storm">⛈️</div>
+                <div class="detail-info">
+                  <h4>Prob. Tormenta</h4>
+                  <p id="storm-value">10%</p>
+                </div>
+              </div>
+              
+              <div class="detail-card">
+                <div class="detail-icon wind">💨</div>
+                <div class="detail-info">
+                  <h4>Ráfagas</h4>
+                  <p id="gusts-value">18 km/h</p>
+                </div>
+              </div>
+              
+              <div class="detail-card">
+                <div class="detail-icon visibility">👁️</div>
+                <div class="detail-info">
+                  <h4>Visibilidad</h4>
+                  <p id="visibility-value">10 km</p>
+                </div>
+              </div>
+              
+              <div class="detail-card">
+                <div class="detail-icon clouds">☁️</div>
+                <div class="detail-info">
+                  <h4>Nubosidad</h4>
+                  <p id="clouds-value">25%</p>
+                </div>
+              </div>
             </div>
-            <div class="weather-detail">
-              <span class="weather-detail-label">💨 Viento</span>
-              <span id="wind" class="weather-detail-value">12 km/h</span>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">Noticias del clima</h3>
+            <div id="news-container" class="news-grid">
+              <div class="no-news">
+                <p>🔍 Busca una ciudad para ver noticias relacionadas</p>
+              </div>
             </div>
-            <div class="weather-detail">
-              <span class="weather-detail-label">🌡️ Sensación</span>
-              <span id="feels-like" class="weather-detail-value">28°</span>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">Mapas del clima</h3>
+            <div class="map-controls">
+              <button class="map-btn active" onclick="changeMapType('satellite')">🛰️ Satelital</button>
+              <button class="map-btn" onclick="changeMapType('weather')">☀️ Clima</button>
+              <button class="map-btn" onclick="changeMapType('precipitation')">🌧️ Lluvia</button>
+              <button class="map-btn" onclick="changeMapType('wind')">💨 Viento</button>
             </div>
-            <div class="weather-detail">
-              <span class="weather-detail-label">📊 Presión</span>
-              <span id="pressure" class="weather-detail-value">1015 hPa</span>
+            <div class="map-container">
+              <iframe id="map-frame" class="map-frame" frameborder="0"></iframe>
             </div>
-          </div>
+          </section>
         </div>
 
-        <div id="result"></div>
+        <aside class="sidebar">
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">🌡️ Curiosidades Meteorológicas</h3>
+            
+            <div class="curiosity-card">
+              <div class="curiosity-icon">🌡️</div>
+              <h4>La temperatura más alta</h4>
+              <p>El récord de temperatura más alta en la Tierra es de 56.7°C, registrado en Furnace Creek, California (USA) en 1913.</p>
+            </div>
+            
+            <div class="curiosity-card">
+              <div class="curiosity-icon">❄️</div>
+              <h4>La temperatura más baja</h4>
+              <p>-89.2°C es la temperatura más baja registrada en la estación Vostok, Antártida, el 21 de julio de 1983.</p>
+            </div>
+            
+            <div class="curiosity-card">
+              <div class="curiosity-icon">🌧️</div>
+              <h4>Más lluvia en un día</h4>
+              <p>En Foc-Foc, Reunión, cayeron 1.825 mm de lluvia en 24 horas el 7 de enero de 1966.</p>
+            </div>
+            
+            <div class="curiosity-card">
+              <div class="curiosity-icon">⚡</div>
+              <h4>Rayos más frecuentes</h4>
+              <p>Elrayos más frecuentes del mundo cae en el Lago de Maracaibo, Venezuela, con hasta 28 rayos por minuto.</p>
+            </div>
+            
+            <div class="curiosity-card">
+              <div class="curiosity-icon">🌪️</div>
+              <h4>Viento más fuerte</h4>
+              <p>El viento más fuerte registrado fue de 408 km/h en el Monte Washington, USA, el 12 de abril de 1934.</p>
+            </div>
+            
+            <div class="curiosity-card">
+              <div class="curiosity-icon">🌪️</div>
+              <h4>Tornado más ancho</h4>
+              <p>El tornado más ancho tuvo 4.2 km de diámetro en El Reno, Oklahoma, el 31 de mayo de 2013.</p>
+            </div>
+          </div>
+          
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">📅 Eventos del Mes</h3>
+            
+            <div class="event-card">
+              <div class="event-date">ENE</div>
+              <div class="event-info">
+                <h4>Perihelio</h4>
+                <p>La Tierra está más cerca del Sol, moviéndose más rápido en su órbita.</p>
+              </div>
+            </div>
+            
+            <div class="event-card">
+              <div class="event-date">ENE</div>
+              <div class="event-info">
+                <h4>Lluvia de Cuadrántidas</h4>
+                <p>Una de las lluvias de meteoros más intensas del año, con hasta 120 meteoros por hora.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="sidebar-section">
+            <h3 class="sidebar-title">💡 ¿Sabías que?</h4>
+            <div class="tip-card">
+              <p>💨 <strong>El sonido del trueno:</strong> Un trueno puede escucharse hasta 16 km de distancia.</p>
+            </div>
+            <div class="tip-card">
+              <p>🌈 <strong>Arcoíris:</strong> Para ver un arcoíris necesitas estar entre el sol y la lluvia, con el sol detrás de ti.</p>
+            </div>
+            <div class="tip-card">
+              <p>⛈️ <strong>Rayos:</strong> Un rayo puede calentar el aire a 30.000°C, 5 veces más caliente que la superficie del Sol.</p>
+            </div>
+            <div class="tip-card">
+              <p>🌍 <strong>Estaciones:</strong> Las estaciones son causadas por la inclinación de 23.5° del eje terrestre, no por la distancia al Sol.</p>
+            </div>
+          </div>
+        </aside>
       </div>
-
-      <section class="satellite-section">
-        <div class="satellite-card">
-          <div class="satellite-header">
-            <h3 class="satellite-title">
-              <span>🛰️</span> Imagen Satelital
-            </h3>
-            <span class="satellite-meta" id="satellite-time">Actualizando...</span>
-          </div>
-          <div class="satellite-image" id="satellite-image">
-            <div class="satellite-placeholder">
-              <div class="icon">🛰️</div>
-              <p>Buscar una ciudad para ver imagen satelital</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-header">
-          <h3 class="section-title">Pronóstico por hora</h3>
-          <div class="filter-tabs">
-            <button class="filter-tab active" onclick="filterHours(12, this)">12 horas</button>
-            <button class="filter-tab" onclick="filterHours(24, this)">24 horas</button>
-          </div>
-        </div>
-        <div class="hourly-scroll" id="hourly-forecast"></div>
-      </section>
-
-      <section class="section">
-        <h3 class="section-title">Próximos 7 días</h3>
-        <div class="daily-list" id="daily-forecast"></div>
-      </section>
-
-      <section class="section">
-        <h3 class="section-title">Detalles adicionales</h3>
-        <div class="details-grid">
-          <div class="detail-card">
-            <div class="detail-icon uv">☀️</div>
-            <div class="detail-info">
-              <h4>Índice UV</h4>
-              <p id="uv-value">Alto (7)</p>
-            </div>
-          </div>
-          
-          <div class="detail-card">
-            <div class="detail-icon rain">💧</div>
-            <div class="detail-info">
-              <h4>Lluvia</h4>
-              <p id="rain-value">0 mm</p>
-            </div>
-          </div>
-          
-          <div class="detail-card">
-            <div class="detail-icon storm">⛈️</div>
-            <div class="detail-info">
-              <h4>Tormentas</h4>
-              <p id="storm-value">10%</p>
-            </div>
-          </div>
-          
-          <div class="detail-card">
-            <div class="detail-icon wind">💨</div>
-            <div class="detail-info">
-              <h4>Ráfagas</h4>
-              <p id="gusts-value">18 km/h</p>
-            </div>
-          </div>
-          
-          <div class="detail-card">
-            <div class="detail-icon visibility">👁️</div>
-            <div class="detail-info">
-              <h4>Visibilidad</h4>
-              <p id="visibility-value">10 km</p>
-            </div>
-          </div>
-          
-          <div class="detail-card">
-            <div class="detail-icon clouds">☁️</div>
-            <div class="detail-info">
-              <h4>Nubosidad</h4>
-              <p id="clouds-value">25%</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <h3 class="section-title">Noticias del clima</h3>
-        <div id="news-container" class="news-grid">
-          <div class="no-news">
-            <p>🔍 Busca una ciudad para ver noticias relacionadas</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <h3 class="section-title">Mapas del clima</h3>
-        <div class="map-controls">
-          <button class="map-btn active" onclick="changeMapType('satellite')">🛰️ Satelital</button>
-          <button class="map-btn" onclick="changeMapType('weather')">☀️ Clima</button>
-          <button class="map-btn" onclick="changeMapType('precipitation')">🌧️ Lluvia</button>
-          <button class="map-btn" onclick="changeMapType('wind')">💨 Viento</button>
-        </div>
-        <div class="map-container">
-          <iframe id="map-frame" class="map-frame" frameborder="0"></iframe>
-        </div>
-      </section>
     </div>
   </div>
 

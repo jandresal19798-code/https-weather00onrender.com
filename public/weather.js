@@ -360,9 +360,10 @@ async function loadSatelliteImage(location) {
       const now = new Date();
       
       satelliteContainer.innerHTML = `
-        <img src="https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${longitude},${latitude},5,0/800x280?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw" 
+        <img src="https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${longitude},${latitude},5,0,0x0,800x280@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw" 
              alt="Imagen satelital de ${location}"
-             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'satellite-placeholder\\'><div class=\\'icon\\'>🛰️</div><p>Imagen no disponible</p></div>'">
+             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'satellite-placeholder\\'><div class=\\'icon\\'>🛰️</div><p>Imagen satelital no disponible</p></div>'"
+             crossorigin="anonymous">
       `;
       
       satelliteTime.innerHTML = `📍 ${data.location || location} • 🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
@@ -372,10 +373,10 @@ async function loadSatelliteImage(location) {
     satelliteContainer.innerHTML = `
       <div class="satellite-placeholder">
         <div class="icon">🛰️</div>
-        <p>No se pudo cargar la imagen</p>
+        <p>No se pudo cargar la imagen satelital</p>
       </div>
     `;
-    satelliteTime.innerHTML = '❌ Error';
+    satelliteTime.innerHTML = '❌ Error al cargar';
   }
 }
 
@@ -508,91 +509,105 @@ async function downloadPDF() {
   const wind = document.getElementById('wind').textContent;
   const pressure = document.getElementById('pressure').textContent;
   const feelsLike = document.getElementById('feels-like').textContent;
+  const clouds = document.getElementById('clouds-value')?.textContent || '25%';
+  const uv = document.getElementById('uv-value')?.textContent || 'Moderado';
   
   doc.setFillColor(66, 133, 244);
-  doc.rect(0, 0, 210, 45, 'F');
+  doc.rect(0, 0, 210, 50, 'F');
   
   doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24);
+  doc.setFont('helvetica', 'bold');
+  doc.text(' Zeus Meteo', 20, 32);
+  
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Reporte Meteorológico', 140, 32);
+  
+  doc.setTextColor(32, 33, 36);
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('⛅ Zeus Meteo', 20, 28);
+  doc.text(`${city}`, 20, 70);
   
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  doc.text('Reporte del Clima', 140, 28);
-  
-  doc.setTextColor(32, 33, 36);
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`${city}`, 20, 65);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
   doc.setTextColor(95, 99, 104);
-  doc.text(`${now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`, 20, 73);
+  doc.text(`${now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`, 20, 80);
   
   doc.setFillColor(248, 249, 250);
-  doc.roundedRect(20, 85, 170, 45, 3, 3, 'F');
+  doc.roundedRect(20, 95, 170, 55, 3, 3, 'F');
   
   doc.setTextColor(32, 33, 36);
-  doc.setFontSize(42);
+  doc.setFontSize(48);
   doc.setFont('helvetica', '300');
-  doc.text(`${temp}°C`, 35, 118);
+  doc.text(`${temp}°C`, 35, 135);
   
   doc.setFontSize(16);
   doc.setFont('helvetica', 'normal');
-  doc.text(desc, 35, 130);
+  doc.text(desc, 35, 148);
   
   const stats = [
     { label: 'Humedad', value: humidity },
     { label: 'Viento', value: wind },
-    { label: 'Sensación', value: feelsLike },
-    { label: 'Presión', value: pressure }
+    { label: 'Sensacion termica', value: feelsLike },
+    { label: 'Presion atmosferica', value: pressure }
   ];
   
   stats.forEach((stat, index) => {
-    const x = 95 + (index * 42);
+    const x = 90 + (index * 42);
     doc.setFontSize(9);
     doc.setTextColor(95, 99, 104);
-    doc.text(stat.label, x, 100);
+    doc.text(stat.label, x, 110);
     doc.setTextColor(32, 33, 36);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(stat.value, x, 112);
+    doc.text(stat.value, x, 122);
   });
   
   doc.setDrawColor(218, 220, 224);
-  doc.line(20, 145, 190, 145);
+  doc.line(20, 165, 190, 165);
   
   doc.setTextColor(32, 33, 36);
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('Fuentes de datos:', 20, 160);
+  doc.text('Condiciones adicionales:', 20, 180);
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(95, 99, 104);
-  doc.text('• OpenMeteo (Suiza)', 25, 170);
-  doc.text('• US National Weather Service (EE.UU.)', 25, 178);
-  doc.text('• Met Norway (Noruega)', 25, 186);
+  doc.text(`Nubosidad: ${clouds}`, 25, 190);
+  doc.text(`Indice UV: ${uv}`, 25, 198);
   
   doc.setTextColor(32, 33, 36);
-  doc.setFontSize(10);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('Zeus Meteo - Inteligencia Artificial', 20, 210);
+  doc.text('Fuentes de datos utilizadas:', 20, 220);
   
-  doc.setFontSize(8);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(95, 99, 104);
+  doc.text('• OpenMeteo (Suiza) - API meteorologica global', 25, 230);
+  doc.text('• US National Weather Service (EE.UU.) - Datos oficiales', 25, 238);
+  doc.text('• Met Norway (Noruega) - Pronosticos europeos', 25, 246);
+  
+  doc.setTextColor(32, 33, 36);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Zeus Meteo - Inteligencia Artificial', 20, 265);
+  
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(128, 128, 128);
-  doc.text('Generado automáticamente', 20, 218);
+  doc.text('Reporte generado automaticamente', 20, 273);
+  doc.text(`Coordenadas: ${currentCoords?.lat?.toFixed(4) || 'N/A'}, ${currentCoords?.lng?.toFixed(4) || 'N/A'}`, 20, 281);
   
   doc.setFillColor(66, 133, 244);
-  doc.rect(0, 277, 210, 20, 'F');
+  doc.rect(0, 285, 210, 12, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(9);
-  doc.text('Zeus Meteo © 2025', 105, 290, { align: 'center' });
+  doc.text('Zeus Meteo © 2025 - Pronosticos con IA', 105, 293, { align: 'center' });
   
-  doc.save(`ZeusMeteo_${city}_${now.toISOString().split('T')[0]}.pdf`);
+  doc.save(`ZeusMeteo_${city.replace(/\s+/g, '_')}_${now.toISOString().split('T')[0]}.pdf`);
 }
 
 document.getElementById('location-input').addEventListener('keypress', (e) => {
