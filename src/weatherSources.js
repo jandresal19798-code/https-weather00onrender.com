@@ -515,6 +515,7 @@ export class WttrIn extends WeatherSource {
   constructor() {
     super();
     this.baseUrl = 'https://wttr.in';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
   }
 
   async getCurrentWeather(location) {
@@ -589,22 +590,19 @@ export class WttrIn extends WeatherSource {
 
   async getCoordinates(location) {
     try {
-      const response = await axios.get(`${this.baseUrl}/${encodeURIComponent(location)}.png`, {
-        params: { format: 'json' },
-        timeout: 5000,
-        maxRedirects: 0,
-        validateStatus: status => status < 500
+      const response = await axios.get(`${this.geoUrl}/search`, {
+        params: { name: location, count: 3, language: 'es' },
+        timeout: 5000
       });
       
-      const url = response.request?.res?.responseUrl || response.config?.url;
-      if (url && url.includes('?') && url.includes('lat=')) {
-        const latMatch = url.match(/lat=([0-9.-]+)/);
-        const lonMatch = url.match(/lon=([0-9.-]+)/);
-        if (latMatch && lonMatch) {
-          return { latitude: parseFloat(latMatch[1]), longitude: parseFloat(lonMatch[1]) };
-        }
+      if (!response.data.results || response.data.results.length === 0) {
+        throw new Error(`Ubicación no encontrada: ${location}`);
       }
-      throw new Error('Could not extract coordinates from URL');
+      
+      return {
+        latitude: response.data.results[0].latitude,
+        longitude: response.data.results[0].longitude
+      };
     } catch (error) {
       throw new Error(`No se pudo geocodificar "${location}": ${error.message}`);
     }
