@@ -510,3 +510,80 @@ export class MockWeatherSource extends WeatherSource {
     };
   }
 }
+
+export class WttrIn extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://wttr.in';
+  }
+
+  async getCurrentWeather(location) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/${encodeURIComponent(location)}.json`, {
+        params: {
+          m: '',
+          M: '',
+          q: '',
+          lang: 'es'
+        },
+        timeout: 10000
+      });
+
+      if (!response.data || !response.data.current_condition) {
+        throw new Error('Invalid wttr.in response');
+      }
+
+      return this.formatData(response.data.current_condition[0]);
+    } catch (error) {
+      throw new Error(`wttr.in no disponible: ${error.message}`);
+    }
+  }
+
+  async getForecast(location, days = 3) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/${encodeURIComponent(location)}.json`, {
+        params: {
+          m: '',
+          q: '',
+          lang: 'es'
+        },
+        timeout: 15000
+      });
+
+      if (!response.data || !response.data.weather) {
+        throw new Error('Invalid wttr.in forecast response');
+      }
+
+      return response.data.weather.slice(0, days).map(day => ({
+        date: day.date,
+        temperatureMax: parseFloat(day.maxtempC),
+        temperatureMin: parseFloat(day.mintempC),
+        description: day.hourly[Math.floor(day.hourly.length / 2)].weatherDesc[0].value,
+        weatherCode: 0,
+        precipitation: parseFloat(day.precipMM) || 0,
+        sunrise: day.astronomy[0]?.sunrise || '06:00',
+        sunset: day.astronomy[0]?.sunset || '18:00'
+      }));
+    } catch (error) {
+      throw new Error(`wttr.in forecast no disponible: ${error.message}`);
+    }
+  }
+
+  formatData(data) {
+    const desc = data.weatherDesc?.[0]?.value || 'desconocido';
+    return {
+      source: 'WttrIn',
+      timestamp: data.localObsDateTime || new Date().toISOString(),
+      temperature: parseFloat(data.temp_C),
+      feelsLike: parseFloat(data.FeelsLikeC),
+      humidity: parseInt(data.humidity),
+      pressure: parseInt(data.pressure),
+      windSpeed: parseFloat(data.windspeedKmph) / 3.6,
+      windDirection: parseInt(data.winddir16Point),
+      description: desc.toLowerCase(),
+      visibility: parseFloat(data.visibility) || 10,
+      clouds: parseInt(data.cloudcover),
+      uvIndex: parseInt(data.uvIndex) || 0
+    };
+  }
+}

@@ -121,16 +121,48 @@ app.get('/api/forecast-7days', async (req, res) => {
       return res.json(cached);
     }
 
-    const { OpenMeteo } = await import('./src/weatherSources.js');
-    const openMeteo = new OpenMeteo();
-    const forecast = await openMeteo.get7DayForecast(location);
+    let forecast = null;
+    let lastError = null;
+
+    try {
+      const { OpenMeteo } = await import('./src/weatherSources.js');
+      const openMeteo = new OpenMeteo();
+      forecast = await openMeteo.get7DayForecast(location);
+      console.log('✅ Forecast desde OpenMeteo');
+    } catch (error) {
+      console.log('⚠️ OpenMeteo falló, intentando WttrIn...');
+      lastError = error;
+      
+      try {
+        const { WttrIn } = await import('./src/weatherSources.js');
+        const wttr = new WttrIn();
+        const wttrForecast = await wttr.getForecast(location, 7);
+        
+        forecast = wttrForecast.map(day => ({
+          date: day.date,
+          temperatureMax: day.temperatureMax,
+          temperatureMin: day.temperatureMin,
+          description: day.description,
+          weatherCode: 0,
+          precipitation: day.precipitation || 0
+        }));
+        console.log('✅ Forecast desde WttrIn');
+      } catch (wttrError) {
+        console.log('⚠️ WttrIn también falló');
+        lastError = wttrError;
+      }
+    }
+
+    if (!forecast) {
+      throw lastError || new Error('No se pudo obtener el pronóstico');
+    }
 
     const response = { success: true, forecast };
     setCached(cacheKey, response);
     
     res.json(response);
   } catch (error) {
-    console.error('Error en forecast 7 días:', error);
+    console.error('Error en forecast 7 días:', error.message);
     res.status(500).json({ error: error.message, suggestion: 'Intenta de nuevo en 5 minutos.' });
   }
 });

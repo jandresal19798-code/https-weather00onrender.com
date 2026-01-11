@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, MockWeatherSource } from './weatherSources.js';
+import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource } from './weatherSources.js';
 import { OllamaClient } from './reportGenerator.js';
 
 dotenv.config();
@@ -14,6 +14,7 @@ class WeatherAgent {
 
   initializeSources() {
     this.sources.push(new OpenMeteo());
+    this.sources.push(new WttrIn());
     this.sources.push(new USNWS());
     this.sources.push(new MetNorway());
 
@@ -150,8 +151,9 @@ class WeatherAgent {
   getSourceWeight(source) {
     const weights = {
       'USNWS': 1.2,
-      'OpenMeteo': 1.1,
+      'OpenMeteo': 1.0,
       'MetNorway': 1.0,
+      'WttrIn': 1.1,
       'OpenWeatherMap': 0.9,
       'WeatherAPI': 0.85
     };
