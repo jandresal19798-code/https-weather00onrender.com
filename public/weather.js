@@ -438,76 +438,124 @@ function easeOutQuart(x) {
 }
 
 async function loadSatelliteImage(location) {
-  const satelliteContainer = document.getElementById('satellite-image');
-  const satelliteTime = document.getElementById('satellite-time');
-  
-  satelliteContainer.innerHTML = '<div class="weather-animation">🛰️ Cargando...</div>';
-  satelliteTime.innerHTML = '🛰️ Cargando...';
+  const visualContainer = document.getElementById('weather-visual');
+  const visualLabel = document.getElementById('weather-visual-label');
   
   try {
-    const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`);
+    visualLabel.textContent = 'Cargando...';
+    
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
+    
+    if (!response.ok) throw new Error('No se pudo obtener clima');
+    
     const data = await response.json();
-
-    if (data.success) {
-      const { latitude, longitude } = data;
-      const now = new Date();
-      
-      const weatherResponse = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
-      const weatherData = await weatherResponse.json();
-      
-      let weatherCondition = 'parcialmente nublado';
-      if (weatherData.report) {
-        const match = weatherData.report.match(/Estado predominante:\s*(.+)/i);
-        if (match) weatherCondition = match[1].trim().toLowerCase();
-      }
-      
-      const emoji = getWeatherIcon(weatherCondition);
-      const animationClass = getWeatherAnimation(weatherCondition);
-      
-      satelliteContainer.innerHTML = `
-        <div class="weather-animation ${animationClass}">
-          <div class="weather-scene">
-            <div class="sun ${weatherCondition.includes('despejado') || weatherCondition.includes('soleado') ? 'visible' : ''}"></div>
-            <div class="moon ${!animationClass.includes('sun') && weatherCondition.includes('despejado') ? 'visible' : ''}"></div>
-            <div class="cloud cloud-1"></div>
-            <div class="cloud cloud-2"></div>
-            <div class="cloud cloud-3"></div>
-            <div class="rain ${animationClass.includes('rain') ? 'visible' : ''}">
-              <div class="drop drop-1"></div>
-              <div class="drop drop-2"></div>
-              <div class="drop drop-3"></div>
-              <div class="drop drop-4"></div>
-              <div class="drop drop-5"></div>
-            </div>
-            <div class="thunder ${animationClass.includes('thunder') ? 'visible' : ''}"></div>
-            <div class="lightning ${animationClass.includes('thunder') ? 'flash' : ''}"></div>
-            <div class="snow ${animationClass.includes('snow') ? 'visible' : ''}">
-              <div class="flake flake-1">❄</div>
-              <div class="flake flake-2">❄</div>
-              <div class="flake flake-3">❄</div>
-            </div>
-            <div class="weather-emoji">${emoji}</div>
-          </div>
-          <div class="weather-info">
-            <div class="weather-location">📍 ${data.location || location}</div>
-            <div class="weather-condition">${weatherCondition}</div>
-            <div class="weather-time">🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</div>
-          </div>
-        </div>
-      `;
-      
-      satelliteTime.innerHTML = `📍 ${data.location || location} • ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+    
+    if (data.success && data.report) {
+      const description = extractWeatherDescription(data.report);
+      updateWeatherVisual(description);
+      visualLabel.textContent = description;
     }
   } catch (error) {
-    console.error('Error:', error);
-    satelliteContainer.innerHTML = `
-      <div class="weather-error">
-        <div class="weather-icon">🌤️</div>
-        <p>Clima en ${location}</p>
-        <p style="opacity: 0.7; font-size: 11px;">No se pudo cargar</p>
-      </div>
-    `;
-    satelliteTime.innerHTML = '⚠️ Error';
+    console.warn('Visual del clima:', error.message);
+    updateWeatherVisual('parcialmente nublado');
+    visualLabel.textContent = 'Clima estimado';
+  }
+}
+
+function updateWeatherVisual(description) {
+  const visual = document.getElementById('weather-visual');
+  const desc = description.toLowerCase();
+  
+  visual.className = 'weather-visual';
+  
+  const isDarkMode = document.body.classList.contains('dark-mode');
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour >= 20;
+  
+  if (isNight && !isDarkMode) {
+    document.body.classList.add('night');
+  }
+  
+  if (desc.includes('lluvia') || desc.includes('rain') || desc.includes('llovizna') || desc.includes('shower')) {
+    visual.classList.add('rainy');
+  } else if (desc.includes('tormenta') || desc.includes('thunder') || desc.includes('storm')) {
+    visual.classList.add('stormy');
+  } else if (desc.includes('nieve') || desc.includes('snow')) {
+    visual.classList.add('snowy');
+  } else if (desc.includes('nublado') || desc.includes('cloudy') || desc.includes('overcast')) {
+    visual.classList.add('cloudy');
+  } else {
+    visual.classList.add('sunny');
+  }
+  
+  const rainContainer = document.getElementById('rain-container');
+  const lightningContainer = document.getElementById('lightning-container');
+  const snowContainer = document.getElementById('snow-container');
+  
+  rainContainer.innerHTML = '';
+  lightningContainer.innerHTML = '';
+  snowContainer.innerHTML = '';
+  
+  if (visual.classList.contains('rainy') || visual.classList.contains('stormy')) {
+    generateRain();
+  }
+  
+  if (visual.classList.contains('stormy')) {
+    generateLightning();
+  }
+  
+  if (visual.classList.contains('snowy')) {
+    generateSnow();
+  }
+}
+
+function generateRain() {
+  const container = document.getElementById('rain-container');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < 50; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'rain-drop';
+    drop.style.left = Math.random() * 100 + '%';
+    drop.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+    drop.style.animationDelay = Math.random() * 2 + 's';
+    container.appendChild(drop);
+  }
+}
+
+function generateLightning() {
+  const container = document.getElementById('lightning-container');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < 3; i++) {
+    const lightning = document.createElement('div');
+    lightning.className = 'lightning';
+    lightning.style.left = (20 + Math.random() * 60) + '%';
+    lightning.style.animationDelay = (Math.random() * 5) + 's';
+    container.appendChild(lightning);
+  }
+}
+
+function generateSnow() {
+  const container = document.getElementById('snow-container');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < 40; i++) {
+    const flake = document.createElement('div');
+    flake.className = 'snowflake';
+    flake.style.left = Math.random() * 100 + '%';
+    flake.style.animationDuration = (3 + Math.random() * 4) + 's';
+    flake.style.animationDelay = Math.random() * 3 + 's';
+    flake.style.width = (4 + Math.random() * 6) + 'px';
+    flake.style.height = flake.style.width;
+    container.appendChild(flake);
   }
 }
 
