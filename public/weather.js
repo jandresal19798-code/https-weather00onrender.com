@@ -60,6 +60,7 @@ async function searchWeather() {
       await loadHourlyForecast(location);
       await loadDailyForecast(location);
       await loadMap(location);
+      await loadWeatherNews(location);
     } else {
       showError(data.error, data.suggestion);
     }
@@ -89,37 +90,45 @@ function updateCurrentWeather(report) {
   const lines = report.split('\n');
   
   lines.forEach(line => {
-    if (line.includes('Ubicación:')) {
-      const city = line.split(': ')[1];
-      document.getElementById('city-name').textContent = city;
+    if (line.includes('Ubicación:') || line.includes('📍')) {
+      const city = line.split(':')[1]?.trim() || line.split('📍')[1]?.trim();
+      if (city) document.getElementById('city-name').textContent = city;
     } else if (line.includes('Fecha:')) {
       const dateStr = line.split(': ')[1];
       const date = new Date(dateStr);
       const options = { weekday: 'long', day: 'numeric', month: 'long' };
       document.getElementById('current-date').textContent = date.toLocaleDateString('es-UY', options);
-    } else if (line.includes('Promedio:')) {
-      const tempStr = line.split('Promedio: ')[1].replace('°C', '').trim();
-      document.getElementById('current-temp').textContent = parseFloat(tempStr).toFixed(0);
-    } else if (line.includes('Velocidad promedio:')) {
-      const wind = line.split(': ')[1].replace('m/s', '').trim();
-      document.getElementById('wind').textContent = `${(parseFloat(wind) * 3.6).toFixed(0)} km/h`;
-    } else if (line.includes('HUMEDAD')) {
-      const match = line.match(/Promedio:\s*([\d.]+)/);
-      if (match) {
-        document.getElementById('humidity').textContent = `${parseFloat(match[1]).toFixed(0)}%`;
-      }
     }
   });
+
+  const tempMatch = report.match(/(\d+(?:\.\d+)?)\s*°C/i);
+  if (tempMatch) {
+    document.getElementById('current-temp').textContent = parseFloat(tempMatch[1]).toFixed(0);
+  }
+
+  const feelsLikeMatch = report.match(/Sensación[\s\S]*?(\d+(?:\.\d+)?)\s*°C/i) || report.match(/sensación[\s\S]*?(\d+(?:\.\d+)?)/i);
+  if (feelsLikeMatch) {
+    document.getElementById('feels-like').textContent = `${parseFloat(feelsLikeMatch[1]).toFixed(0)}°`;
+  }
+
+  const windMatch = report.match(/Velocidad promedio:\s*(\d+(?:\.\d+)?)/i) || report.match(/viento:\s*(\d+(?:\.\d+)?)/i);
+  if (windMatch) {
+    document.getElementById('wind').textContent = `${(parseFloat(windMatch[1]) * 3.6).toFixed(0)} km/h`;
+  }
+
+  const humidityMatch = report.match(/Humedad[\s\S]*?(\d+(?:\.\d+)?)%/i);
+  if (humidityMatch) {
+    document.getElementById('humidity').textContent = `${parseFloat(humidityMatch[1]).toFixed(0)}%`;
+  }
+
+  const pressureMatch = report.match(/Presión:\s*(\d+(?:\.\d+)?)/i);
+  if (pressureMatch) {
+    document.getElementById('pressure').textContent = `${parseFloat(pressureMatch[1]).toFixed(0)} hPa`;
+  }
 
   const weatherDescription = extractWeatherDescription(report);
   document.getElementById('weather-description').textContent = weatherDescription;
   document.getElementById('weather-icon-animated').textContent = getWeatherIcon(weatherDescription);
-  
-  const feelsLike = extractFeelsLike(report);
-  document.getElementById('feels-like').textContent = feelsLike;
-  
-  const pressure = extractPressure(report);
-  document.getElementById('pressure').textContent = pressure;
 }
 
 function extractWeatherDescription(report) {
@@ -318,6 +327,79 @@ async function loadMap(location) {
     }
   } catch (error) {
     console.error('Error al cargar mapa:', error);
+  }
+}
+
+async function loadWeatherNews(location) {
+  const newsContainer = document.getElementById('news-container');
+  newsContainer.innerHTML = '<p class="loading-text">🔍 Buscando noticias del clima...</p>';
+  
+  try {
+    const keywords = ['tormenta', 'lluvia', 'inundación', 'huracán', 'clima extremo', 'temporal', 'granizo'];
+    const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+    const query = `${location} ${randomKeyword}`;
+    
+    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=es&gl=ES&ceid=ES:es`)}`);
+    
+    if (!response.ok) throw new Error('No se pudo obtener noticias');
+    
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'text/xml');
+    const items = xml.querySelectorAll('item');
+    
+    const news = [];
+    items.forEach((item, index) => {
+      if (index < 6) {
+        const title = item.querySelector('title')?.textContent;
+        const link = item.querySelector('link')?.textContent;
+        const pubDate = item.querySelector('pubDate')?.textContent;
+        const source = item.querySelector('source')?.textContent || 'Noticias';
+        
+        if (title && link && !title.toLowerCase().includes('bit.ly')) {
+          news.push({
+            title: title.replace(/<[^>]*>/g, ''),
+            link: link,
+            date: pubDate ? new Date(pubDate).toLocaleDateString('es') : '',
+            source: source.replace(/<[^>]*>/g, '')
+          });
+        }
+      }
+    });
+    
+    if (news.length === 0) {
+      newsContainer.innerHTML = `
+        <div class="no-news">
+          <p>📰 No se encontraron noticias recientes del clima para ${location}</p>
+          <p style="font-size: 14px; margin-top: 8px; opacity: 0.7;">Las noticias aparecerán cuando haya eventos climáticos significativos</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const weatherEmojis = ['⛈️', '🌧️', '🌪️', '🌊', '☀️', '🌡️'];
+    
+    newsContainer.innerHTML = news.map(item => `
+      <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-card">
+        <div class="news-image" style="display: flex; align-items: center; justify-content: center; font-size: 48px;">
+          ${weatherEmojis[Math.floor(Math.random() * weatherEmojis.length)]}
+        </div>
+        <div class="news-content">
+          <div class="news-source">${item.source}</div>
+          <div class="news-title">${item.title}</div>
+          <div class="news-date">${item.date}</div>
+        </div>
+      </a>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error al cargar noticias:', error);
+    newsContainer.innerHTML = `
+      <div class="no-news">
+        <p>📰 No se pudieron cargar las noticias</p>
+        <p style="font-size: 14px; margin-top: 8px; opacity: 0.7;">Intenta de nuevo más tarde</p>
+      </div>
+    `;
   }
 }
 
