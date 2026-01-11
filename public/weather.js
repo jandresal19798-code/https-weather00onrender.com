@@ -67,6 +67,7 @@ async function searchWeather() {
     if (data.success) {
       updateCurrentWeather(data.report);
       currentReport = data.report;
+      const now = new Date();
       await Promise.all([
         loadHourlyForecast(location),
         loadDailyForecast(location),
@@ -74,6 +75,8 @@ async function searchWeather() {
         loadSatelliteImage(location),
         loadWeatherNews(location)
       ]);
+      updateSolarInfo(now);
+      updateMoonInfo(now);
     } else {
       showError(data.error, data.suggestion);
     }
@@ -272,17 +275,21 @@ async function loadDailyForecast(location, retryCount = 0) {
     }
     
     const data = await response.json();
- 
+    
     if (data.success) {
       displayDailyForecast(data.forecast);
       updateWeatherDetails(data.forecast);
       renderTempChart(data.forecast);
+      updateSolarInfo(new Date());
+      updateMoonInfo(new Date());
+      generateActivities(data.forecast);
     } else {
       console.warn('Pronóstico diario no disponible');
       const mockData = getMockForecast();
       displayDailyForecast(mockData);
       updateWeatherDetails(mockData);
       renderTempChart(mockData);
+      generateActivities(mockData);
     }
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -291,12 +298,14 @@ async function loadDailyForecast(location, retryCount = 0) {
       displayDailyForecast(mockData);
       updateWeatherDetails(mockData);
       renderTempChart(mockData);
+      generateActivities(mockData);
     } else {
       console.warn('Error pronóstico diario, usando datos demo:', error.message);
       const mockData = getMockForecast();
       displayDailyForecast(mockData);
       updateWeatherDetails(mockData);
       renderTempChart(mockData);
+      generateActivities(mockData);
     }
   }
 }
@@ -436,6 +445,249 @@ function animateValue(id, start, end, duration, suffix = '', textSuffix = '') {
 
 function easeOutQuart(x) {
   return 1 - Math.pow(1 - x, 4);
+}
+
+function updateSolarInfo(date) {
+  const sunriseEl = document.getElementById('sunrise');
+  const sunsetEl = document.getElementById('sunset');
+  
+  try {
+    const response = await fetch(`https://api.sunrisesunset.io/json?lat=${currentCoords?.lat || 0}&lng=${currentCoords?.lng || 0}&date=${date.toISOString().split('T')[0]}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      if (data.results && data.results.sunrise && data.results.sunset) {
+        const sunrise = new Date(data.results.sunrise);
+        const sunset = new Date(data.results.sunset);
+        
+        sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+        sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+  } catch (error) {
+    console.warn('Solar data error:', error);
+    const now = new Date();
+    const sunrise = new Date(now);
+    sunrise.setHours(6, 30, 0);
+    const sunset = new Date(now);
+    sunset.setHours(18, 30, 0);
+    
+    sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  }
+}
+
+function calculateMoonPhase(date) {
+  const synodic = 29.53058867;
+  const knownNewMoon = new Date('2023-01-21T20:53:00Z');
+  const daysSinceNewMoon = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
+  const newMoons = daysSinceNewMoon / synodic;
+  const phase = newMoons - Math.floor(newMoons);
+  
+  const phases = [
+    { name: 'Luna Nueva', icon: '🌑', illumination: 0 },
+    { name: 'Cuarto Creciente', icon: '🌒', illumination: 25 },
+    { name: 'Cuarto Creciente', icon: '🌓', illumination: 50 },
+    { name: 'Luna Llena', icon: '🌕', illumination: 100 },
+    { name: 'Cuarto Menguante', icon: '🌖', illumination: 75 },
+    { name: 'Cuarto Menguante', icon: '🌗', illumination: 50 },
+    { name: 'Luna Vieja', icon: '🌘', illumination: 25 }
+  ];
+  
+  const phaseIndex = Math.floor(phase * 8) % 8;
+  return phases[phaseIndex];
+}
+
+function updateMoonInfo(date) {
+  const moonNameEl = document.getElementById('moon-name');
+  const moonIlluminationEl = document.getElementById('moon-illumination');
+  const moonContainer = document.getElementById('moon-phase');
+  
+  const moon = calculateMoonPhase(date);
+  const moonIconEl = moonContainer.querySelector('.moon-icon');
+  
+  moonNameEl.textContent = moon.name;
+  moonIlluminationEl.textContent = `${moon.illumination}% iluminación`;
+  moonIconEl.textContent = moon.icon;
+}
+
+function generateActivities(forecast) {
+  const container = document.getElementById('activities-grid');
+  const today = forecast[0];
+  
+  if (!today) return;
+  
+  const temp = (today.temperatureMax + today.temperatureMin) / 2;
+  const weatherDesc = today.description?.toLowerCase() || '';
+  const weatherCode = today.weatherCode || 0;
+  
+  const activities = [];
+  
+  if (weatherDesc.includes('lluvia') || weatherDesc.includes('rain') || weatherDesc.includes('shower')) {
+    activities.push({
+      icon: '☔',
+      name: 'Mantenerse bajo techo',
+      recommendation: 'Lleva paraguas y ropa impermeable',
+      confidence: 85,
+      level: 'high'
+    });
+    activities.push({
+      icon: '📱',
+      name: 'Actividades interiores',
+      recommendation: 'Es buen momento para lectura, películas o proyectos en casa',
+      confidence: 90,
+      level: 'high'
+    });
+  }
+  
+  if (temp > 30) {
+    activities.push({
+      icon: '🏊',
+      name: 'Ir a la playa o piscina',
+      recommendation: 'Temperatura ideal para refrescarse en el agua',
+      confidence: 95,
+      level: 'high'
+    });
+    activities.push({
+      icon: '🧴',
+      name: 'Hidratarse frecuentemente',
+      recommendation: 'Bebe mucha agua y evita el sol directo',
+      confidence: 90,
+      level: 'high'
+    });
+  }
+  
+  if (weatherDesc.includes('soleado') || weatherDesc.includes('despejado')) {
+    activities.push({
+      icon: '🏃',
+      name: 'Correr al aire libre',
+      recommendation: 'Condiciones perfectas para ejercicio al exterior',
+      confidence: 90,
+      level: 'high'
+    });
+    activities.push({
+      icon: '🧘',
+      name: 'Usar protector solar',
+      recommendation: 'Aplica SPF 50+ cada 2 horas',
+      confidence: 95,
+      level: 'high'
+    });
+  }
+  
+  if (weatherDesc.includes('nublado') || weatherDesc.includes('cloudy')) {
+    activities.push({
+      icon: '🚶',
+      name: 'Caminar por la ciudad',
+      recommendation: 'Temperatura agradable, ideal para paseos',
+      confidence: 80,
+      level: 'medium'
+    });
+    activities.push({
+      icon: '📸',
+      name: 'Fotografía urbana',
+      recommendation: 'Luz difusa perfecta para retratos',
+      confidence: 75,
+      level: 'medium'
+    });
+  }
+  
+  if (weatherDesc.includes('nieve') || weatherDesc.includes('snow')) {
+    activities.push({
+      icon: '⛷️',
+      name: 'Esquiar o snowboard',
+      recommendation: 'Condiciones perfectas para deportes de nieve',
+      confidence: 90,
+      level: 'high'
+    });
+    activities.push({
+      icon: '⛄',
+      name: 'Construir muñeco de nieve',
+      recommendation: 'Actividad divertida para disfrutar con la familia',
+      confidence: 85,
+      level: 'medium'
+    });
+  }
+  
+  if (weatherDesc.includes('tormenta') || weatherDesc.includes('thunder') || weatherDesc.includes('storm')) {
+    activities.push({
+      icon: '🏠',
+      name: 'Quedarse en casa',
+      recommendation: 'Es lo más seguro durante tormentas eléctricas',
+      confidence: 95,
+      level: 'high'
+    });
+    activities.push({
+      icon: '📺',
+      name: 'Ver series o películas',
+      recommendation: 'Buen momento para maratones de tu programa favorito',
+      confidence: 90,
+      level: 'high'
+    });
+  }
+  
+  const moderateActivities = [
+    { icon: '📖', name: 'Leer un libro', recommendation: 'Momento ideal para disfrutar de una buena lectura', confidence: 70, level: 'medium' },
+    { icon: '🎮', name: 'Videojuegos', recommendation: 'Pasa tiempo jugando tus juegos favoritos', confidence: 65, level: 'medium' },
+    { icon: '🍳', name: 'Actividades al aire libre', recommendation: 'Disfruta del aire libre si las condiciones lo permiten', confidence: 60, level: 'low' },
+    { icon: '🎧', name: 'Escuchar música', recommendation: 'Crea tu playlist del momento según el clima', confidence: 65, level: 'low' },
+    { icon: '🍳', name: 'Picnic al aire libre', recommendation: 'Disfruta de un almuerzo o cena al aire libre', confidence: 70, level: 'medium' }
+  ];
+  
+  if (activities.length < 4) {
+    activities.push(...moderateActivities.slice(0, 4 - activities.length));
+  }
+  
+  container.innerHTML = activities.slice(0, 6).map(act => `
+    <div class="activity-card ${act.level === 'high' ? 'recommended' : ''}">
+      <div class="activity-header">
+        <span class="activity-icon">${act.icon}</span>
+        <span class="activity-name">${act.name}</span>
+      </div>
+      <div class="activity-recommendation">${act.recommendation}</div>
+      <div class="activity-confidence ${act.level}">
+        ${act.confidence}% recomendado
+      </div>
+    </div>
+  `).join('');
+}
+
+function setForecastDateConstraints() {
+  const datePicker = document.getElementById('forecast-date');
+  const today = new Date();
+  const maxDate = new Date();
+  maxDate.setDate(today.getDate() + 7);
+  
+  datePicker.min = today.toISOString().split('T')[0];
+  datePicker.max = maxDate.toISOString().split('T')[0];
+  datePicker.value = today.toISOString().split('T')[0];
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setForecastDateConstraints();
+  
+  const datePicker = document.getElementById('forecast-date');
+  datePicker.addEventListener('change', (e) => {
+    const selectedDate = new Date(e.target.value);
+    loadDailyForecastForDate(currentLocation, selectedDate);
+    updateSolarInfo(selectedDate);
+    updateMoonInfo(selectedDate);
+  });
+});
+
+async function loadDailyForecastForDate(location, date) {
+  try {
+    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      displayDailyForecast(data.forecast);
+      updateWeatherDetails(data.forecast);
+      generateActivities(data.forecast);
+    }
+  } catch (error) {
+    console.warn('Error loading forecast for date:', error);
+  }
 }
 
 async function loadSatelliteImage(location) {

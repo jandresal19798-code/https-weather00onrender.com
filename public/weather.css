@@ -770,6 +770,203 @@ a:hover {
   color: var(--danger);
 }
 
+/* Forecast Date Picker */
+.forecast-date-picker {
+  padding: 14px 24px;
+  background: var(--bg-card);
+  border: var(--glass-border);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.forecast-date-picker:hover {
+  background: var(--bg-tertiary);
+}
+
+.forecast-date-picker:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+/* Solar Info */
+.solar-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-backdrop);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.solar-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.solar-icon {
+  font-size: 36px;
+}
+
+.solar-data {
+  flex: 1;
+}
+
+.solar-label {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.solar-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Moon Info */
+.moon-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-card);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  margin-top: 24px;
+}
+
+.moon-phase {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.moon-icon {
+  font-size: 64px;
+  animation: moonGlow 4s ease-in-out infinite;
+}
+
+@keyframes moonGlow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 10px rgba(148, 163, 184, 0.6));
+    transform: scale(1); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 20px rgba(148, 163, 184, 0.4));
+    transform: scale(1.05); 
+  }
+}
+
+.moon-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.moon-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.moon-illumination {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Activities Grid */
+.activities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.activity-card {
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-backdrop);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-left: 4px solid var(--primary);
+}
+
+.activity-card:hover {
+  transform: translateX(8px);
+  box-shadow: var(--shadow-md);
+}
+
+.activity-card:not(.recommended) {
+  border-left-color: var(--text-tertiary);
+  opacity: 0.6;
+}
+
+.activity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.activity-icon {
+  font-size: 32px;
+}
+
+.activity-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.activity-recommendation {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.activity-confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, var(--secondary), #22c55e);
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.activity-confidence.high {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.activity-confidence.medium {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.activity-confidence.low {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
 /* Section */
 .section {
   margin-bottom: 40px;
