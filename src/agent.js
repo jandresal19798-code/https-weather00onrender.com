@@ -46,13 +46,27 @@ class WeatherAgent {
     const locationsToTry = [
       location,
       location.replace(/,\s*\w+$/i, ''),
-      location.replace(/\s+\w+$/i, '')
+      location.replace(/\s+\w+$/i, ''),
+      location.toLowerCase(),
+      location.toUpperCase(),
+      location.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
     ];
+
+    const triedLocations = new Set();
+    const maxTries = 3;
 
     for (const source of this.sources) {
       let locationFound = false;
+      let tries = 0;
+      
       for (const loc of locationsToTry) {
-        if (locationFound) break;
+        if (locationFound || tries >= maxTries) break;
+        if (triedLocations.has(loc.toLowerCase())) {
+          tries++;
+          continue;
+        }
+        triedLocations.add(loc.toLowerCase());
+        
         try {
           let data;
           if (useForecast) {
@@ -76,11 +90,23 @@ class WeatherAgent {
             errors.push({ source: source.constructor.name, error: error.message });
           }
         }
+        tries++;
       }
     }
 
     if (weatherData.length === 0) {
-      throw new Error(`No se pudo obtener datos. Intenta con el nombre de la ciudad en español o inglés.`);
+      const errorMessages = errors.map(e => e.error).join(', ');
+      let suggestion = 'Intenta con el nombre de la ciudad en español o inglés';
+      
+      if (location.toLowerCase().includes('jsoe') || location.toLowerCase().includes('j0se')) {
+        suggestion = '¿Quisiste decir "San José de Mayo"? Verifica la ortografía.';
+      } else if (location.length < 3) {
+        suggestion = 'El nombre de la ciudad es muy corto. Ingresa al menos 3 caracteres.';
+      } else if (location.includes(' ')) {
+        suggestion = 'Intenta solo el nombre de la ciudad sin país/región.';
+      }
+      
+      throw new Error(`No se encontró "${location}". ${suggestion}`);
     }
 
     console.log('\n🧠 Aplicando IA de Zeus Meteo...');

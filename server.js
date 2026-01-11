@@ -56,6 +56,13 @@ app.get('/api/weather', async (req, res) => {
       return res.status(400).json({ error: 'Ubicación requerida' });
     }
 
+    if (location.length < 2) {
+      return res.status(400).json({ 
+        error: 'Nombre muy corto',
+        suggestion: 'Ingresa al menos 2 caracteres para buscar'
+      });
+    }
+
     const cacheKey = getCacheKey('/api/weather', { location, date, forecast });
     const cached = getCached(cacheKey);
     
@@ -77,9 +84,14 @@ app.get('/api/weather', async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error('Error en API:', error);
-    res.status(500).json({ 
+    
+    const isNotFound = error.message.includes('No se encontró') || 
+                       error.message.includes('no encontrada') ||
+                       error.message.includes('ubicación');
+    
+    res.status(isNotFound ? 400 : 500).json({ 
       error: error.message,
-      suggestion: 'Intenta con el nombre de la ciudad en español o inglés'
+      suggestion: isNotFound ? 'Verifica la ortografía o intenta con otra ciudad' : 'Intenta de nuevo en unos minutos'
     });
   }
 });
