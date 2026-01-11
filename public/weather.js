@@ -1223,9 +1223,20 @@ function removeThinkingIndicator() {
   }
 }
 
+// Configuración de APIs
+const API_CONFIG = {
+  groq: {
+    endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+    model: 'llama-3.3-70b-versatile',
+    apiKey: localStorage.getItem('zeus_groq_api_key') || ''
+  },
+  ollama: {
+    endpoint: 'http://localhost:11434/api/generate',
+    model: 'llama3.2'
+  }
+};
+
 async function getAIResponse(userMessage) {
-  const ollamaEndpoint = 'http://localhost:11434/api/generate';
-  
   const systemMessage = WEATHER_CONTEXT;
   
   const messages = [
@@ -1234,26 +1245,53 @@ async function getAIResponse(userMessage) {
     { role: 'user', content: userMessage }
   ];
   
-  const prompt = messages.map(m => {
-    if (m.role === 'system') return `[SYSTEM]: ${m.content}`;
-    if (m.role === 'user') return `[USER]: ${m.content}`;
-    return `[ASSISTANT]: ${m.content}`;
-  }).join('\n');
+  // Intentar Groq primero (gratuito en la nube)
+  if (API_CONFIG.groq.apiKey) {
+    try {
+      const response = await fetch(API_CONFIG.groq.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_CONFIG.groq.apiKey}`
+        },
+        body: JSON.stringify({
+          model: API_CONFIG.groq.model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 300,
+          stream: false
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.choices[0].message.content.trim();
+      }
+    } catch (error) {
+      console.error('Groq error:', error);
+    }
+  }
   
+  // Intentar Ollama local como fallback
   try {
+    const prompt = messages.map(m => {
+      if (m.role === 'system') return `[SYSTEM]: ${m.content}`;
+      if (m.role === 'user') return `[USER]: ${m.content}`;
+      return `[ASSISTANT]: ${m.content}`;
+    }).join('\n');
+    
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
     
-    const response = await fetch(ollamaEndpoint, {
+    const response = await fetch(API_CONFIG.ollama.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llama3.2',
+        model: API_CONFIG.ollama.model,
         prompt: prompt,
         stream: false,
         options: {
           temperature: 0.7,
-          top_p: 0.9,
           max_tokens: 300
         }
       }),
@@ -1262,52 +1300,224 @@ async function getAIResponse(userMessage) {
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.response.trim();
     }
-    
-    const data = await response.json();
-    return data.response.trim();
   } catch (error) {
-    console.error('Ollama error:', error.message);
-    
-    if (error.name === 'AbortError') {
-      return '⏱️ La IA tardó demasiado en responder. ¿Podrías repetir tu pregunta?';
+    console.log('Ollama no disponible, usando respuestas inteligentes');
+  }
+  
+  // Respuestas inteligentes locales
+  return getSmartResponse(userMessage);
+}
+
+function getSmartResponse(message) {
+  const lowerMessage = message.toLowerCase();
+  
+  const smartResponses = {
+    greeting: ['Hola 👋 ¿En qué puedo ayudarte con el clima?', '¡Hey! 🌤️ ¿Buscas información meteorológica?', '¡Buenas! ☀️ ¿Qué quieres saber del clima?'],
+    weather_search: ['Para conocer el clima exacto, busca una ciudad arriba 🔍 ¿Te ayudo a buscar alguna?', '🌡️ Escribe el nombre de una ciudad y te doy el pronóstico completo', '🔍 Busca cualquier ciudad del mundo para ver su clima actual'],
+    temperature: ['La temperatura depende de la ciudad y la época del año 🌡️ ¿Cuál te interesa?', '❄️🔥 Las temperaturas varían mucho según la ubicación. ¿Buscas alguna ciudad específica?'],
+    rain: ['🌧️ Para saber si lloverá, necesito saber dónde estás. ¿Buscas el clima de alguna ciudad?', 'La probabilidad de lluvia se calcula según la humedad y presión atmosférica ☔'],
+    sun: ['☀️ ¡Perfecto! El sol es genial. ¿En qué ciudad quieres ver el pronóstico?', 'El sol aparece cuando no hay nubes ☀️ ¿Te gustaría buscar una ciudad?'],
+    wind: ['💨 El viento puede ser fuerte o suave. ¿En qué zona te interesa?', 'Los vientos se miden en km/h y dependen de la presión atmosférica 🌬️'],
+    storm: ['⛈️ Las tormentas son fenómenos complejos. ¿Te interesa alguna ciudad específica?'],
+    cold: ['❄️ Hace frío, ¿verdad? La sensación térmica puede ser diferente a la temperatura real 🧥'],
+    hot: ['🔥 Hace calor hoy. No olvides hidratarte y usar protector solar 🧴'],
+    humidity: ['💧 La humedad alta hace que la sensación térmica sea más extrema. ¿En qué ciudad consultas?'],
+    forecast: ['📊 Los pronósticos están disponibles para 7 días. Busca una ciudad para verlos 🌤️'],
+    curiosity: ['💡 Dato curioso: Los rayos pueden alcanzar temperaturas de 30,000°C ⚡', '¿Sabías que la presión atmosférica puede predecir cambios de clima? 📊', '🌍 La temperatura más alta registrada fue 56.7°C en California'],
+    thanks: ['¡De nada! 😊 ¿Hay algo más en lo que pueda ayudarte?', '¡Con gusto! 🌤️ ¿Necesitas algo más?'],
+    goodbye: ['¡Adiós! 👋 ¡Que tengas un excelente día!', '¡Chao! 🌙 ¡Vuelve cuando quieras!', '¡Hasta luego! ☀️ ¡Cuídate!'],
+    help: ['🤖 Puedo responder preguntas sobre:\n• El clima actual\n• Pronósticos\n• Curiosidades meteorológicas\n• Consejos según el clima\n\nSolo busca una ciudad o pregúntame algo 😊'],
+    how_are_you: ['¡Muy bien! 🌞 Estoy listo para ayudarte con el clima. ¿Qué quieres saber?', '¡Excelente! ☀️ ¿En qué puedo asistirte hoy?'],
+    what_is: ['💡 Pregunta interesante. Los fenómenos meteorológicos son fascinantes. ¿Hay algo específico que quieras saber?'],
+    why: ['🤔 Buena pregunta. El clima depende de muchos factores: temperatura, humedad, presión, viento...'],
+    when: ['⏰ El tiempo meteorológico cambia constantemente. ¿Buscas el pronóstico para una fecha específica?'],
+    where: ['📍 Las condiciones climáticas varían según la ubicación. ¿Qué ciudad te interesa?'],
+    can_i: ['¡Claro! 😊 Pregúntame lo que quieras sobre el clima 🌤️'],
+    should_i: ['💡 Basándome en las condiciones, te recomendaría... ¿En qué ciudad estás?']
+  };
+  
+  const patterns = [
+    { keys: ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'hey', 'qué tal', 'que tal'], type: 'greeting' },
+    { keys: ['clima', 'tiempo', 'pronóstico', 'pronostico', 'como está', 'como esta'], type: 'weather_search' },
+    { keys: ['temperatura', 'cuántos grados', 'cuantos grados', 'calor', 'frío', 'frio'], type: 'temperature' },
+    { keys: ['llover', 'lluvia', 'lloverá', 'llovera', 'llovizna', 'aguanieve'], type: 'rain' },
+    { keys: ['sol', 'soleado', 'despejado', 'claro'], type: 'sun' },
+    { keys: ['viento', 'viento', 'ráfagas', 'rafagas'], type: 'wind' },
+    { keys: ['tormenta', 'rayo', 'trueno', 'relámpago', 'rayos'], type: 'storm' },
+    { keys: ['frío', 'frio', 'helado', 'congelado'], type: 'cold' },
+    { keys: ['calor', 'caluroso', 'caliente'], type: 'hot' },
+    { keys: ['humedad', 'húmedo', 'humedo'], type: 'humidity' },
+    { keys: ['pronóstico', 'pronostico', '7 días', '7 dias', 'semana'], type: 'forecast' },
+    { keys: ['sabías', 'sabias', 'curiosidad', 'dato', 'interesante'], type: 'curiosity' },
+    { keys: ['gracias', 'thank', 'te agradezco'], type: 'thanks' },
+    { keys: ['adiós', 'adios', 'chao', 'bye', 'nos vemos', 'hasta luego'], type: 'goodbye' },
+    { keys: ['qué puedes', 'que puedes', 'qué haces', 'que haces', 'ayuda', 'help'], type: 'help' },
+    { keys: ['cómo estás', 'como estas', 'qué tal estás', 'que tal estas', 'cómo te', 'como te'], type: 'how_are_you' },
+    { keys: ['qué es', 'que es', 'qué es el', 'que es el', 'explica', 'explicar'], type: 'what_is' },
+    { keys: ['por qué', 'porque', 'por que', 'el motivo', 'la razón', 'la razon'], type: 'why' },
+    { keys: ['cuándo', 'cuando', 'a qué hora', 'a que hora'], type: 'when' },
+    { keys: ['dónde', 'donde', 'en qué lugar', 'en que lugar'], type: 'where' },
+    { keys: ['puedo', 'puedo hacer', 'puedo llevar', 'debería', 'deberia'], type: 'should_i' },
+    { keys: ['puedo', 'puedo usar', 'se puede', 'es seguro'], type: 'can_i' }
+  ];
+  
+  for (const pattern of patterns) {
+    if (pattern.keys.some(key => lowerMessage.includes(key))) {
+      const responses = smartResponses[pattern.type];
+      return responses[Math.floor(Math.random() * responses.length)];
     }
-    
-    return getFallbackResponse(userMessage);
+  }
+  
+  const defaultResponses = [
+    'Interesante pregunta 🤔 Para darte información precisa, busca una ciudad específica arriba 🔍',
+    '¡Hmm! Pregunta interesante 💭 ¿Te ayudo a buscar el clima de alguna ciudad?',
+    '😊 No estoy seguro de entender. ¿Buscas el pronóstico de alguna ciudad?',
+    '¡Vale! 🌤️ ¿En qué ciudad te gustaría consultar el clima?'
+  ];
+  
+  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+}
+
+// ==================== GROQ API CONFIG ====================
+
+function showApiKeyConfig() {
+  const container = document.getElementById('chatbot-messages');
+  const configHtml = `
+    <div class="chatbot-config">
+      <div class="chatbot-config-header">
+        <span>⚙️</span>
+        <strong>Configurar Groq API (Opcional)</strong>
+      </div>
+      <p>Groq ofrece IA gratuita en la nube. Obtén tu API key gratis:</p>
+      <ol>
+        <li>Ve a <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
+        <li>Crea una cuenta gratis</li>
+        <li>Copia tu API Key</li>
+        <li>Pégala aquí abajo</li>
+      </ol>
+      <div class="chatbot-input-container" style="margin-top: 12px;">
+        <input type="password" id="groq-api-key" placeholder="Pega tu API key de Groq..." />
+        <button class="chatbot-send" onclick="saveApiKey()">💾</button>
+      </div>
+      <p style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Tu API key se guarda solo en tu navegador</p>
+      <button onclick="testApiKey()" style="margin-top: 8px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); cursor: pointer;">Probar API Key</button>
+    </div>
+  `;
+  
+  container.insertAdjacentHTML('beforeend', configHtml);
+  container.scrollTop = container.scrollHeight;
+}
+
+function saveApiKey() {
+  const input = document.getElementById('groq-api-key');
+  const apiKey = input.value.trim();
+  
+  if (apiKey.length < 10) {
+    alert('La API key parece muy corta. Verifícala por favor.');
+    return;
+  }
+  
+  localStorage.setItem('zeus_groq_api_key', apiKey);
+  API_CONFIG.groq.apiKey = apiKey;
+  
+  const configDiv = document.querySelector('.chatbot-config');
+  if (configDiv) {
+    configDiv.innerHTML = `
+      <div style="text-align: center; padding: 20px;">
+        <span style="font-size: 48px;">✅</span>
+        <p style="margin-top: 12px;"><strong>¡API Key guardada!</strong></p>
+        <p style="font-size: 13px; opacity: 0.7;">Ahora el chatbot usará IA avanzada de Groq</p>
+      </div>
+    `;
   }
 }
 
-function getFallbackResponse(message) {
-  const lowerMessage = message.toLowerCase();
+function testApiKey() {
+  const input = document.getElementById('groq-api-key');
+  const apiKey = input.value.trim();
   
-  const responses = {
-    'hola': '¡Hola! 👋 Soy Zeus AI. ¿Cómo puedo ayudarte con el clima hoy?',
-    'buenos días': '¡Buenos días! ☀️ ¿Qué te gustaría saber sobre el clima?',
-    'buenas tardes': '¡Buenas tardes! 🌤️ ¿En qué puedo ayudarte?',
-    'buenas noches': '¡Buenas noches! 🌙 ¿Necesitas información sobre el clima nocturno?',
-    'llover': '🌧️ Para saber si lloverá, busca una ciudad específica. ¿Te gustaría buscar el clima de algún lugar?',
-    'lluvia': '🌧️ La lluvia depende de muchos factores. ¿En qué ciudad estás interesado?',
-    'sol': '☀️ ¡Perfecto! El sol está brillando. ¿Buscas el pronóstico para alguna ciudad?',
-    'frío': '❄️ Hace frío, ¿verdad? Puedo darte información sobre temperaturas bajas. ¿En qué ciudad?',
-    'calor': '🔥 Mucho calor hoy. ¿Te gustaría saber el pronóstico para otra ciudad?',
-    'viento': '💨 El viento puede ser fuerte. ¿En qué zona te interesa consultar?',
-    'tormenta': '⛈️ Cuidado con las tormentas. ¿Te ayudo a buscar información sobre alguna ciudad específica?',
-    'temperatura': '🌡️ Para conocer la temperatura exacta, busca una ciudad. ¿Dónde te gustaría consultar?',
-    'pronóstico': '📊 Los pronósticos están disponibles para cualquier ciudad. ¿Cuál te interesa?',
-    'gracias': '¡De nada! 😊 ¿Hay algo más en lo que pueda ayudarte?',
-    'adiós': '¡Adiós! 👋 ¡Que tengas un excelente día!',
-    'chao': '¡Chao! 👋 ¡Vuelve cuando quieras consultar el clima!',
-    'qué puedes hacer': '🤖 Puedo:\n• Responder preguntas sobre el clima\n• Compartir curiosidades meteorológicas\n• Darte consejos según las condiciones\n• Explicar fenómenos climáticos',
-    'que puedes hacer': '🤖 Puedo:\n• Responder preguntas sobre el clima\n• Compartir curiosidades meteorológicas\n• Darte consejos según las condiciones\n• Explicar fenómenos climáticos'
-  };
+  if (!apiKey) {
+    alert('Primero ingresa una API key');
+    return;
+  }
   
-  for (const [key, value] of Object.entries(responses)) {
-    if (lowerMessage.includes(key)) {
-      return value;
+  const btn = document.querySelector('button[onclick="testApiKey()"]');
+  btn.textContent = '⏳ Probando...';
+  btn.disabled = true;
+  
+  fetch('https://api.groq.com/openai/v1/models', {
+    headers: { 'Authorization': `Bearer ${apiKey}` }
+  })
+  .then(response => {
+    if (response.ok) {
+      alert('✅ API Key válida. El chatbot ahora usará IA avanzada.');
+      saveApiKey();
+    } else {
+      alert('❌ API Key inválida. Verifícala en console.groq.com');
+    }
+  })
+  .catch(error => {
+    alert('❌ Error al conectar. Verifica tu conexión o API key.');
+  })
+  .finally(() => {
+    btn.textContent = 'Probar API Key';
+    btn.disabled = false;
+  });
+}
+
+// Añadir comando para configurar API key
+function handleSpecialCommands(message) {
+  const lower = message.toLowerCase().trim();
+  
+  if (lower === '/config' || lower === '/api' || lower === 'configurar api') {
+    showApiKeyConfig();
+    return true;
+  }
+  
+  if (lower === '/clear' || lower === '/borrar') {
+    chatHistory = [];
+    const container = document.getElementById('chatbot-messages');
+    container.innerHTML = `
+      <div class="chatbot-welcome">
+        <div class="chatbot-avatar">🤖</div>
+        <p>¡Historial borrado! 💬 ¿En qué puedo ayudarte?</p>
+      </div>
+    `;
+    return true;
+  }
+  
+  if (lower === '/status' || lower === '/estado') {
+    let status = '📊 Estado del Chatbot:\n\n';
+    status += API_CONFIG.groq.apiKey ? '✅ Groq API: Configurada\n' : '⚪ Groq API: No configurada\n';
+    status += '✅ Respuestas inteligentes: Activas\n';
+    status += localStorage.getItem('zeus_groq_api_key') ? '✅ API Key: Guardada' : '⚪ API Key: No guardada';
+    
+    alert(status);
+    return true;
+  }
+  
+  return false;
+}
+
+// Modificar sendChatMessage para incluir comandos especiales
+const originalSendChatMessage = sendChatMessage;
+sendChatMessage = function() {
+  const input = document.getElementById('chatbot-input');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  if (message.startsWith('/') || message.toLowerCase().includes('/api') || message.toLowerCase().includes('configurar')) {
+    if (handleSpecialCommands(message)) {
+      input.value = '';
+      return;
     }
   }
   
-  return `Interesante pregunta sobre "${message}". 🤔 Para darte información precisa sobre el clima, te recomiendo buscar una ciudad específica. ¿Hay algo más en lo que pueda ayudarte?`;
-}
+  originalSendChatMessage();
+};
+

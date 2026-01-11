@@ -420,10 +420,13 @@
         <span class="chatbot-icon">🤖</span>
         <div>
           <strong>Zeus AI</strong>
-          <span class="chatbot-status">Conectado a Ollama</span>
+          <span class="chatbot-status" id="chatbot-status-text">IA Gratuita</span>
         </div>
       </div>
-      <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="chatbot-config-btn" onclick="showApiKeyConfig()" title="Configurar API">⚙️</button>
+        <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+      </div>
     </div>
     
     <div class="chatbot-messages" id="chatbot-messages">
@@ -437,7 +440,7 @@
           <li>📊 Datos climáticos</li>
           <li>💡 Consejos según el clima</li>
         </ul>
-        <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">Powered by Ollama (Gratis)</p>
+        <p style="font-size: 11px; opacity: 0.7; margin-top: 8px;">💡 Escribe <strong>/config</strong> para configurar IA avanzada</p>
       </div>
     </div>
     
@@ -448,5 +451,19 @@
   </div>
 
   <script src="weather.js"></script>
+  <script>
+    // Update chatbot status based on API configuration
+    function updateChatbotStatus() {
+      const statusEl = document.getElementById('chatbot-status-text');
+      if (API_CONFIG.groq.apiKey) {
+        statusEl.textContent = 'Groq IA';
+        statusEl.style.color = '#00c853';
+      } else {
+        statusEl.textContent = 'IA Gratuita';
+        statusEl.style.color = '#fff';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', updateChatbotStatus);
+  </script>
 </body>
 </html>
