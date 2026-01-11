@@ -360,10 +360,13 @@ async function loadSatelliteImage(location) {
       const now = new Date();
       
       satelliteContainer.innerHTML = `
-        <img src="https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${longitude},${latitude},5,0,0x0,800x280@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw" 
-             alt="Imagen satelital de ${location}"
-             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'satellite-placeholder\\'><div class=\\'icon\\'>🛰️</div><p>Imagen satelital no disponible</p></div>'"
-             crossorigin="anonymous">
+        <div style="width: 100%; height: 280px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%); border-radius: 0;">
+          <img src="https://static-maps.yandex.ru/1.x/?lang=es&ll=${longitude},${latitude}&z=5&size=800,400&l=sat" 
+               alt="Imagen satelital de ${location}"
+               style="width: 100%; height: 100%; object-fit: cover; border-radius: 0;"
+               onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'width:100%;height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a237e,#0d47a1);\\'><div style=\\'font-size:48px;\\'>🛰️</div><p style=\\'color:white;margin-top:12px;\\'>Imagen satelital en vivo</p><p style=\\'color:rgba(255,255,255,0.7);font-size:12px;\\'>${data.location || location}</p><p style=\\'color:rgba(255,255,255,0.5);font-size:11px;\\'>Lat: ${latitude.toFixed(2)}, Lon: ${longitude.toFixed(2)}</p></div>'"
+               crossorigin="anonymous">
+        </div>
       `;
       
       satelliteTime.innerHTML = `📍 ${data.location || location} • 🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
@@ -371,9 +374,10 @@ async function loadSatelliteImage(location) {
   } catch (error) {
     console.error('Error al cargar imagen satelital:', error);
     satelliteContainer.innerHTML = `
-      <div class="satellite-placeholder">
-        <div class="icon">🛰️</div>
-        <p>No se pudo cargar la imagen satelital</p>
+      <div style="width: 100%; height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a237e, #0d47a1);">
+        <div style="font-size: 48px;">🛰️</div>
+        <p style="color: white; margin-top: 12px;">No se pudo cargar la imagen satelital</p>
+        <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Intenta de nuevo más tarde</p>
       </div>
     `;
     satelliteTime.innerHTML = '❌ Error al cargar';
@@ -617,3 +621,144 @@ document.getElementById('location-input').addEventListener('keypress', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', initTheme);
+
+// PWA Install Prompt
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  setTimeout(() => {
+    if (deferredPrompt) {
+      showInstallBanner();
+    }
+  }, 30000);
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  console.log('Zeus Meteo instalada correctamente');
+});
+
+function showInstallBanner() {
+  if (document.querySelector('.install-banner')) return;
+  
+  const banner = document.createElement('div');
+  banner.className = 'install-banner';
+  banner.innerHTML = `
+    <div class="install-content">
+      <span style="font-size: 24px;">📱</span>
+      <div class="install-text">
+        <strong>Instala Zeus Meteo</strong>
+        <p>Accede rapidamente desde tu pantalla de inicio</p>
+      </div>
+      <button class="install-btn" onclick="installPWA()">Instalar</button>
+      <button class="dismiss-btn" onclick="dismissInstall()">✕</button>
+    </div>
+  `;
+  
+  const style = document.createElement('style');
+  style.textContent = `
+    .install-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+      color: white;
+      padding: 16px 20px;
+      z-index: 1000;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+      animation: slideUp 0.5s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .install-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .install-text {
+      flex: 1;
+    }
+    .install-text strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 2px;
+    }
+    .install-text p {
+      font-size: 13px;
+      opacity: 0.9;
+      margin: 0;
+    }
+    .install-btn {
+      background: white;
+      color: #4285f4;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .install-btn:hover {
+      background: #f8f9fa;
+    }
+    .dismiss-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 8px;
+      opacity: 0.8;
+    }
+    .dismiss-btn:hover {
+      opacity: 1;
+    }
+    @media (max-width: 600px) {
+      .install-content {
+        flex-wrap: wrap;
+      }
+      .install-text {
+        width: calc(100% - 80px);
+      }
+      .install-btn {
+        width: 100%;
+        margin-top: 12px;
+      }
+      .dismiss-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(banner);
+}
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choiceResult => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuario acepto instalar');
+      }
+      deferredPrompt = null;
+    });
+  }
+}
+
+function dismissInstall() {
+  const banner = document.querySelector('.install-banner');
+  if (banner) {
+    banner.style.animation = 'slideDown 0.3s ease forwards';
+    setTimeout(() => banner.remove(), 300);
+  }
+}

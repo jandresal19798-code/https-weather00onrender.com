@@ -18,6 +18,16 @@ app.use(cors());
 app.use(express.static('public'));
 app.use(express.json());
 
+app.use((req, res, next) => {
+  if (req.path.endsWith('.json')) {
+    res.setHeader('Content-Type', 'application/json');
+  }
+  if (req.path.endsWith('.js') && req.path.includes('sw')) {
+    res.setHeader('Content-Type', 'application/javascript');
+  }
+  next();
+});
+
 const cache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000;
 
