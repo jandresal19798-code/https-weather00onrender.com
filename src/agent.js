@@ -9,6 +9,7 @@ class WeatherAgent {
     this.sources = [];
     this.reportGenerator = new OllamaClient(process.env.OLLAMA_URL);
     this.initializeSources();
+    this.aiModels = this.initializeAIModels();
   }
 
   initializeSources() {
@@ -25,10 +26,19 @@ class WeatherAgent {
     }
   }
 
+  initializeAIModels() {
+    return {
+      ensemble: (data) => this.ensemblePrediction(data),
+      trend: (data) => this.trendAnalysis(data),
+      anomaly: (data) => this.anomalyDetection(data),
+      confidence: (data) => this.calculateConfidence(data)
+    };
+  }
+
   async analyzeWeather(location, date = new Date().toISOString().split('T')[0], useForecast = false) {
-    console.log(`🔍 Analizando clima para: ${location}`);
+    console.log(`🔍 Zeus Meteo analizando: ${location}`);
     console.log(`📅 Fecha: ${date}`);
-    console.log(`📊 Consultando ${this.sources.length} fuentes de datos...\n`);
+    console.log(`🤖 Consultando ${this.sources.length} fuentes con IA...\n`);
 
     const weatherData = [];
     const errors = [];
@@ -70,17 +80,203 @@ class WeatherAgent {
     }
 
     if (weatherData.length === 0) {
-      throw new Error(`No se pudo obtener datos de ninguna fuente. Intenta con el nombre de la ciudad en español o inglés.`);
+      throw new Error(`No se pudo obtener datos. Intenta con el nombre de la ciudad en español o inglés.`);
     }
 
+    console.log('\n🧠 Aplicando IA de Zeus Meteo...');
+    
+    const aiAnalysis = this.applyAIAnalysis(weatherData, location, date);
+    
     if (errors.length > 0) {
       console.log(`⚠️  Algunas fuentes fallaron: ${errors.map(e => e.source).join(', ')}`);
     }
 
-    console.log('\n📝 Generando informe...\n');
+    console.log('\n📝 Generando informe mejorado...\n');
     const report = await this.reportGenerator.generateReport(weatherData, location, date);
 
-    return report;
+    const enhancedReport = this.enhanceReportWithAI(report, aiAnalysis);
+
+    return enhancedReport;
+  }
+
+  applyAIAnalysis(data, location, date) {
+    const ensemble = this.aiModels.ensemble(data);
+    const trend = this.aiModels.trend(data);
+    const anomaly = this.aiModels.anomaly(data);
+    const confidence = this.aiModels.confidence(data);
+    const confidence = this.aiModels.confidence(data);
+
+    return {
+      ensemble,
+      trend,
+      anomaly,
+      confidence,
+      recommendation: this.generateRecommendation(ensemble, trend),
+      alerts: this.generateAlerts(ensemble, anomaly)
+    };
+  }
+
+  ensemblePrediction(data) {
+    if (data.length === 0) return { avg: 20, min: 15, max: 25 };
+
+    const weights = data.map(d => this.getSourceWeight(d.source));
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    
+    const avgTemp = data.reduce((sum, d, i) => sum + d.temperature * weights[i], 0) / totalWeight;
+    const avgHumidity = data.reduce((sum, d, i) => sum + (d.humidity || 50) * weights[i], 0) / totalWeight;
+    const avgWind = data.reduce((sum, d, i) => sum + (d.windSpeed || 0) * weights[i], 0) / totalWeight;
+    const avgPressure = data.reduce((sum, d, i) => sum + (d.pressure || 1013) * weights[i], 0) / totalWeight;
+
+    return {
+      avg: avgTemp,
+      min: Math.min(...data.map(d => d.temperature)) - 2,
+      max: Math.max(...data.map(d => d.temperature)) + 2,
+      humidity: avgHumidity,
+      wind: avgWind,
+      pressure: avgPressure,
+      descriptions: [...new Set(data.map(d => d.description))].slice(0, 3)
+    };
+  }
+
+  getSourceWeight(source) {
+    const weights = {
+      'USNWS': 1.2,
+      'OpenMeteo': 1.1,
+      'MetNorway': 1.0,
+      'OpenWeatherMap': 0.9,
+      'WeatherAPI': 0.85
+    };
+    return weights[source] || 1.0;
+  }
+
+  trendAnalysis(data) {
+    if (data.length < 2) return { direction: 'stable', change: 0 };
+
+    const sorted = [...data].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const tempDiff = sorted[sorted.length - 1].temperature - sorted[0].temperature;
+    
+    let direction = 'estable';
+    if (tempDiff > 2) direction = 'subiendo';
+    else if (tempDiff < -2) direction = 'bajando';
+
+    return {
+      direction,
+      change: tempDiff,
+      humidityTrend: sorted[sorted.length - 1].humidity - sorted[0].humidity,
+      windTrend: sorted[sorted.length - 1].windSpeed - sorted[0].windSpeed
+    };
+  }
+
+  anomalyDetection(data) {
+    const temps = data.map(d => d.temperature);
+    const mean = temps.reduce((a, b) => a + b, 0) / temps.length;
+    const stdDev = Math.sqrt(temps.reduce((sum, t) => sum + Math.pow(t - mean, 2), 0) / temps.length);
+
+    const anomalies = data.filter(d => Math.abs(d.temperature - mean) > 2 * stdDev);
+
+    return {
+      isAnomaly: anomalies.length > 0,
+      mean,
+      stdDev,
+      abnormalSources: anomalies.map(d => d.source)
+    };
+  }
+
+  calculateConfidence(data) {
+    const sourceCount = data.length;
+    const consistency = this.calculateConsistency(data);
+    const dataQuality = this.assessDataQuality(data);
+    
+    let confidence = 0;
+    confidence += Math.min(sourceCount * 15, 45);
+    confidence += consistency * 30;
+    confidence += dataQuality * 25;
+
+    return Math.min(Math.round(confidence), 100);
+  }
+
+  calculateConsistency(data) {
+    if (data.length < 2) return 1;
+    const temps = data.map(d => d.temperature);
+    const range = Math.max(...temps) - Math.min(...temps);
+    return Math.max(0, 1 - range / 20);
+  }
+
+  assessDataQuality(data) {
+    let score = 0;
+    data.forEach(d => {
+      if (d.temperature > -50 && d.temperature < 60) score += 0.15;
+      if (d.humidity !== null && d.humidity >= 0 && d.humidity <= 100) score += 0.1;
+      if (d.pressure !== null && d.pressure >= 900 && d.pressure <= 1100) score += 0.1;
+    });
+    return Math.min(score / data.length, 1);
+  }
+
+  generateRecommendation(ensemble, trend) {
+    const recs = [];
+    
+    if (ensemble.avg > 25) {
+      recs.push('Usar protector solar');
+    }
+    if (ensemble.avg < 15) {
+      recs.push('Abrigarse bien');
+    }
+    if (trend.direction === 'bajando') {
+      recs.push('Temperatura en descenso - planificar actividades');
+    }
+    if (trend.direction === 'subiendo') {
+      recs.push('Temperatura en aumento');
+    }
+    if (ensemble.wind > 10) {
+      recs.push('Precaución con viento fuerte');
+    }
+    
+    return recs.length > 0 ? recs : ['Clima favorable para actividades'];
+  }
+
+  generateAlerts(ensemble, anomaly) {
+    const alerts = [];
+    
+    if (anomaly.isAnomaly) {
+      alerts.push(`⚠️ Variación detectada de ${anomaly.mean.toFixed(1)}°C`);
+    }
+    if (ensemble.humidity > 85) {
+      alerts.push('💧 Alta humedad - posible sensación de bochorno');
+    }
+    if (ensemble.wind > 15) {
+      alerts.push('💨 Viento fuerte - precaución');
+    }
+    
+    return alerts;
+  }
+
+  enhanceReportWithAI(report, aiAnalysis) {
+    let enhanced = report;
+    
+    enhanced += `
+
+═══════════════════════════════════════════
+🤖 ANÁLISIS INTELIGENTE ZEUS METEO
+═══════════════════════════════════════════
+
+📊 Predicción Ensemble (ponderada):
+   Temperatura: ${aiAnalysis.ensemble.avg.toFixed(1)}°C
+   Rango: ${aiAnalysis.ensemble.min.toFixed(1)}°C - ${aiAnalysis.ensemble.max.toFixed(1)}°C
+   Humedad promedio: ${aiAnalysis.ensemble.humidity.toFixed(0)}%
+   Viento promedio: ${aiAnalysis.ensemble.wind.toFixed(1)} m/s
+
+📈 Tendencia: ${aiAnalysis.trend.direction === 'estable' ? '🟢 Estable' : aiAnalysis.trend.direction === 'subiendo' ? '🔴 Subiendo' : '🔵 Bajando'}
+   Cambio: ${aiAnalysis.trend.change > 0 ? '+' : ''}${aiAnalysis.trend.change.toFixed(1)}°C
+
+🎯 Confianza del pronóstico: ${aiAnalysis.confidence}%
+
+💡 Recomendaciones:
+${aiAnalysis.recommendation.map(r => `   • ${r}`).join('\n')}
+
+⚡ Fuentes procesadas: ${aiAnalysis.ensemble.descriptions.length} condiciones detectadas
+`;
+
+    return enhanced;
   }
 
   async saveReport(report, filename) {
@@ -95,21 +291,21 @@ async function main() {
   
   if (args.length < 1) {
     console.log(`
-🌤️  Agente de Análisis del Clima
+ ⚡ Zeus Meteo - Agente de Análisis del Clima
 
-Uso:
-  node src/agent.js <ubicación> [fecha] [opciones]
+ Uso:
+   node src/agent.js <ubicación> [fecha] [opciones]
 
-Ejemplos:
-  node src/agent.js "Madrid"
-  node src/agent.js "Buenos Aires" "2024-01-15"
-  node src/agent.js "Ciudad de México" "2024-01-15" --save reporte.txt
-  node src/agent.js "Lima" --forecast
+ Ejemplos:
+   node src/agent.js "Madrid"
+   node src/agent.js "Buenos Aires" "2024-01-15"
+   node src/agent.js "Ciudad de México" "2024-01-15" --save reporte.txt
+   node src/agent.js "Lima" --forecast
 
-Opciones:
-  --save <archivo>   Guardar informe en archivo
-  --forecast         Usar datos de pronóstico
-    `);
+ Opciones:
+   --save <archivo>   Guardar informe en archivo
+   --forecast         Usar datos de pronóstico
+     `);
     process.exit(1);
   }
 
