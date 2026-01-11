@@ -56,23 +56,41 @@ async function searchWeather() {
   loading.classList.add('active');
   
   try {
-    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
     const data = await response.json();
     
     if (data.success) {
       updateCurrentWeather(data.report);
       currentReport = data.report;
-      await loadHourlyForecast(location);
-      await loadDailyForecast(location);
-      await loadMap(location);
-      await loadSatelliteImage(location);
-      await loadWeatherNews(location);
+      await Promise.all([
+        loadHourlyForecast(location),
+        loadDailyForecast(location),
+        loadMap(location),
+        loadSatelliteImage(location),
+        loadWeatherNews(location)
+      ]);
     } else {
       showError(data.error, data.suggestion);
     }
   } catch (error) {
     console.error('Error:', error);
-    showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
+    if (error.name === 'AbortError') {
+      showError('Tiempo de espera agotado', 'El servidor está tardando mucho. Intenta más tarde.');
+    } else {
+      showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
+    }
   } finally {
     loading.classList.remove('active');
   }
@@ -514,9 +532,9 @@ async function loadWeatherNews(location) {
     const query = `${location} ${randomKeyword}`;
     
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 5000);
     
-    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=es&gl=ES&ceid=ES:es`)}`, {
+    const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=es&gl=ES&ceid=ES:es`)}`, {
       signal: controller.signal
     });
     
@@ -524,33 +542,18 @@ async function loadWeatherNews(location) {
     
     if (!response.ok) throw new Error('No se pudo obtener noticias');
     
-    const text = await response.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, 'text/xml');
-    const items = xml.querySelectorAll('item');
+    const data = await response.json();
     
-    const news = [];
-    items.forEach((item, index) => {
-      if (index < 4) {
-        const title = item.querySelector('title')?.textContent;
-        const link = item.querySelector('link')?.textContent;
-        const pubDate = item.querySelector('pubDate')?.textContent;
-        const source = item.querySelector('source')?.textContent || 'Noticias';
-        
-        if (title && link && !title.toLowerCase().includes('bit.ly') && title.length > 10) {
-          news.push({
-            title: title.replace(/<[^>]*>/g, ''),
-            link: link,
-            date: pubDate ? new Date(pubDate).toLocaleDateString('es') : '',
-            source: source.replace(/<[^>]*>/g, '')
-          });
-        }
-      }
-    });
-    
-    if (news.length === 0) {
+    if (!data.items || data.items.length === 0) {
       throw new Error('No se encontraron noticias');
     }
+    
+    const news = data.items.slice(0, 4).map(item => ({
+      title: item.title?.replace(/<[^>]*>/g, '') || '',
+      link: item.link || '#',
+      date: item.pubDate ? new Date(item.pubDate).toLocaleDateString('es', { day: 'numeric', month: 'short' }) : '',
+      source: item.author || 'Noticias'
+    }));
     
     const weatherEmojis = ['⛈️', '🌧️', '🌪️', '🌊'];
     
