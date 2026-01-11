@@ -452,6 +452,18 @@
 
   <script src="weather.js"></script>
   <script>
+    // API Configuration object
+    const API_CONFIG = {
+      groq: {
+        apiKey: localStorage.getItem('groq_api_key') || '',
+        model: 'llama3-8b-8192'
+      },
+      ollama: {
+        url: 'http://localhost:11434',
+        model: 'llama3'
+      }
+    };
+
     // Update chatbot status based on API configuration
     function updateChatbotStatus() {
       const statusEl = document.getElementById('chatbot-status-text');

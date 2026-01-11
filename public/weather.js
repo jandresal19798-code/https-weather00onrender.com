@@ -280,7 +280,10 @@ async function loadDailyForecast(location, retryCount = 0) {
     updateWeatherDetails(mockData);
     renderTempChart(mockData);
   }
+  }
 }
+
+function filterHours(hours, btn) {
   filterHoursValue = hours;
   document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
   btn.classList.add('active');
