@@ -24,6 +24,8 @@ class WeatherAgent {
     if (process.env.WEATHERAPI_KEY && process.env.WEATHERAPI_KEY !== 'tu_api_key_aqui') {
       this.sources.push(new WeatherAPI(process.env.WEATHERAPI_KEY));
     }
+    
+    this.mockSource = new MockWeatherSource();
   }
 
   initializeAIModels() {
@@ -72,13 +74,27 @@ class WeatherAgent {
             locationFound = true;
           }
         } catch (error) {
-          console.log(`❌ ${source.constructor.name} con "${loc}": ${error.message}`);
+          if (!error.message.includes('429') && !error.message.includes('Too Many')) {
+            console.log(`❌ ${source.constructor.name} con "${loc}": ${error.message}`);
+          }
+          errors.push(`${source.constructor.name}: ${error.message}`);
         }
       }
     }
 
     if (weatherData.length === 0) {
-      throw new Error(`No se encontró información climática para "${location}". Verifica la ortografía o intenta con otra ciudad.`);
+      console.log('\n⚠️ Todas las APIs fallaron. Usando datos de respaldo...');
+      console.log('💡 Los datos pueden no ser precisos para esta ubicación.');
+      
+      try {
+        const mockData = await this.mockSource.getCurrentWeather(location);
+        mockData.description = `Clima estimado para ${location}`;
+        mockData.source = 'Datos estimados';
+        weatherData.push(mockData);
+        console.log(`✅ Datos estimados: ${mockData.temperature.toFixed(1)}°C`);
+      } catch (mockError) {
+        throw new Error(`No se pudo obtener información climática para "${location}" y los datos de respaldo tampoco están disponibles.`);
+      }
     }
 
     console.log('\n🧠 Aplicando IA de Zeus Meteo...');
@@ -88,7 +104,7 @@ class WeatherAgent {
     console.log('\n📝 Generando informe...\n');
     const report = await this.reportGenerator.generateReport(weatherData, location, date);
 
-    const enhancedReport = this.enhanceReportWithAI(report, aiAnalysis);
+    const enhancedReport = this.enhanceReportWithAI(report, aiAnalysis, weatherData.length === 1);
 
     return enhancedReport;
   }
@@ -243,8 +259,15 @@ class WeatherAgent {
     return alerts;
   }
 
-  enhanceReportWithAI(report, aiAnalysis) {
+  enhanceReportWithAI(report, aiAnalysis, isMockData = false) {
     let enhanced = report;
+    
+    if (isMockData) {
+      enhanced += `
+
+⚠️ NOTA: Los datos shown son estimaciones. Las APIs meteorológicas están temporalmente no disponibles.
+`;
+    }
     
     enhanced += `
 
