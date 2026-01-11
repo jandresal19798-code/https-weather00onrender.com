@@ -7,8 +7,8 @@ const port = process.env.PORT || 3001;
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Demasiadas solicitudes. Por favor, espera un momento.',
+  max: 500,
+  message: { error: 'Demasiadas solicitudes', suggestion: 'Espera un momento antes de continuar' },
   standardHeaders: true,
   legacyHeaders: false,
 });

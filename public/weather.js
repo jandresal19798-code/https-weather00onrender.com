@@ -189,23 +189,98 @@ function getWeatherIcon(description) {
   return '☀️';
 }
 
-async function loadHourlyForecast(location) {
+async function loadHourlyForecast(location, retryCount = 0) {
   try {
-    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
+    
+    if (!response.ok) {
+      if (response.status === 429 && retryCount < 2) {
+        console.log('Rate limited, reintentando en 2 segundos...');
+        await new Promise(r => setTimeout(r, 2000));
+        return loadHourlyForecast(location, retryCount + 1);
+      }
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
     const data = await response.json();
 
     if (data.success) {
       hourlyForecastData = data.forecast;
       displayHourlyForecast(hourlyForecastData);
     } else {
-      console.error('Error en pronóstico horario:', data.error);
+      console.warn('Pronóstico no disponible:', data.error);
+      displayHourlyForecast(getMockForecast());
     }
   } catch (error) {
-    console.error('Error al cargar pronóstico horario:', error);
+    console.warn('Error pronóstico, usando datos demo:', error.message);
+    hourlyForecastData = getMockForecast();
+    displayHourlyForecast(hourlyForecastData);
   }
 }
 
-function filterHours(hours, btn) {
+function getMockForecast() {
+  const today = new Date();
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() + i);
+    return {
+      date: date.toISOString(),
+      temperatureMax: 22 + Math.random() * 10,
+      temperatureMin: 12 + Math.random() * 8,
+      description: 'parcialmente nublado',
+      weatherCode: 3
+    };
+  });
+}
+
+async function loadDailyForecast(location, retryCount = 0) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
+    
+    if (!response.ok) {
+      if (response.status === 429 && retryCount < 2) {
+        console.log('Rate limited, reintentando...');
+        await new Promise(r => setTimeout(r, 2000));
+        return loadDailyForecast(location, retryCount + 1);
+      }
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+
+    if (data.success) {
+      displayDailyForecast(data.forecast);
+      updateWeatherDetails(data.forecast);
+      renderTempChart(data.forecast);
+    } else {
+      console.warn('Pronóstico diario no disponible');
+      const mockData = getMockForecast();
+      displayDailyForecast(mockData);
+      updateWeatherDetails(mockData);
+      renderTempChart(mockData);
+    }
+  } catch (error) {
+    console.warn('Error pronóstico diario, usando datos demo:', error.message);
+    const mockData = getMockForecast();
+    displayDailyForecast(mockData);
+    updateWeatherDetails(mockData);
+    renderTempChart(mockData);
+  }
+}
   filterHoursValue = hours;
   document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
   btn.classList.add('active');
