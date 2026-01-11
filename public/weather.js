@@ -435,24 +435,28 @@ function animateValue(id, start, end, duration, suffix = '', textSuffix = '') {
     const displayValue = (id === 'uv-value') ? value.toFixed(0) : value.toFixed(1);
     obj.textContent = textSuffix ? `${textSuffix} (${displayValue})` : displayValue + suffix;
     
-    if (progress < 1) {
-      requestAnimationFrame(update);
+    if (data.success && data.report) {
+      const description = extractWeatherDescription(data.report);
+      updateWeatherVisual(description);
+      visualLabel.textContent = description;
     }
+  } catch (error) {
+    console.warn('Visual del clima:', error.message);
+    updateWeatherVisual('parcialmente nublado');
+    visualLabel.textContent = 'Clima estimado';
   }
-  
-  requestAnimationFrame(update);
-}
-
-function easeOutQuart(x) {
-  return 1 - Math.pow(1 - x, 4);
 }
 
 function updateSolarInfo(date) {
   const sunriseEl = document.getElementById('sunrise');
-  const sunsetEl = document.getElementById('sunset');
+  const sunsetEl = document.getElementById('sunset-time');
   
   try {
-    const response = await fetch(`https://api.sunrisesunset.io/json?lat=${currentCoords?.lat || 0}&lng=${currentCoords?.lng || 0}&date=${date.toISOString().split('T')[0]}`);
+    const lat = currentCoords?.lat || 0;
+    const lng = currentCoords?.lng || 0;
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const response = await fetch('https://api.sunrisesunset.io/json?lat=' + lat + '&lng=' + lng + '&date=' + dateStr);
     
     if (response.ok) {
       const data = await response.json();
@@ -478,8 +482,7 @@ function updateSolarInfo(date) {
   }
 }
 
-function calculateMoonPhase(date) {
-  const synodic = 29.53058867;
+const synodic = 29.53058867;
   const knownNewMoon = new Date('2023-01-21T20:53:00Z');
   const daysSinceNewMoon = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
   const newMoons = daysSinceNewMoon / synodic;
@@ -688,7 +691,6 @@ async function loadDailyForecastForDate(location, date) {
   } catch (error) {
     console.warn('Error loading forecast for date:', error);
   }
-}
 
 async function loadSatelliteImage(location) {
   const visualContainer = document.getElementById('weather-visual');
@@ -714,6 +716,8 @@ async function loadSatelliteImage(location) {
     visualLabel.textContent = 'Clima estimado';
   }
 }
+
+
 
 function updateWeatherVisual(description) {
   const visual = document.getElementById('weather-visual');
@@ -1895,3 +1899,39 @@ sendChatMessage = function() {
   originalSendChatMessage();
 };
 
+const synodic = 29.53058867;
+
+function updateSolarInfo(date) {
+  const sunriseEl = document.getElementById('sunrise');
+  const sunsetEl = document.getElementById('sunset-time');
+  
+  try {
+    const lat = currentCoords?.lat || 0;
+    const lng = currentCoords?.lng || 0;
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const response = await fetch('https://api.sunrisesunset.io/json?lat=' + lat + '&lng=' + lng + '&date=' + dateStr);
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      if (data.results && data.results.sunrise && data.results.sunset) {
+        const sunrise = new Date(data.results.sunrise);
+        const sunset = new Date(data.results.sunset);
+        
+        sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+        sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+  } catch (error) {
+    console.warn('Solar data error:', error);
+    const now = new Date();
+    const sunrise = new Date(now);
+    sunrise.setHours(6, 30, 0);
+    const sunset = new Date(now);
+    sunset.setHours(18, 30, 0);
+    
+    sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  }
+}
