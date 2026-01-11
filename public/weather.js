@@ -218,7 +218,7 @@ async function loadHourlyForecast(location, retryCount = 0) {
     
     const data = await response.json();
  
-    if (data.success) {
+     if (data.success) {
       hourlyForecastData = data.forecast;
       displayHourlyForecast(hourlyForecastData);
     } else {
@@ -233,24 +233,6 @@ async function loadHourlyForecast(location, retryCount = 0) {
       console.warn('Error pronóstico horario, usando datos demo:', error.message);
       displayHourlyForecast(getMockForecast());
     }
-  }
-}
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-
-    if (data.success) {
-      hourlyForecastData = data.forecast;
-      displayHourlyForecast(hourlyForecastData);
-    } else {
-      console.warn('Pronóstico no disponible:', data.error);
-      displayHourlyForecast(getMockForecast());
-    }
-  } catch (error) {
-    console.warn('Error pronóstico, usando datos demo:', error.message);
-    hourlyForecastData = getMockForecast();
-    displayHourlyForecast(hourlyForecastData);
   }
 }
 
