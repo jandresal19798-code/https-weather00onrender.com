@@ -336,23 +336,6 @@ function displayHourlyForecast(forecast) {
   `).join('');
 }
 
-async function loadDailyForecast(location) {
-  try {
-    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`);
-    const data = await response.json();
-
-    if (data.success) {
-      displayDailyForecast(data.forecast);
-      updateWeatherDetails(data.forecast);
-      renderTempChart(data.forecast);
-    } else {
-      console.error('Error en pronóstico diario:', data.error);
-    }
-  } catch (error) {
-    console.error('Error al cargar pronóstico diario:', error);
-  }
-}
-
 function displayDailyForecast(forecast) {
   const container = document.getElementById('daily-forecast');
   
