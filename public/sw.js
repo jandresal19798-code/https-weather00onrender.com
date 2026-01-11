@@ -7,14 +7,13 @@ const STATIC_URLS = [
   '/index.html',
   '/weather.css',
   '/weather.js',
-  '/manifest.json',
-  '/favicon.ico'
+  '/manifest.json'
 ];
 
 const CACHE_STRATEGIES = {
-  static: new RegExp('/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2)$/'),
+  static: new RegExp('/\\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2)$/'),
   api: new RegExp('/api/'),
-  html: new RegExp('/.*\.html$/')
+  html: new RegExp('/.*\\.html$/')
 };
 
 self.addEventListener('install', event => {
@@ -41,6 +40,11 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
+  if (url.origin !== self.location.origin) {
+    event.respondWith(networkFirstExternal(request));
+    return;
+  }
+
   if (CACHE_STRATEGIES.api.test(url.pathname)) {
     event.respondWith(networkFirst(request));
   } else if (CACHE_STRATEGIES.static.test(url.pathname)) {
@@ -59,7 +63,7 @@ async function cacheFirst(request) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, response.clone());
+      await cache.put(request, response.clone());
     }
     return response;
   } catch (error) {
@@ -72,7 +76,7 @@ async function networkFirst(request) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(RUNTIME_CACHE);
-      cache.put(request, response.clone());
+      await cache.put(request, response.clone());
     }
     return response;
   } catch (error) {
@@ -90,15 +94,29 @@ async function networkFirst(request) {
 async function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
   
-  const fetchPromise = fetch(request).then(response => {
+  const fetchPromise = fetch(request).then(async response => {
     if (response.ok) {
-      const cache = caches.open(RUNTIME_CACHE);
-      cache.then(c => c.put(request, response.clone()));
+      const cache = await caches.open(RUNTIME_CACHE);
+      await cache.put(request, response.clone());
     }
     return response;
-  }).catch(() => cached);
+  }).catch(() => {
+    return cached;
+  });
   
   return cached || fetchPromise;
+}
+
+async function networkFirstExternal(request) {
+  try {
+    const response = await fetch(request);
+    return response;
+  } catch (error) {
+    return new Response('External resource not available', { 
+      status: 503,
+      statusText: 'Service Unavailable'
+    });
+  }
 }
 
 self.addEventListener('message', event => {

@@ -350,7 +350,7 @@ async function loadSatelliteImage(location) {
   const satelliteContainer = document.getElementById('satellite-image');
   const satelliteTime = document.getElementById('satellite-time');
   
-  satelliteContainer.innerHTML = '<div class="satellite-loading">🛰️ Cargando imagen satelital...</div>';
+  satelliteContainer.innerHTML = '<div class="satellite-loading">🛰️ Cargando...</div>';
   satelliteTime.innerHTML = '🛰️ Cargando...';
   
   try {
@@ -361,17 +361,20 @@ async function loadSatelliteImage(location) {
       const { latitude, longitude } = data;
       const now = new Date();
       
+      const weatherEmojis = ['☀️', '🌤️', '⛅', '☁️', '🌧️', '⛈️'];
+      const randomEmoji = weatherEmojis[Math.floor(Math.random() * weatherEmojis.length)];
+      
       satelliteContainer.innerHTML = `
-        <img src="https://static-maps.yandex.ru/1.x/?lang=es&ll=${longitude},${latitude}&z=4&size=600,400&l=sat" 
-             alt="Imagen satelital de ${location}"
-             class="satellite-img"
-             onload="this.style.opacity=1"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-        <div class="satellite-fallback" style="display:none">
-          <div class="satellite-icon">🛰️</div>
-          <p class="satellite-title">Imagen Satelital</p>
-          <p class="satellite-location">${data.location || location}</p>
-          <p class="satellite-coords">Lat: ${latitude.toFixed(2)}° | Lon: ${longitude.toFixed(2)}°</p>
+        <div class="satellite-visual">
+          <div class="satellite-globe">
+            <div class="satellite-emoji">${randomEmoji}</div>
+            <div class="satellite-orbit"></div>
+          </div>
+          <div class="satellite-info">
+            <div class="satellite-location-icon">📍</div>
+            <div class="satellite-location-text">${data.location || location}</div>
+            <div class="satellite-coords">${Math.abs(latitude).toFixed(2)}°${latitude >= 0 ? 'N' : 'S'} • ${Math.abs(longitude).toFixed(2)}°${longitude >= 0 ? 'E' : 'W'}</div>
+          </div>
         </div>
       `;
       
