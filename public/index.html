@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zeus Meteo - Clima Inteligente</title>
+  <title>Zeus Meteo - Clima</title>
   <link rel="stylesheet" href="weather.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -13,13 +13,13 @@
     <div class="container">
       <div class="header-content">
         <a href="#" class="logo" onclick="showHome()">
-          <span class="logo-icon">⚡</span>
+          <span class="logo-icon">⛅</span>
           <span class="logo-text">Zeus Meteo</span>
         </a>
         
         <nav class="nav-tabs">
           <button class="nav-tab active" onclick="showHome()">
-            <span>🏠</span><span>Inicio</span>
+            <span>📍</span><span>Hoy</span>
           </button>
           <button class="nav-tab" onclick="showForecasts()">
             <span>📊</span><span>Pronósticos</span>
@@ -27,8 +27,8 @@
         </nav>
 
         <div class="header-actions">
-          <button class="download-btn" onclick="downloadPDF()" title="Descargar PDF">📥</button>
-          <button class="theme-btn" onclick="toggleTheme()" aria-label="Cambiar tema">🌙</button>
+          <button class="icon-btn" onclick="downloadPDF()" title="Descargar PDF">📥</button>
+          <button class="icon-btn" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
         </div>
       </div>
     </div>
@@ -38,13 +38,13 @@
     <section class="hero">
       <div class="container">
         <div class="hero-content">
-          <h1 class="hero-title">Clima Inteligente</h1>
-          <p class="hero-subtitle">Pronósticos precisos con IA y múltiples fuentes de datos</p>
+          <h1 class="hero-title">Clima en tu ciudad</h1>
+          <p class="hero-subtitle">Pronósticos precisos actualizados en tiempo real</p>
           
           <div class="search-container">
             <div class="search-box">
-              <input type="text" id="location-input" placeholder="Buscar ciudad..." />
-              <button class="search-btn" onclick="searchWeather()">🔍 Buscar</button>
+              <input type="text" id="location-input" placeholder="Buscar ciudad o código postal..." />
+              <button class="search-btn" onclick="searchWeather()">Buscar</button>
             </div>
           </div>
 
@@ -53,7 +53,6 @@
             <a href="#" class="quick-link" onclick="quickSearch('Buenos Aires')">🇦🇷 Buenos Aires</a>
             <a href="#" class="quick-link" onclick="quickSearch('Madrid')">🇪🇸 Madrid</a>
             <a href="#" class="quick-link" onclick="quickSearch('New York')">🇺🇸 New York</a>
-            <a href="#" class="quick-link" onclick="quickSearch('Tokyo')">🇯🇵 Tokyo</a>
           </div>
         </div>
       </div>
@@ -62,33 +61,33 @@
     <section class="features">
       <div class="container">
         <div class="features-header">
-          <h2 class="features-title">¿Por qué Zeus Meteo?</h2>
-          <p class="features-subtitle">La tecnología más avanzada al servicio del clima</p>
+          <h2 class="features-title">Zeus Meteo</h2>
+          <p class="features-subtitle">Clima inteligente con IA y múltiples fuentes de datos</p>
         </div>
         
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon blue">🤖</div>
+            <div class="feature-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8);">🤖</div>
             <h3>Inteligencia Artificial</h3>
-            <p>Análisis inteligente del clima usando múltiples algoritmos de IA para predicciones más precisas.</p>
+            <p>Análisis predictivo con algoritmos de aprendizaje automático para mayor precisión.</p>
           </div>
           
           <div class="feature-card">
-            <div class="feature-icon green">🌐</div>
+            <div class="feature-icon" style="background: linear-gradient(135deg, #34a853, #1e8e3e);">🌐</div>
             <h3>3 APIs Gratuitas</h3>
-            <p>Combinamos datos de OpenMeteo, US NWS y MetNorway para máxima precisión sin costo.</p>
+            <p>Datos de OpenMeteo, US NWS y MetNorway combinados para máxima exactitud.</p>
           </div>
           
           <div class="feature-card">
-            <div class="feature-icon purple">📡</div>
+            <div class="feature-icon" style="background: linear-gradient(135deg, #8ab4f8, #4285f4);">🛰️</div>
             <h3>Satélite en Vivo</h3>
-            <p>Imágenes satelitales actualizadas de tu ubicación para ver las condiciones actuales.</p>
+            <p>Imágenes satelitales actualizadas de tu ubicación para condiciones reales.</p>
           </div>
           
           <div class="feature-card">
-            <div class="feature-icon orange">📄</div>
+            <div class="feature-icon" style="background: linear-gradient(135deg, #fbbc04, #f9a825);">📄</div>
             <h3>Reportes PDF</h3>
-            <p>Genera y descarga reportes detallados del clima en formato PDF para guardar o compartir.</p>
+            <p>Genera y descarga informes detallados del clima para guardar o compartir.</p>
           </div>
         </div>
       </div>
@@ -99,7 +98,7 @@
     <div class="loading" id="loading">
       <div class="loading-content">
         <div class="spinner"></div>
-        <p>Analizando datos meteorológicos...</p>
+        <p>Cargando datos meteorológicos...</p>
       </div>
     </div>
 
@@ -109,38 +108,36 @@
           <div class="weather-header">
             <div class="location-info">
               <h2 id="city-name">Montevideo</h2>
-              <p id="current-date">Sábado, 10 de Enero</p>
+              <p id="current-date">Domingo, 11 de enero</p>
             </div>
           </div>
 
           <div class="weather-main">
-            <span class="weather-icon" id="weather-icon-animated">☀️</span>
-            <div class="temperature">
-              <span id="current-temp">28</span><sup>°C</sup>
+            <span class="weather-icon-large" id="weather-icon">☀️</span>
+            <div class="temperature-display">
+              <span class="temp-value" id="current-temp">26</span>
+              <span class="temp-unit">°C</span>
             </div>
           </div>
 
-          <p id="weather-description" class="weather-desc">Mayormente despejado</p>
+          <p id="weather-description" class="weather-condition">Soleado</p>
 
-          <div class="weather-stats">
-            <div class="stat-box">
-              <div class="stat-label">Sensación</div>
-              <div id="feels-like" class="stat-value">30°</div>
+          <div class="weather-details-grid">
+            <div class="weather-detail">
+              <span class="weather-detail-label">💧 Humedad</span>
+              <span id="humidity" class="weather-detail-value">65%</span>
             </div>
-            
-            <div class="stat-box">
-              <div class="stat-label">Humedad</div>
-              <div id="humidity" class="stat-value">65%</div>
+            <div class="weather-detail">
+              <span class="weather-detail-label">💨 Viento</span>
+              <span id="wind" class="weather-detail-value">12 km/h</span>
             </div>
-            
-            <div class="stat-box">
-              <div class="stat-label">Viento</div>
-              <div id="wind" class="stat-value">12 km/h</div>
+            <div class="weather-detail">
+              <span class="weather-detail-label">🌡️ Sensación</span>
+              <span id="feels-like" class="weather-detail-value">28°</span>
             </div>
-            
-            <div class="stat-box">
-              <div class="stat-label">Presión</div>
-              <div id="pressure" class="stat-value">1015 hPa</div>
+            <div class="weather-detail">
+              <span class="weather-detail-label">📊 Presión</span>
+              <span id="pressure" class="weather-detail-value">1015 hPa</span>
             </div>
           </div>
         </div>
@@ -154,12 +151,12 @@
             <h3 class="satellite-title">
               <span>🛰️</span> Imagen Satelital
             </h3>
-            <span class="satellite-time" id="satellite-time">🔄 Actualizando...</span>
+            <span class="satellite-meta" id="satellite-time">Actualizando...</span>
           </div>
           <div class="satellite-image" id="satellite-image">
             <div class="satellite-placeholder">
               <div class="icon">🛰️</div>
-              <p>Buscando imagen satelital...</p>
+              <p>Buscar una ciudad para ver imagen satelital</p>
             </div>
           </div>
         </div>
@@ -167,7 +164,7 @@
 
       <section class="section">
         <div class="section-header">
-          <h3 class="section-title">Pronóstico por Hora</h3>
+          <h3 class="section-title">Pronóstico por hora</h3>
           <div class="filter-tabs">
             <button class="filter-tab active" onclick="filterHours(12, this)">12 horas</button>
             <button class="filter-tab" onclick="filterHours(24, this)">24 horas</button>
@@ -177,12 +174,12 @@
       </section>
 
       <section class="section">
-        <h3 class="section-title">Próximos 7 Días</h3>
+        <h3 class="section-title">Próximos 7 días</h3>
         <div class="daily-list" id="daily-forecast"></div>
       </section>
 
       <section class="section">
-        <h3 class="section-title">Detalles Avanzados</h3>
+        <h3 class="section-title">Detalles adicionales</h3>
         <div class="details-grid">
           <div class="detail-card">
             <div class="detail-icon uv">☀️</div>
@@ -193,7 +190,7 @@
           </div>
           
           <div class="detail-card">
-            <div class="detail-icon rain">🌧️</div>
+            <div class="detail-icon rain">💧</div>
             <div class="detail-info">
               <h4>Lluvia</h4>
               <p id="rain-value">0 mm</p>
@@ -203,7 +200,7 @@
           <div class="detail-card">
             <div class="detail-icon storm">⛈️</div>
             <div class="detail-info">
-              <h4>Prob. Tormenta</h4>
+              <h4>Tormentas</h4>
               <p id="storm-value">10%</p>
             </div>
           </div>
@@ -235,7 +232,7 @@
       </section>
 
       <section class="section">
-        <h3 class="section-title">Noticias del Clima</h3>
+        <h3 class="section-title">Noticias del clima</h3>
         <div id="news-container" class="news-grid">
           <div class="no-news">
             <p>🔍 Busca una ciudad para ver noticias relacionadas</p>
@@ -244,7 +241,7 @@
       </section>
 
       <section class="section">
-        <h3 class="section-title">Mapas del Clima</h3>
+        <h3 class="section-title">Mapas del clima</h3>
         <div class="map-controls">
           <button class="map-btn active" onclick="changeMapType('satellite')">🛰️ Satelital</button>
           <button class="map-btn" onclick="changeMapType('weather')">☀️ Clima</button>
@@ -262,15 +259,15 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-logo">
-          <span>⚡</span> Zeus Meteo
+          <span>⛅</span> Zeus Meteo
         </div>
-        <p>Inteligencia meteorológica con IA y datos de múltiples fuentes</p>
+        <p>Clima inteligente con IA • OpenMeteo + US NWS + MetNorway</p>
         <div class="footer-links">
           <a href="#">Términos</a>
           <a href="#">Privacidad</a>
-          <a href="#">Contacto</a>
+          <a href="#">Acerca de</a>
         </div>
-        <p style="margin-top: 16px; font-size: 12px;">© 2025 Zeus Meteo | OpenMeteo + US NWS + MetNorway</p>
+        <p style="margin-top: 16px; font-size: 12px; color: var(--text-tertiary);">© 2025 Zeus Meteo</p>
       </div>
     </div>
   </footer>

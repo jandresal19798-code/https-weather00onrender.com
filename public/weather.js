@@ -16,7 +16,7 @@ function toggleTheme() {
   const isDark = document.body.classList.contains('dark-mode');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   
-  const themeBtn = document.querySelector('.theme-btn');
+  const themeBtn = document.querySelector('.icon-btn:last-child');
   themeBtn.textContent = isDark ? '☀️' : '🌙';
 }
 
@@ -136,7 +136,7 @@ function updateCurrentWeather(report) {
 
   const weatherDescription = extractWeatherDescription(report);
   document.getElementById('weather-description').textContent = weatherDescription;
-  document.getElementById('weather-icon-animated').textContent = getWeatherIcon(weatherDescription);
+  document.getElementById('weather-icon').textContent = getWeatherIcon(weatherDescription);
 }
 
 function extractWeatherDescription(report) {
@@ -162,7 +162,10 @@ function getWeatherIcon(description) {
     'rain': '🌧️',
     'snow': '🌨️',
     'clear': '☀️',
-    'cloudy': '☁️'
+    'cloudy': '☁️',
+    'sunny': '☀️',
+    'mostly sunny': '🌤️',
+    'partly cloudy': '⛅'
   };
   
   const descLower = description.toLowerCase();
@@ -171,7 +174,7 @@ function getWeatherIcon(description) {
       return value;
     }
   }
-  return '🌤️';
+  return '☀️';
 }
 
 async function loadHourlyForecast(location) {
@@ -214,7 +217,6 @@ function displayHourlyForecast(forecast) {
   for (let i = 0; i < filterHoursValue; i += 1) {
     const hour = currentHour + i;
     const displayHour = hour >= 24 ? hour - 24 : hour;
-    const nextHour = displayHour + 1 >= 24 ? 0 : displayHour + 1;
     
     const tempVariation = (i * 0.5) * Math.sin(i / 3);
     const temp = todayData.temperatureMax - 2 + tempVariation + (Math.random() * 1 - 0.5);
@@ -223,12 +225,14 @@ function displayHourlyForecast(forecast) {
     const baseIcon = getWeatherIcon(todayData.description);
     const icon = isDaytime ? baseIcon : baseIcon.replace('☀️', '🌙').replace('🌤️', '🌙').replace('⛅', '☁️');
     
+    const precipChance = Math.random() * 20;
+    
     hours.push({
-      time: i === 0 ? 'Ahora' : `${displayHour}:00`,
-      fullTime: `${displayHour}:00-${nextHour}:00`,
+      time: i === 0 ? 'Ahora' : `${String(displayHour).padStart(2, '0')}:00`,
       temp: temp,
       icon: i === 0 ? '🕐' : icon,
-      isNow: i === 0
+      isNow: i === 0,
+      precip: precipChance
     });
   }
 
@@ -237,6 +241,7 @@ function displayHourlyForecast(forecast) {
       <div class="hourly-time">${hour.time}</div>
       <div class="hourly-icon">${hour.icon}</div>
       <div class="hourly-temp">${hour.temp.toFixed(0)}°</div>
+      ${hour.precip > 5 ? `<div class="hourly-precip">💧 ${hour.precip.toFixed(0)}%</div>` : ''}
     </div>
   `).join('');
 }
@@ -290,7 +295,7 @@ function updateWeatherDetails(forecast) {
   
   const uvIndex = Math.max(0, 11 - (today.weatherCode / 10)).toFixed(0);
   let uvLevel = 'Bajo';
-  if (uvIndex >= 8) uvLevel = 'Muy alto';
+  if (uvIndex >= 8) uvLevel = 'Extremo';
   else if (uvIndex >= 6) uvLevel = 'Alto';
   else if (uvIndex >= 3) uvLevel = 'Moderado';
   
@@ -344,7 +349,7 @@ async function loadSatelliteImage(location) {
   const satelliteContainer = document.getElementById('satellite-image');
   const satelliteTime = document.getElementById('satellite-time');
   
-  satelliteTime.innerHTML = '🛰️ Cargando imagen...';
+  satelliteTime.innerHTML = '🛰️ Cargando...';
   
   try {
     const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`);
@@ -353,34 +358,33 @@ async function loadSatelliteImage(location) {
     if (data.success) {
       const { latitude, longitude } = data;
       const now = new Date();
-      const timestamp = now.toISOString().replace(/[-:]/g, '').split('.')[0];
       
       satelliteContainer.innerHTML = `
-        <img src="https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${longitude},${latitude},5,0/800x300?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw" 
+        <img src="https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${longitude},${latitude},5,0/800x280?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw" 
              alt="Imagen satelital de ${location}"
              onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'satellite-placeholder\\'><div class=\\'icon\\'>🛰️</div><p>Imagen no disponible</p></div>'">
       `;
       
-      satelliteTime.innerHTML = `📍 ${data.location || location} | 🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+      satelliteTime.innerHTML = `📍 ${data.location || location} • 🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
     }
   } catch (error) {
     console.error('Error al cargar imagen satelital:', error);
     satelliteContainer.innerHTML = `
       <div class="satellite-placeholder">
         <div class="icon">🛰️</div>
-        <p>No se pudo cargar la imagen satelital</p>
+        <p>No se pudo cargar la imagen</p>
       </div>
     `;
-    satelliteTime.innerHTML = '❌ Error al cargar';
+    satelliteTime.innerHTML = '❌ Error';
   }
 }
 
 async function loadWeatherNews(location) {
   const newsContainer = document.getElementById('news-container');
-  newsContainer.innerHTML = '<p class="loading-text">🔍 Buscando noticias del clima...</p>';
+  newsContainer.innerHTML = '<p class="loading-text">🔍 Buscando noticias...</p>';
   
   try {
-    const keywords = ['tormenta', 'lluvia', 'inundación', 'huracán', 'clima extremo', 'temporal', 'granizo', 'viento'];
+    const keywords = ['tormenta', 'lluvia', 'inundación', 'huracán', 'clima extremo', 'temporal'];
     const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
     const query = `${location} ${randomKeyword}`;
     
@@ -395,7 +399,7 @@ async function loadWeatherNews(location) {
     
     const news = [];
     items.forEach((item, index) => {
-      if (index < 6) {
+      if (index < 4) {
         const title = item.querySelector('title')?.textContent;
         const link = item.querySelector('link')?.textContent;
         const pubDate = item.querySelector('pubDate')?.textContent;
@@ -415,18 +419,17 @@ async function loadWeatherNews(location) {
     if (news.length === 0) {
       newsContainer.innerHTML = `
         <div class="no-news">
-          <p>📰 No se encontraron noticias recientes del clima para ${location}</p>
-          <p style="font-size: 14px; margin-top: 8px; opacity: 0.7;">Las noticias aparecerán cuando haya eventos climáticos significativos</p>
+          <p>📰 No se encontraron noticias para ${location}</p>
         </div>
       `;
       return;
     }
     
-    const weatherEmojis = ['⛈️', '🌧️', '🌪️', '🌊', '☀️', '🌡️', '🌈', '💨'];
+    const weatherEmojis = ['⛈️', '🌧️', '🌪️', '🌊'];
     
     newsContainer.innerHTML = news.map(item => `
       <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-card">
-        <div class="news-image" style="display: flex; align-items: center; justify-content: center; font-size: 48px;">
+        <div class="news-image" style="display: flex; align-items: center; justify-content: center; font-size: 40px;">
           ${weatherEmojis[Math.floor(Math.random() * weatherEmojis.length)]}
         </div>
         <div class="news-content">
@@ -442,7 +445,6 @@ async function loadWeatherNews(location) {
     newsContainer.innerHTML = `
       <div class="no-news">
         <p>📰 No se pudieron cargar las noticias</p>
-        <p style="font-size: 14px; margin-top: 8px; opacity: 0.7;">Intenta de nuevo más tarde</p>
       </div>
     `;
   }
@@ -507,92 +509,88 @@ async function downloadPDF() {
   const pressure = document.getElementById('pressure').textContent;
   const feelsLike = document.getElementById('feels-like').textContent;
   
-  doc.setFillColor(99, 102, 241);
-  doc.rect(0, 0, 210, 40, 'F');
+  doc.setFillColor(66, 133, 244);
+  doc.rect(0, 0, 210, 45, 'F');
   
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
+  doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('⚡ Zeus Meteo', 20, 25);
+  doc.text('⛅ Zeus Meteo', 20, 28);
   
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  doc.text('Reporte del Clima', 140, 25);
+  doc.text('Reporte del Clima', 140, 28);
   
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(16);
+  doc.setTextColor(32, 33, 36);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text(`📍 ${city}`, 20, 55);
+  doc.text(`${city}`, 20, 65);
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text(`📅 ${now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} | 🕐 ${now.toLocaleTimeString('es-ES')}`, 20, 63);
+  doc.setTextColor(95, 99, 104);
+  doc.text(`${now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`, 20, 73);
   
-  doc.setFillColor(248, 250, 252);
-  doc.roundedRect(20, 75, 170, 50, 3, 3, 'F');
+  doc.setFillColor(248, 249, 250);
+  doc.roundedRect(20, 85, 170, 45, 3, 3, 'F');
   
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(36);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`${temp}°C`, 35, 110);
+  doc.setTextColor(32, 33, 36);
+  doc.setFontSize(42);
+  doc.setFont('helvetica', '300');
+  doc.text(`${temp}°C`, 35, 118);
   
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'normal');
-  doc.text(desc, 35, 120);
+  doc.text(desc, 35, 130);
   
   const stats = [
-    { label: 'Sensación', value: feelsLike },
     { label: 'Humedad', value: humidity },
     { label: 'Viento', value: wind },
+    { label: 'Sensación', value: feelsLike },
     { label: 'Presión', value: pressure }
   ];
   
   stats.forEach((stat, index) => {
-    const x = 100 + (index * 40);
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(stat.label, x, 90);
-    doc.setTextColor(0, 0, 0);
+    const x = 95 + (index * 42);
+    doc.setFontSize(9);
+    doc.setTextColor(95, 99, 104);
+    doc.text(stat.label, x, 100);
+    doc.setTextColor(32, 33, 36);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(stat.value, x, 100);
+    doc.text(stat.value, x, 112);
   });
   
-  doc.setDrawColor(226, 232, 240);
-  doc.line(20, 140, 190, 140);
+  doc.setDrawColor(218, 220, 224);
+  doc.line(20, 145, 190, 145);
   
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('📊 Fuentes de Datos:', 20, 155);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text('• OpenMeteo (Suiza) - API Meteorológica Global', 25, 165);
-  doc.text('• US National Weather Service (EE.UU.) - Datos Oficiales', 25, 173);
-  doc.text('• Met Norway (Noruega) - Pronósticos Europeos', 25, 181);
-  
-  doc.setDrawColor(226, 232, 240);
-  doc.line(20, 195, 190, 195);
-  
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(32, 33, 36);
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('🤖 Zeus Meteo - Inteligencia Artificial Meteorológica', 20, 210);
+  doc.text('Fuentes de datos:', 20, 160);
   
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(100, 100, 100);
-  doc.text('Generado automáticamente por Zeus Meteo', 20, 218);
-  doc.text(`Lat: ${currentCoords?.lat || 'N/A'} | Lon: ${currentCoords?.lng || 'N/A'}`, 20, 225);
-  
-  doc.setFillColor(99, 102, 241);
-  doc.rect(0, 270, 210, 27, 'F');
-  doc.setTextColor(255, 255, 255);
   doc.setFontSize(10);
-  doc.text(' Zeus Meteo © 2025 | Precisión Meteorológica con IA', 105, 285, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(95, 99, 104);
+  doc.text('• OpenMeteo (Suiza)', 25, 170);
+  doc.text('• US National Weather Service (EE.UU.)', 25, 178);
+  doc.text('• Met Norway (Noruega)', 25, 186);
+  
+  doc.setTextColor(32, 33, 36);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Zeus Meteo - Inteligencia Artificial', 20, 210);
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(128, 128, 128);
+  doc.text('Generado automáticamente', 20, 218);
+  
+  doc.setFillColor(66, 133, 244);
+  doc.rect(0, 277, 210, 20, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.text('Zeus Meteo © 2025', 105, 290, { align: 'center' });
   
   doc.save(`ZeusMeteo_${city}_${now.toISOString().split('T')[0]}.pdf`);
 }
