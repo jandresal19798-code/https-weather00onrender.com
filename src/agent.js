@@ -38,86 +38,54 @@ class WeatherAgent {
   async analyzeWeather(location, date = new Date().toISOString().split('T')[0], useForecast = false) {
     console.log(`🔍 Zeus Meteo analizando: ${location}`);
     console.log(`📅 Fecha: ${date}`);
-    console.log(`🤖 Consultando ${this.sources.length} fuentes con IA...\n`);
+    console.log(`🤖 Consultando ${this.sources.length} fuentes...\n`);
 
     const weatherData = [];
     const errors = [];
 
-    const locationsToTry = [
+    const locationsToTry = new Set([
       location,
       location.replace(/,\s*\w+$/i, ''),
       location.replace(/\s+\w+$/i, ''),
       location.toLowerCase(),
-      location.toUpperCase(),
-      location.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-    ];
-
-    const triedLocations = new Set();
-    const maxTries = 3;
+      location.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    ]);
 
     for (const source of this.sources) {
       let locationFound = false;
-      let tries = 0;
       
       for (const loc of locationsToTry) {
-        if (locationFound || tries >= maxTries) break;
-        if (triedLocations.has(loc.toLowerCase())) {
-          tries++;
-          continue;
-        }
-        triedLocations.add(loc.toLowerCase());
+        if (locationFound) break;
         
         try {
           let data;
           if (useForecast) {
             const forecast = await source.getForecast(loc, 3);
             data = Array.isArray(forecast) ? forecast[0] : forecast;
-            if (!data || !data.temperature) {
-              throw new Error('Datos de pronóstico no válidos');
-            }
           } else {
             data = await source.getCurrentWeather(loc);
-            if (!data || !data.temperature) {
-              throw new Error('Datos actuales no válidos');
-            }
           }
-          weatherData.push(data);
-          console.log(`✅ ${data.source}: ${data.temperature}°C - ${data.description}`);
-          locationFound = true;
+          
+          if (data && data.temperature !== undefined && data.temperature !== null) {
+            weatherData.push(data);
+            console.log(`✅ ${data.source}: ${data.temperature}°C - ${data.description}`);
+            locationFound = true;
+          }
         } catch (error) {
-          if (loc === locationsToTry[locationsToTry.length - 1]) {
-            console.log(`❌ ${source.constructor.name}: ${error.message}`);
-            errors.push({ source: source.constructor.name, error: error.message });
-          }
+          console.log(`❌ ${source.constructor.name} con "${loc}": ${error.message}`);
         }
-        tries++;
       }
     }
 
     if (weatherData.length === 0) {
-      const errorMessages = errors.map(e => e.error).join(', ');
-      let suggestion = 'Intenta con el nombre de la ciudad en español o inglés';
-      
-      if (location.toLowerCase().includes('jsoe') || location.toLowerCase().includes('j0se')) {
-        suggestion = '¿Quisiste decir "San José de Mayo"? Verifica la ortografía.';
-      } else if (location.length < 3) {
-        suggestion = 'El nombre de la ciudad es muy corto. Ingresa al menos 3 caracteres.';
-      } else if (location.includes(' ')) {
-        suggestion = 'Intenta solo el nombre de la ciudad sin país/región.';
-      }
-      
-      throw new Error(`No se encontró "${location}". ${suggestion}`);
+      throw new Error(`No se encontró información climática para "${location}". Verifica la ortografía o intenta con otra ciudad.`);
     }
 
     console.log('\n🧠 Aplicando IA de Zeus Meteo...');
     
     const aiAnalysis = this.applyAIAnalysis(weatherData, location, date);
-    
-    if (errors.length > 0) {
-      console.log(`⚠️  Algunas fuentes fallaron: ${errors.map(e => e.source).join(', ')}`);
-    }
 
-    console.log('\n📝 Generando informe mejorado...\n');
+    console.log('\n📝 Generando informe...\n');
     const report = await this.reportGenerator.generateReport(weatherData, location, date);
 
     const enhancedReport = this.enhanceReportWithAI(report, aiAnalysis);
@@ -129,7 +97,6 @@ class WeatherAgent {
     const ensemble = this.aiModels.ensemble(data);
     const trend = this.aiModels.trend(data);
     const anomaly = this.aiModels.anomaly(data);
-    const confidence = this.aiModels.confidence(data);
     const confidence = this.aiModels.confidence(data);
 
     return {
@@ -176,7 +143,7 @@ class WeatherAgent {
   }
 
   trendAnalysis(data) {
-    if (data.length < 2) return { direction: 'stable', change: 0 };
+    if (data.length < 2) return { direction: 'estable', change: 0 };
 
     const sorted = [...data].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     const tempDiff = sorted[sorted.length - 1].temperature - sorted[0].temperature;
