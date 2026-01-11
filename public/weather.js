@@ -56,14 +56,7 @@ async function searchWeather() {
   loading.classList.add('active');
   
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    
-    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeout);
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -86,11 +79,7 @@ async function searchWeather() {
     }
   } catch (error) {
     console.error('Error:', error);
-    if (error.name === 'AbortError') {
-      showError('Tiempo de espera agotado', 'El servidor está tardando mucho. Intenta más tarde.');
-    } else {
-      showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
-    }
+    showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
   } finally {
     loading.classList.remove('active');
   }
@@ -210,7 +199,7 @@ function getWeatherIcon(description) {
 async function loadHourlyForecast(location, retryCount = 0) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(),10000);
     
     const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`, {
       signal: controller.signal
@@ -224,6 +213,28 @@ async function loadHourlyForecast(location, retryCount = 0) {
         await new Promise(r => setTimeout(r, 2000));
         return loadHourlyForecast(location, retryCount + 1);
       }
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+ 
+    if (data.success) {
+      hourlyForecastData = data.forecast;
+      displayHourlyForecast(hourlyForecastData);
+    } else {
+      console.warn('Pronóstico no disponible:', data.error);
+      displayHourlyForecast(getMockForecast());
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.warn('Hourly forecast timeout, using mock data');
+      displayHourlyForecast(getMockForecast());
+    } else {
+      console.warn('Error pronóstico horario, usando datos demo:', error.message);
+      displayHourlyForecast(getMockForecast());
+    }
+  }
+}
       throw new Error(`HTTP ${response.status}`);
     }
     
@@ -279,7 +290,7 @@ async function loadDailyForecast(location, retryCount = 0) {
     }
     
     const data = await response.json();
-
+ 
     if (data.success) {
       displayDailyForecast(data.forecast);
       updateWeatherDetails(data.forecast);
@@ -292,11 +303,19 @@ async function loadDailyForecast(location, retryCount = 0) {
       renderTempChart(mockData);
     }
   } catch (error) {
-    console.warn('Error pronóstico diario, usando datos demo:', error.message);
-    const mockData = getMockForecast();
-    displayDailyForecast(mockData);
-    updateWeatherDetails(mockData);
-    renderTempChart(mockData);
+    if (error.name === 'AbortError') {
+      console.warn('Daily forecast timeout, using mock data');
+      const mockData = getMockForecast();
+      displayDailyForecast(mockData);
+      updateWeatherDetails(mockData);
+      renderTempChart(mockData);
+    } else {
+      console.warn('Error pronóstico diario, usando datos demo:', error.message);
+      const mockData = getMockForecast();
+      displayDailyForecast(mockData);
+      updateWeatherDetails(mockData);
+      renderTempChart(mockData);
+    }
   }
 }
 
@@ -444,14 +463,7 @@ async function loadSatelliteImage(location) {
   try {
     visualLabel.textContent = 'Cargando...';
     
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeout);
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
     
     if (!response.ok) throw new Error('No se pudo obtener clima');
     
@@ -619,7 +631,9 @@ async function loadWeatherNews(location) {
     `).join('');
     
   } catch (error) {
-    console.warn('Noticias no disponibles:', error.message);
+    if (error.name !== 'AbortError') {
+      console.warn('Noticias no disponibles:', error.message);
+    }
     newsContainer.innerHTML = `
       <div class="no-news">
         <p>📰 Las noticias temporales no están disponibles en este momento.</p>
