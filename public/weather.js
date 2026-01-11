@@ -1120,3 +1120,194 @@ document.addEventListener('DOMContentLoaded', () => {
     gpsBtn.addEventListener('click', getCurrentLocation);
   }
 });
+
+// ==================== CHATBOT OLLAMA ====================
+
+let chatHistory = [];
+
+const WEATHER_CONTEXT = `
+Eres Zeus AI, un asistente meteorológico inteligente.
+Contexto sobre Zeus Meteo:
+- App de clima con IA que usa 3 APIs gratuitas: OpenMeteo, US NWS y MetNorway
+- Características: pronósticos por hora/día, imagen satelital, mapas interactivos, reportes PDF
+- Diseño moderno con glassmorphism y animaciones
+- PWA instalable en móvil
+- Totalmente gratis y sin registro
+
+Instrucciones:
+1. Responde de forma concisa y amigable
+2. Usa emojis relevantes para hacer las respuestas más visuales
+3. Si te preguntan sobre el clima, sugiere buscar una ciudad
+4. Puedes compartir curiosidades meteorológicas interesantes
+5. Mantén las respuestas relativamente cortas (máximo 2-3 oraciones)
+6. Si no sabes algo, sé honesto y sugiere consultar fuentes oficiales
+`;
+
+async function toggleChatbot() {
+  const container = document.getElementById('chatbot-container');
+  const fab = document.getElementById('chatbot-fab');
+  container.classList.toggle('active');
+  fab.style.display = container.classList.contains('active') ? 'none' : 'flex';
+  
+  if (container.classList.contains('active')) {
+    setTimeout(() => {
+      document.getElementById('chatbot-input').focus();
+    }, 300);
+  }
+}
+
+function handleChatKeyPress(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    sendChatMessage();
+  }
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chatbot-input');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  addChatMessage('user', message);
+  input.value = '';
+  
+  addThinkingIndicator();
+  
+  getAIResponse(message).then(response => {
+    removeThinkingIndicator();
+    addChatMessage('assistant', response);
+  }).catch(error => {
+    removeThinkingIndicator();
+    addChatMessage('assistant', '😕 Lo siento, hubo un error. ¿Podrías intentar de nuevo?');
+    console.error('Chat error:', error);
+  });
+}
+
+function addChatMessage(role, content) {
+  const container = document.getElementById('chatbot-messages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `chatbot-message ${role}`;
+  messageDiv.textContent = content;
+  container.appendChild(messageDiv);
+  
+  container.scrollTop = container.scrollHeight;
+  
+  chatHistory.push({ role, content });
+  
+  if (chatHistory.length > 20) {
+    chatHistory = chatHistory.slice(-20);
+  }
+}
+
+function addThinkingIndicator() {
+  const container = document.getElementById('chatbot-messages');
+  const indicator = document.createElement('div');
+  indicator.className = 'chatbot-message thinking';
+  indicator.id = 'thinking-indicator';
+  indicator.innerHTML = `
+    <div class="typing-indicator">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+  container.appendChild(indicator);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeThinkingIndicator() {
+  const indicator = document.getElementById('thinking-indicator');
+  if (indicator) {
+    indicator.remove();
+  }
+}
+
+async function getAIResponse(userMessage) {
+  const ollamaEndpoint = 'http://localhost:11434/api/generate';
+  
+  const systemMessage = WEATHER_CONTEXT;
+  
+  const messages = [
+    { role: 'system', content: systemMessage },
+    ...chatHistory.slice(-10),
+    { role: 'user', content: userMessage }
+  ];
+  
+  const prompt = messages.map(m => {
+    if (m.role === 'system') return `[SYSTEM]: ${m.content}`;
+    if (m.role === 'user') return `[USER]: ${m.content}`;
+    return `[ASSISTANT]: ${m.content}`;
+  }).join('\n');
+  
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
+    const response = await fetch(ollamaEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama3.2',
+        prompt: prompt,
+        stream: false,
+        options: {
+          temperature: 0.7,
+          top_p: 0.9,
+          max_tokens: 300
+        }
+      }),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.response.trim();
+  } catch (error) {
+    console.error('Ollama error:', error.message);
+    
+    if (error.name === 'AbortError') {
+      return '⏱️ La IA tardó demasiado en responder. ¿Podrías repetir tu pregunta?';
+    }
+    
+    return getFallbackResponse(userMessage);
+  }
+}
+
+function getFallbackResponse(message) {
+  const lowerMessage = message.toLowerCase();
+  
+  const responses = {
+    'hola': '¡Hola! 👋 Soy Zeus AI. ¿Cómo puedo ayudarte con el clima hoy?',
+    'buenos días': '¡Buenos días! ☀️ ¿Qué te gustaría saber sobre el clima?',
+    'buenas tardes': '¡Buenas tardes! 🌤️ ¿En qué puedo ayudarte?',
+    'buenas noches': '¡Buenas noches! 🌙 ¿Necesitas información sobre el clima nocturno?',
+    'llover': '🌧️ Para saber si lloverá, busca una ciudad específica. ¿Te gustaría buscar el clima de algún lugar?',
+    'lluvia': '🌧️ La lluvia depende de muchos factores. ¿En qué ciudad estás interesado?',
+    'sol': '☀️ ¡Perfecto! El sol está brillando. ¿Buscas el pronóstico para alguna ciudad?',
+    'frío': '❄️ Hace frío, ¿verdad? Puedo darte información sobre temperaturas bajas. ¿En qué ciudad?',
+    'calor': '🔥 Mucho calor hoy. ¿Te gustaría saber el pronóstico para otra ciudad?',
+    'viento': '💨 El viento puede ser fuerte. ¿En qué zona te interesa consultar?',
+    'tormenta': '⛈️ Cuidado con las tormentas. ¿Te ayudo a buscar información sobre alguna ciudad específica?',
+    'temperatura': '🌡️ Para conocer la temperatura exacta, busca una ciudad. ¿Dónde te gustaría consultar?',
+    'pronóstico': '📊 Los pronósticos están disponibles para cualquier ciudad. ¿Cuál te interesa?',
+    'gracias': '¡De nada! 😊 ¿Hay algo más en lo que pueda ayudarte?',
+    'adiós': '¡Adiós! 👋 ¡Que tengas un excelente día!',
+    'chao': '¡Chao! 👋 ¡Vuelve cuando quieras consultar el clima!',
+    'qué puedes hacer': '🤖 Puedo:\n• Responder preguntas sobre el clima\n• Compartir curiosidades meteorológicas\n• Darte consejos según las condiciones\n• Explicar fenómenos climáticos',
+    'que puedes hacer': '🤖 Puedo:\n• Responder preguntas sobre el clima\n• Compartir curiosidades meteorológicas\n• Darte consejos según las condiciones\n• Explicar fenómenos climáticos'
+  };
+  
+  for (const [key, value] of Object.entries(responses)) {
+    if (lowerMessage.includes(key)) {
+      return value;
+    }
+  }
+  
+  return `Interesante pregunta sobre "${message}". 🤔 Para darte información precisa sobre el clima, te recomiendo buscar una ciudad específica. ¿Hay algo más en lo que pueda ayudarte?`;
+}

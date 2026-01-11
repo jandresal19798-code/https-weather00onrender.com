@@ -409,6 +409,44 @@
     </div>
   </footer>
 
+  <!-- Chatbot Ollama -->
+  <div class="chatbot-fab" id="chatbot-fab" onclick="toggleChatbot()">
+    <span>💬</span>
+  </div>
+  
+  <div class="chatbot-container" id="chatbot-container">
+    <div class="chatbot-header">
+      <div class="chatbot-title">
+        <span class="chatbot-icon">🤖</span>
+        <div>
+          <strong>Zeus AI</strong>
+          <span class="chatbot-status">Conectado a Ollama</span>
+        </div>
+      </div>
+      <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+    </div>
+    
+    <div class="chatbot-messages" id="chatbot-messages">
+      <div class="chatbot-welcome">
+        <div class="chatbot-avatar">🤖</div>
+        <p>¡Hola! Soy Zeus AI, tu asistente meteorológico. 🤖</p>
+        <p>Puedo responder preguntas sobre:</p>
+        <ul>
+          <li>🌡️ El clima actual y pronóstico</li>
+          <li>🌍 Curiosidades meteorológicas</li>
+          <li>📊 Datos climáticos</li>
+          <li>💡 Consejos según el clima</li>
+        </ul>
+        <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">Powered by Ollama (Gratis)</p>
+      </div>
+    </div>
+    
+    <div class="chatbot-input-container">
+      <input type="text" id="chatbot-input" placeholder="Escribe tu pregunta..." onkeypress="handleChatKeyPress(event)" />
+      <button class="chatbot-send" onclick="sendChatMessage()">➤</button>
+    </div>
+  </div>
+
   <script src="weather.js"></script>
 </body>
 </html>
