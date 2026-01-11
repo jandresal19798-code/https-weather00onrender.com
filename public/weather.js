@@ -624,123 +624,52 @@ document.addEventListener('DOMContentLoaded', initTheme);
 
 // PWA Install Prompt
 let deferredPrompt = null;
+let installBannerShown = false;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  console.log('PWA install prompt disponible');
   
   setTimeout(() => {
-    if (deferredPrompt) {
+    if (deferredPrompt && !installBannerShown) {
       showInstallBanner();
     }
-  }, 30000);
+  }, 15000);
 });
 
 window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
+  installBannerShown = true;
+  const banner = document.querySelector('.install-banner');
+  if (banner) banner.remove();
   console.log('Zeus Meteo instalada correctamente');
 });
 
 function showInstallBanner() {
-  if (document.querySelector('.install-banner')) return;
+  if (installBannerShown || document.querySelector('.install-banner')) return;
+  
+  installBannerShown = true;
   
   const banner = document.createElement('div');
   banner.className = 'install-banner';
   banner.innerHTML = `
     <div class="install-content">
-      <span style="font-size: 24px;">📱</span>
+      <span style="font-size: 28px;">⛅</span>
       <div class="install-text">
         <strong>Instala Zeus Meteo</strong>
-        <p>Accede rapidamente desde tu pantalla de inicio</p>
+        <p>Accede rapidamente desde tu pantalla</p>
       </div>
       <button class="install-btn" onclick="installPWA()">Instalar</button>
       <button class="dismiss-btn" onclick="dismissInstall()">✕</button>
     </div>
   `;
   
-  const style = document.createElement('style');
-  style.textContent = `
-    .install-banner {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
-      color: white;
-      padding: 16px 20px;
-      z-index: 1000;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
-      animation: slideUp 0.5s ease;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    .install-content {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .install-text {
-      flex: 1;
-    }
-    .install-text strong {
-      display: block;
-      font-size: 16px;
-      margin-bottom: 2px;
-    }
-    .install-text p {
-      font-size: 13px;
-      opacity: 0.9;
-      margin: 0;
-    }
-    .install-btn {
-      background: white;
-      color: #4285f4;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 24px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .install-btn:hover {
-      background: #f8f9fa;
-    }
-    .dismiss-btn {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-      padding: 8px;
-      opacity: 0.8;
-    }
-    .dismiss-btn:hover {
-      opacity: 1;
-    }
-    @media (max-width: 600px) {
-      .install-content {
-        flex-wrap: wrap;
-      }
-      .install-text {
-        width: calc(100% - 80px);
-      }
-      .install-btn {
-        width: 100%;
-        margin-top: 12px;
-      }
-      .dismiss-btn {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-      }
-    }
-  `;
-  document.head.appendChild(style);
   document.body.appendChild(banner);
+  
+  setTimeout(() => {
+    banner.style.opacity = '1';
+  }, 100);
 }
 
 function installPWA() {
@@ -751,14 +680,28 @@ function installPWA() {
         console.log('Usuario acepto instalar');
       }
       deferredPrompt = null;
+      installBannerShown = true;
     });
+  } else {
+    showIOSInstructions();
   }
+}
+
+function showIOSInstructions() {
+  alert('Para instalar en iOS:\n\n1. Toca el botón Compartir 📤\n2. Selecciona "Agregar a pantalla de inicio" ➕');
 }
 
 function dismissInstall() {
   const banner = document.querySelector('.install-banner');
   if (banner) {
-    banner.style.animation = 'slideDown 0.3s ease forwards';
+    banner.style.opacity = '0';
     setTimeout(() => banner.remove(), 300);
   }
+  installBannerShown = true;
+}
+
+// Check if running as installed PWA
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  installBannerShown = true;
+  console.log('Zeus Meteo running as PWA');
 }

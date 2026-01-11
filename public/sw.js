@@ -1,16 +1,26 @@
 const CACHE_NAME = 'zeus-meteo-v1';
-const urlsToCache = [
+const STATIC_CACHE = 'zeus-meteo-static-v1';
+const RUNTIME_CACHE = 'zeus-meteo-runtime-v1';
+
+const STATIC_URLS = [
   '/',
   '/index.html',
   '/weather.css',
   '/weather.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/favicon.ico'
 ];
+
+const CACHE_STRATEGIES = {
+  static: new RegExp('/\.(js|css|png|jpg|jpeg|svg|ico|woff|woff2)$/'),
+  api: new RegExp('/api/'),
+  html: new RegExp('/.*\.html$/')
+};
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(STATIC_CACHE)
+      .then(cache => cache.addAll(STATIC_URLS))
       .then(() => self.skipWaiting())
   );
 });
@@ -19,37 +29,80 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+        cacheNames
+          .filter(name => name !== STATIC_CACHE && name !== RUNTIME_CACHE)
+          .map(name => caches.delete(name))
       );
     }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).then(response => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        });
-      })
-      .catch(() => {
-        return caches.match('/index.html');
-      })
-  );
+  const { request } = event;
+  const url = new URL(request.url);
+
+  if (CACHE_STRATEGIES.api.test(url.pathname)) {
+    event.respondWith(networkFirst(request));
+  } else if (CACHE_STRATEGIES.static.test(url.pathname)) {
+    event.respondWith(cacheFirst(request));
+  } else {
+    event.respondWith(staleWhileRevalidate(request));
+  }
+});
+
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) {
+    return cached;
+  }
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    return new Response('Offline', { status: 503 });
+  }
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    const cached = await caches.match(request);
+    if (cached) {
+      return cached;
+    }
+    return new Response(JSON.stringify({ error: 'Offline', cached: false }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+  
+  const fetchPromise = fetch(request).then(response => {
+    if (response.ok) {
+      const cache = caches.open(RUNTIME_CACHE);
+      cache.then(c => c.put(request, response.clone()));
+    }
+    return response;
+  }).catch(() => cached);
+  
+  return cached || fetchPromise;
+}
+
+self.addEventListener('message', event => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });

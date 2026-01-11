@@ -1,33 +1,50 @@
 {
   "name": "Zeus Meteo",
   "short_name": "Zeus Meteo",
-  "description": "Clima inteligente con IA y múltiples fuentes de datos",
-  "start_url": "/",
+  "description": "Clima inteligente con IA y múltiples fuentes de datos meteorológicos en tiempo real",
+  "start_url": "/?source=pwa",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
   "background_color": "#f8f9fa",
   "theme_color": "#4285f4",
   "orientation": "portrait-primary",
   "scope": "/",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["weather", "utilities", "lifestyle"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%234285f4' width='100' height='100' rx='20'/><text x='50' y='68' font-size='55' text-anchor='middle'>⛅</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%234285f4' width='512' height='512' rx='100'/><text x='256' y='340' font-size='280' text-anchor='middle' fill='white'>⛅</text></svg>",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234285f4' width='192' height='192' rx='40'/><text x='96' y='130' font-size='100' text-anchor='middle'>⛅</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%234285f4' width='192' height='192' rx='40'/><text x='96' y='130' font-size='100' text-anchor='middle' fill='white'>⛅</text></svg>",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%234285f4' width='512' height='512' rx='100'/><text x='256' y='350' font-size='280' text-anchor='middle'>⛅</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%234285f4' width='512' height='512' rx='100'/><text x='256' y='340' font-size='280' text-anchor='middle' fill='white'>⛅</text></svg>",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
-  "categories": ["weather", "utilities"],
-  "lang": "es",
-  "dir": "ltr",
-  "prefer_related_applications": false
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Buscar clima",
+      "short_name": "Buscar",
+      "description": "Buscar el clima de una ciudad",
+      "url": "/?action=search",
+      "icons": []
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "display_media_capability": "none",
+  "handle_links": "preferred",
+  "target_browser": "chrome"
 }
