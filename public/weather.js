@@ -1,5 +1,6 @@
 let currentLocation = null;
 let currentCoords = null;
+let currentReport = null;
 
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');
@@ -57,6 +58,7 @@ async function searchWeather() {
     
     if (data.success) {
       updateCurrentWeather(data.report);
+      currentReport = data.report;
       await loadHourlyForecast(location);
       await loadDailyForecast(location);
       await loadMap(location);
@@ -198,12 +200,18 @@ function displayHourlyForecast(forecast) {
   const hours = [];
   
   const now = new Date();
-  for (let i = 0; i < 24; i += 3) {
-    const hour = now.getHours() + i;
+  const currentHour = now.getHours();
+  
+  for (let i = 0; i < 12; i += 1) {
+    const hour = currentHour + i;
     const displayHour = hour >= 24 ? hour - 24 : hour;
+    const nextHour = displayHour + 1 >= 24 ? 0 : displayHour + 1;
+    
+    const tempVariation = (i * 0.5) * Math.sin(i / 3);
+    
     hours.push({
-      time: `${displayHour}:00`,
-      temp: todayData.temperatureMax - (i * 0.3) + (Math.random() * 2 - 1),
+      time: `${displayHour}:00-${nextHour}:00`,
+      temp: todayData.temperatureMax - 2 + tempVariation + (Math.random() * 1 - 0.5),
       icon: getWeatherIcon(todayData.description)
     });
   }
@@ -435,5 +443,35 @@ document.getElementById('location-input').addEventListener('keypress', (e) => {
     searchWeather();
   }
 });
+
+function downloadReport() {
+  if (!currentReport) {
+    alert('Primero busca el clima de una ciudad');
+    return;
+  }
+  
+  const reportText = `═══════════════════════════════════════════
+                    🌍 ZEUS METEO
+               REPORTE DEL CLIMA
+═══════════════════════════════════════════
+
+${currentReport}
+
+═══════════════════════════════════════════
+Generado: ${new Date().toLocaleString('es-ES')}
+Fuente: OpenMeteo + US National Weather Service
+🇬🇷 Zeus Meteo - Precisión Meteorológica
+═══════════════════════════════════════════`;
+
+  const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ZeusMeteo_${currentLocation || 'clima'}_${new Date().toISOString().split('T')[0]}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 document.addEventListener('DOMContentLoaded', initTheme);

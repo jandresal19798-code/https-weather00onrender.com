@@ -351,6 +351,148 @@ export class MetNorway extends WeatherSource {
   }
 }
 
+export class USNWS extends WeatherSource {
+  constructor() {
+    super();
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+    this.weatherUrl = 'https://api.weather.gov';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 3, language: 'es' }
+    });
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    
+    const pointsResponse = await axios.get(`${this.weatherUrl}/points/${coords.latitude},${coords.longitude}`, {
+      headers: { 'User-Agent': 'ZeusMeteo/1.0 (contact@zeusmeteo.com)' }
+    });
+    
+    const forecastUrl = pointsResponse.data.properties.forecast;
+    const stationsUrl = pointsResponse.data.properties.stations;
+    
+    const [forecastResponse] = await Promise.all([
+      axios.get(forecastUrl, { headers: { 'User-Agent': 'ZeusMeteo/1.0' } }),
+      axios.get(stationsUrl, { headers: { 'User-Agent': 'ZeusMeteo/1.0' } }).catch(() => ({ data: { properties: { stations: [] } } }))
+    ]);
+    
+    const currentPeriod = forecastResponse.data.properties.periods[0];
+    
+    return this.formatData(currentPeriod, coords.name);
+  }
+
+  async get7DayForecast(location) {
+    const coords = await this.getCoordinates(location);
+    
+    const pointsResponse = await axios.get(`${this.weatherUrl}/points/${coords.latitude},${coords.longitude}`, {
+      headers: { 'User-Agent': 'ZeusMeteo/1.0' }
+    });
+    
+    const forecastUrl = pointsResponse.data.properties.forecast;
+    const forecastResponse = await axios.get(forecastUrl, { 
+      headers: { 'User-Agent': 'ZeusMeteo/1.0' } 
+    });
+    
+    const periods = forecastResponse.data.properties.periods;
+    const dailyData = new Map();
+    
+    periods.forEach(period => {
+      const date = period.startTime.split('T')[0];
+      const temp = period.temperature;
+      const description = period.shortForecast.toLowerCase();
+      
+      if (!dailyData.has(date)) {
+        dailyData.set(date, { temps: [], weatherCode: 0, descriptions: [], periods: [] });
+      }
+      
+      const day = dailyData.get(date);
+      day.temps.push(temp);
+      day.descriptions.push(description);
+      day.periods.push(period);
+    });
+    
+    return Array.from(dailyData.entries()).slice(0, 7).map(([date, data]) => ({
+      source: 'USNWS',
+      date: date,
+      temperatureMax: Math.max(...data.temps),
+      temperatureMin: Math.min(...data.temps),
+      weatherCode: this.getWeatherCode(data.descriptions),
+      description: this.getDescription(data.descriptions),
+      precipitation: this.getPrecipitation(data.descriptions),
+      windMax: this.getWind(data.descriptions)
+    }));
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'USNWS',
+      timestamp: data.startTime || new Date().toISOString(),
+      location: location,
+      temperature: data.temperature,
+      feelsLike: data.temperature,
+      humidity: null,
+      pressure: null,
+      windSpeed: null,
+      windDirection: null,
+      description: data.shortForecast || 'desconocido',
+      visibility: null,
+      clouds: this.getClouds(data.shortForecast)
+    };
+  }
+
+  getWeatherCode(descriptions) {
+    if (descriptions.some(d => d.includes('thunder') || d.includes('storm'))) return 95;
+    if (descriptions.some(d => d.includes('rain') || d.includes('showers'))) return 61;
+    if (descriptions.some(d => d.includes('snow') || d.includes('flurries'))) return 71;
+    if (descriptions.some(d => d.includes('cloudy'))) return 3;
+    if (descriptions.some(d => d.includes('partly') || d.includes('mostly'))) return 2;
+    return 0;
+  }
+
+  getDescription(descriptions) {
+    const desc = descriptions.join(' ').toLowerCase();
+    if (desc.includes('thunder') && desc.includes('rain')) return 'tormenta eléctrica';
+    if (desc.includes('thunder')) return 'tormenta eléctrica';
+    if (desc.includes('rain') && desc.includes('showers')) return 'lluvia';
+    if (desc.includes('rain')) return 'lluvia';
+    if (desc.includes('snow') && desc.includes('showers')) return 'chubascos de nieve';
+    if (desc.includes('snow')) return 'nieve';
+    if (desc.includes('cloudy') && !desc.includes('partly')) return 'nublado';
+    if (desc.includes('partly') || desc.includes('mostly')) return 'parcialmente nublado';
+    if (desc.includes('sunny') || desc.includes('clear')) return 'cielo despejado';
+    return descriptions[0] || 'desconocido';
+  }
+
+  getPrecipitation(descriptions) {
+    const desc = descriptions.join(' ').toLowerCase();
+    if (desc.includes('rain') && desc.includes('heavy')) return 10;
+    if (desc.includes('rain')) return 5;
+    if (desc.includes('snow') && desc.includes('heavy')) return 8;
+    if (desc.includes('snow')) return 3;
+    return 0;
+  }
+
+  getWind(descriptions) {
+    const desc = descriptions.join(' ').toLowerCase();
+    if (desc.includes('breezy') || desc.includes('windy')) return 8;
+    return 3;
+  }
+
+  getClouds(shortForecast) {
+    const desc = shortForecast.toLowerCase();
+    if (desc.includes('clear') || desc.includes('sunny')) return 0;
+    if (desc.includes('partly') || desc.includes('mostly')) return 50;
+    return 100;
+  }
+}
+
 export class MockWeatherSource extends WeatherSource {
   async getCurrentWeather(location) {
     return {

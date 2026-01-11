@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, MockWeatherSource } from './weatherSources.js';
+import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, MockWeatherSource } from './weatherSources.js';
 import { OllamaClient } from './reportGenerator.js';
 
 dotenv.config();
@@ -13,6 +13,7 @@ class WeatherAgent {
 
   initializeSources() {
     this.sources.push(new OpenMeteo());
+    this.sources.push(new USNWS());
     this.sources.push(new MetNorway());
 
     if (process.env.OPENWEATHER_API_KEY && process.env.OPENWEATHER_API_KEY !== 'tu_api_key_aqui') {
