@@ -350,7 +350,7 @@ async function loadSatelliteImage(location) {
   const satelliteContainer = document.getElementById('satellite-image');
   const satelliteTime = document.getElementById('satellite-time');
   
-  satelliteContainer.innerHTML = '<div class="satellite-loading">🛰️ Cargando...</div>';
+  satelliteContainer.innerHTML = '<div class="weather-animation">🛰️ Cargando...</div>';
   satelliteTime.innerHTML = '🛰️ Cargando...';
   
   try {
@@ -361,36 +361,73 @@ async function loadSatelliteImage(location) {
       const { latitude, longitude } = data;
       const now = new Date();
       
-      const weatherEmojis = ['☀️', '🌤️', '⛅', '☁️', '🌧️', '⛈️'];
-      const randomEmoji = weatherEmojis[Math.floor(Math.random() * weatherEmojis.length)];
+      const weatherResponse = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
+      const weatherData = await weatherResponse.json();
+      
+      let weatherCondition = 'parcialmente nublado';
+      if (weatherData.report) {
+        const match = weatherData.report.match(/Estado predominante:\s*(.+)/i);
+        if (match) weatherCondition = match[1].trim().toLowerCase();
+      }
+      
+      const emoji = getWeatherIcon(weatherCondition);
+      const animationClass = getWeatherAnimation(weatherCondition);
       
       satelliteContainer.innerHTML = `
-        <div class="satellite-visual">
-          <div class="satellite-globe">
-            <div class="satellite-emoji">${randomEmoji}</div>
-            <div class="satellite-orbit"></div>
+        <div class="weather-animation ${animationClass}">
+          <div class="weather-scene">
+            <div class="sun ${weatherCondition.includes('despejado') || weatherCondition.includes('soleado') ? 'visible' : ''}"></div>
+            <div class="moon ${!animationClass.includes('sun') && weatherCondition.includes('despejado') ? 'visible' : ''}"></div>
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+            <div class="rain ${animationClass.includes('rain') ? 'visible' : ''}">
+              <div class="drop drop-1"></div>
+              <div class="drop drop-2"></div>
+              <div class="drop drop-3"></div>
+              <div class="drop drop-4"></div>
+              <div class="drop drop-5"></div>
+            </div>
+            <div class="thunder ${animationClass.includes('thunder') ? 'visible' : ''}"></div>
+            <div class="lightning ${animationClass.includes('thunder') ? 'flash' : ''}"></div>
+            <div class="snow ${animationClass.includes('snow') ? 'visible' : ''}">
+              <div class="flake flake-1">❄</div>
+              <div class="flake flake-2">❄</div>
+              <div class="flake flake-3">❄</div>
+            </div>
+            <div class="weather-emoji">${emoji}</div>
           </div>
-          <div class="satellite-info">
-            <div class="satellite-location-icon">📍</div>
-            <div class="satellite-location-text">${data.location || location}</div>
-            <div class="satellite-coords">${Math.abs(latitude).toFixed(2)}°${latitude >= 0 ? 'N' : 'S'} • ${Math.abs(longitude).toFixed(2)}°${longitude >= 0 ? 'E' : 'W'}</div>
+          <div class="weather-info">
+            <div class="weather-location">📍 ${data.location || location}</div>
+            <div class="weather-condition">${weatherCondition}</div>
+            <div class="weather-time">🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</div>
           </div>
         </div>
       `;
       
-      satelliteTime.innerHTML = `📍 ${data.location || location} • 🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+      satelliteTime.innerHTML = `📍 ${data.location || location} • ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
     }
   } catch (error) {
-    console.error('Error al cargar imagen satelital:', error);
+    console.error('Error:', error);
     satelliteContainer.innerHTML = `
-      <div class="satellite-error">
-        <div class="satellite-icon">🛰️</div>
-        <p>Imagen satelital</p>
-        <p style="opacity: 0.7; font-size: 11px;">${location}</p>
+      <div class="weather-error">
+        <div class="weather-icon">🌤️</div>
+        <p>Clima en ${location}</p>
+        <p style="opacity: 0.7; font-size: 11px;">No se pudo cargar</p>
       </div>
     `;
-    satelliteTime.innerHTML = '⚠️ No disponible';
+    satelliteTime.innerHTML = '⚠️ Error';
   }
+}
+
+function getWeatherAnimation(condition) {
+  const c = condition.toLowerCase();
+  if (c.includes('lluvia') || c.includes('rain') || c.includes('shower')) return 'rainy';
+  if (c.includes('tormenta') || c.includes('thunder') || c.includes('storm')) return 'thunder';
+  if (c.includes('nieve') || c.includes('snow')) return 'snowy';
+  if (c.includes('despejado') || c.includes('soleado') || c.includes('clear') || c.includes('sunny')) return 'sunny';
+  if (c.includes('nublado') || c.includes('cloudy') || c.includes('nublado')) return 'cloudy';
+  return 'partly-cloudy';
 }
 
 async function loadWeatherNews(location) {
