@@ -1277,13 +1277,20 @@ a:hover {
 /* Weekly Forecast */
 .weekly-forecast {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding: 8px 4px 16px;
+  margin: 0 -8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .weekly-forecast::-webkit-scrollbar {
   height: 6px;
+}
+
+.weekly-forecast::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
 }
 
 .weekly-forecast::-webkit-scrollbar-thumb {
@@ -1293,12 +1300,13 @@ a:hover {
 
 .day-card {
   flex: 0 0 auto;
-  width: 80px;
+  width: 70px;
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
-  padding: 16px 12px;
+  padding: 12px 8px;
   text-align: center;
   transition: all 0.3s ease;
+  min-width: 70px;
 }
 
 .day-card:hover {
@@ -1346,13 +1354,20 @@ a:hover {
 /* Hourly Scroll */
 .hourly-scroll {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   overflow-x: auto;
-  padding-bottom: 12px;
+  padding: 8px 4px 16px;
+  margin: 0 -8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .hourly-scroll::-webkit-scrollbar {
   height: 6px;
+}
+
+.hourly-scroll::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
 }
 
 .hourly-scroll::-webkit-scrollbar-thumb {
@@ -1362,7 +1377,7 @@ a:hover {
 
 .hourly-card {
   flex: 0 0 auto;
-  width: 90px;
+  width: 80px;
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
   padding: 16px;
@@ -1378,17 +1393,17 @@ a:hover {
 .hourly-time {
   font-size: 12px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .hourly-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+  font-size: 28px;
+  margin-bottom: 6px;
   display: block;
 }
 
 .hourly-temp {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -1397,21 +1412,22 @@ a:hover {
 .temp-chart-container {
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
-  padding: 16px;
-  min-height: 250px;
+  padding: 12px;
+  min-height: 200px;
+  margin: -8px;
 }
 
 /* Activities Grid */
 .activities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
 }
 
 .activity-card {
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 12px 8px;
   text-align: center;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -1423,8 +1439,8 @@ a:hover {
 }
 
 .activity-icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+  font-size: 28px;
+  margin-bottom: 6px;
   display: block;
 }
 
@@ -1444,17 +1460,17 @@ a:hover {
 /* Details Grid */
 .details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
 }
 
 .detail-item {
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   transition: all 0.3s ease;
 }
 
@@ -1464,7 +1480,7 @@ a:hover {
 }
 
 .detail-icon {
-  font-size: 28px;
+  font-size: 24px;
   width: 50px;
   height: 50px;
   background: linear-gradient(135deg, var(--primary-light), var(--primary));
