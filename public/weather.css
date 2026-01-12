@@ -880,6 +880,7 @@ a:hover {
   backdrop-filter: var(--glass-backdrop);
   border: var(--glass-border);
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .pillar-card:hover {
@@ -1415,6 +1416,17 @@ a:hover {
   padding: 12px;
   min-height: 200px;
   margin: -8px;
+  width: calc(100% + 16px);
+  overflow: hidden;
+}
+
+.temp-chart-container .apexcharts {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.temp-chart-container .apexcharts-canvas {
+  max-width: 100% !important;
 }
 
 /* Activities Grid */
@@ -1563,12 +1575,22 @@ a:hover {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
+  width: 100%;
 }
 
 .map-frame {
   width: 100%;
-  height: 350px;
+  max-width: 100%;
+  height: 300px;
   border: none;
+  display: block;
+}
+
+/* Responsive map */
+@media (max-width: 768px) {
+  .map-frame {
+    height: 250px;
+  }
 }
 
 /* Sidebar */
