@@ -77,9 +77,7 @@ async function searchWeather() {
       await Promise.all([
         loadHourlyForecast(location),
         loadDailyForecast(location),
-        loadMap(location),
-        loadSatelliteImage(location),
-        loadWeatherNews(location)
+        loadMap(location)
       ]);
     } else {
       showError(data.error, data.suggestion);
@@ -731,6 +729,8 @@ async function loadSatelliteImage(location) {
   const visualContainer = document.getElementById('weather-visual');
   const visualLabel = document.getElementById('weather-visual-label');
   
+  if (!visualContainer || !visualLabel) return;
+  
   try {
     const weatherResponse = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
     const weatherData = await weatherResponse.json();
@@ -762,13 +762,16 @@ async function loadSatelliteImage(location) {
     visualLabel.textContent = weatherCondition;
   } catch (error) {
     console.warn('Visual del clima:', error.message);
-    document.getElementById('weather-visual').classList.add('sunny');
-    document.getElementById('weather-visual-label').textContent = 'Clima';
+    const safeVisual = document.getElementById('weather-visual');
+    const safeLabel = document.getElementById('weather-visual-label');
+    if (safeVisual) safeVisual.classList.add('sunny');
+    if (safeLabel) safeLabel.textContent = 'Clima';
   }
 }
 
 function generateRain() {
   const container = document.getElementById('rain-container');
+  if (!container) return;
   container.innerHTML = '';
   
   for (let i = 0; i < 40; i++) {
@@ -783,6 +786,7 @@ function generateRain() {
 
 function generateLightning() {
   const container = document.getElementById('lightning-container');
+  if (!container) return;
   container.innerHTML = '';
   
   for (let i = 0; i < 3; i++) {
@@ -796,6 +800,7 @@ function generateLightning() {
 
 function generateSnow() {
   const container = document.getElementById('snow-container');
+  if (!container) return;
   container.innerHTML = '';
   
   for (let i = 0; i < 35; i++) {
