@@ -988,51 +988,6 @@ async function downloadPDF() {
   
   doc.save(`ZeusMeteo_${city.replace(/\s+/g, '_')}_${now.toISOString().split('T')[0]}.pdf`);
 }
-      doc.text(`${tempMin}°`, x + 11, startY + 40, { align: 'center' });
-    });
-    
-    const maxTemp = Math.max(...forecast.map(d => d.temperatureMax));
-    const minTemp = Math.min(...forecast.map(d => d.temperatureMin));
-    const range = maxTemp - minTemp;
-    
-    doc.setTextColor(100, 100, 100);
-    doc.setFontSize(7);
-    doc.text(`Rango semanal: ${Math.round(minTemp)}°C - ${Math.round(maxTemp)}°C`, 105, 240);
-  } else {
-    doc.setTextColor(150, 150, 150);
-    doc.setFontSize(9);
-    doc.text('Pronóstico no disponible', 18, 200);
-  }
-  
-  doc.setDrawColor(200, 210, 230);
-  doc.line(15, 248, 195, 248);
-  
-  doc.setFillColor(25, 118, 210);
-  doc.roundedRect(15, 253, 88, 35, 3, 3, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('🌙 Fase Lunar', 20, 262);
-  doc.setFontSize(20);
-  doc.text(moonPhase, 25, 278);
-  doc.setFontSize(8);
-  doc.text(`${document.getElementById('moon-illumination')?.textContent || '0%'} iluminada`, 45, 278);
-  
-  doc.setFillColor(76, 175, 80);
-  doc.roundedRect(108, 253, 87, 35, 3, 3, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('☀️ Datos Adicionales', 113, 262);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`☁️ Nubosidad: ${clouds}`, 113, 270);
-  doc.text(`🛡️ UV: ${uv}`, 113, 277);
-  doc.text(`📈 Presión: ${pressure}`, 113, 284);
-  
-  doc.setTextColor(100, 100, 100);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
   doc.text('🤖 Generado por Zeus Meteo AI', 15, 298);
   doc.text(`📡 Fuentes: OpenMeteo, MetNorway, Wttr.in`, 15, 304);
   doc.text(`📍 Coordenadas: ${currentCoords?.lat?.toFixed(4) || 'N/A'}, ${currentCoords?.lng?.toFixed(4) || 'N/A'}`, 15, 310);
