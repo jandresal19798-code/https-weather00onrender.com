@@ -326,20 +326,28 @@ function updateSolarInfo(date) {
   const sunriseEl = document.getElementById('sunrise');
   const sunsetEl = document.getElementById('sunset');
   
-  const hour = date.getHours();
-  const isNight = hour < 6 || hour >= 20;
+  const lat = currentCoords?.lat || -34.9;
+  const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
   
-  const sunriseHour = 6 + Math.floor(Math.random() * 2);
-  const sunriseMinute = Math.floor(Math.random() * 60);
+  const declination = 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+  const hourAngle = Math.acos(-Math.tan(lat * Math.PI / 180) * Math.tan(declination * Math.PI / 180));
   
-  const sunsetHour = 18 + Math.floor(Math.random() * 3);
-  const sunsetMinute = Math.floor(Math.random() * 60);
+  const dayLength = 2 * hourAngle * 12 / Math.PI;
+  const solarNoon = 12 - (4 * (15 - 0) / 60);
+  const sunriseTime = solarNoon - dayLength / 2;
+  const sunsetTime = solarNoon + dayLength / 2;
+  
+  const sunriseHours = Math.floor(sunriseTime);
+  const sunriseMinutes = Math.floor((sunriseTime - sunriseHours) * 60);
+  
+  const sunsetHours = Math.floor(sunsetTime);
+  const sunsetMinutes = Math.floor((sunsetTime - sunsetHours) * 60);
   
   const sunrise = new Date(date);
-  sunrise.setHours(sunriseHour, sunriseMinute, 0);
+  sunrise.setHours(Math.max(0, Math.min(23, sunriseHours)), Math.max(0, Math.min(59, sunriseMinutes)), 0);
   
   const sunset = new Date(date);
-  sunset.setHours(sunsetHour, sunsetMinute, 0);
+  sunset.setHours(Math.max(0, Math.min(23, sunsetHours)), Math.max(0, Math.min(59, sunsetMinutes)), 0);
   
   sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
   sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
@@ -580,76 +588,85 @@ function easeOutQuart(x) {
 }
 
 async function loadSatelliteImage(location) {
-  const satelliteContainer = document.getElementById('satellite-image');
-  const satelliteTime = document.getElementById('satellite-time');
-  
-  satelliteContainer.innerHTML = '<div class="weather-animation">🛰️ Cargando...</div>';
-  satelliteTime.innerHTML = '🛰️ Cargando...';
+  const visualContainer = document.getElementById('weather-visual');
+  const visualLabel = document.getElementById('weather-visual-label');
   
   try {
-    const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`);
-    const data = await response.json();
-
-    if (data.success) {
-      const { latitude, longitude } = data;
-      const now = new Date();
-      
-      const weatherResponse = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
-      const weatherData = await weatherResponse.json();
-      
-      let weatherCondition = 'parcialmente nublado';
-      if (weatherData.report) {
-        const match = weatherData.report.match(/Estado predominante:\s*(.+)/i);
-        if (match) weatherCondition = match[1].trim().toLowerCase();
-      }
-      
-      const emoji = getWeatherIcon(weatherCondition);
-      const animationClass = getWeatherAnimation(weatherCondition);
-      
-      satelliteContainer.innerHTML = `
-        <div class="weather-animation ${animationClass}">
-          <div class="weather-scene">
-            <div class="sun ${weatherCondition.includes('despejado') || weatherCondition.includes('soleado') ? 'visible' : ''}"></div>
-            <div class="moon ${!animationClass.includes('sun') && weatherCondition.includes('despejado') ? 'visible' : ''}"></div>
-            <div class="cloud cloud-1"></div>
-            <div class="cloud cloud-2"></div>
-            <div class="cloud cloud-3"></div>
-            <div class="rain ${animationClass.includes('rain') ? 'visible' : ''}">
-              <div class="drop drop-1"></div>
-              <div class="drop drop-2"></div>
-              <div class="drop drop-3"></div>
-              <div class="drop drop-4"></div>
-              <div class="drop drop-5"></div>
-            </div>
-            <div class="thunder ${animationClass.includes('thunder') ? 'visible' : ''}"></div>
-            <div class="lightning ${animationClass.includes('thunder') ? 'flash' : ''}"></div>
-            <div class="snow ${animationClass.includes('snow') ? 'visible' : ''}">
-              <div class="flake flake-1">❄</div>
-              <div class="flake flake-2">❄</div>
-              <div class="flake flake-3">❄</div>
-            </div>
-            <div class="weather-emoji">${emoji}</div>
-          </div>
-          <div class="weather-info">
-            <div class="weather-location">📍 ${data.location || location}</div>
-            <div class="weather-condition">${weatherCondition}</div>
-            <div class="weather-time">🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</div>
-          </div>
-        </div>
-      `;
-      
-      satelliteTime.innerHTML = `📍 ${data.location || location} • ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+    const weatherResponse = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
+    const weatherData = await weatherResponse.json();
+    
+    let weatherCondition = 'parcialmente nublado';
+    if (weatherData.report) {
+      const match = weatherData.report.match(/Estado predominante:\s*(.+)/i);
+      if (match) weatherCondition = match[1].trim().toLowerCase();
     }
+    
+    visualContainer.className = 'weather-visual';
+    
+    if (weatherCondition.includes('lluvia') || weatherCondition.includes('rain') || weatherCondition.includes('shower')) {
+      visualContainer.classList.add('rainy');
+      generateRain();
+    } else if (weatherCondition.includes('tormenta') || weatherCondition.includes('thunder') || weatherCondition.includes('storm')) {
+      visualContainer.classList.add('stormy');
+      generateRain();
+      generateLightning();
+    } else if (weatherCondition.includes('nieve') || weatherCondition.includes('snow')) {
+      visualContainer.classList.add('snowy');
+      generateSnow();
+    } else if (weatherCondition.includes('nublado') || weatherCondition.includes('cloudy') || weatherCondition.includes('overcast')) {
+      visualContainer.classList.add('cloudy');
+    } else {
+      visualContainer.classList.add('sunny');
+    }
+    
+    visualLabel.textContent = weatherCondition;
   } catch (error) {
-    console.error('Error:', error);
-    satelliteContainer.innerHTML = `
-      <div class="weather-error">
-        <div class="weather-icon">🌤️</div>
-        <p>Clima en ${location}</p>
-        <p style="opacity: 0.7; font-size: 11px;">No se pudo cargar</p>
-      </div>
-    `;
-    satelliteTime.innerHTML = '⚠️ Error';
+    console.warn('Visual del clima:', error.message);
+    document.getElementById('weather-visual').classList.add('sunny');
+    document.getElementById('weather-visual-label').textContent = 'Clima';
+  }
+}
+
+function generateRain() {
+  const container = document.getElementById('rain-container');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < 40; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'rain-drop';
+    drop.style.left = Math.random() * 100 + '%';
+    drop.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+    drop.style.animationDelay = Math.random() * 2 + 's';
+    container.appendChild(drop);
+  }
+}
+
+function generateLightning() {
+  const container = document.getElementById('lightning-container');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < 3; i++) {
+    const lightning = document.createElement('div');
+    lightning.className = 'lightning';
+    lightning.style.left = (20 + Math.random() * 60) + '%';
+    lightning.style.animationDelay = (Math.random() * 5) + 's';
+    container.appendChild(lightning);
+  }
+}
+
+function generateSnow() {
+  const container = document.getElementById('snow-container');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < 35; i++) {
+    const flake = document.createElement('div');
+    flake.className = 'snowflake';
+    flake.style.left = Math.random() * 100 + '%';
+    flake.style.animationDuration = (3 + Math.random() * 4) + 's';
+    flake.style.animationDelay = Math.random() * 3 + 's';
+    flake.style.width = (4 + Math.random() * 6) + 'px';
+    flake.style.height = flake.style.width;
+    container.appendChild(flake);
   }
 }
 
