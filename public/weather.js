@@ -670,24 +670,28 @@ function displayDailyForecast(forecast) {
   const container = document.getElementById('daily-forecast');
   
   if (!forecast || forecast.length === 0) {
-    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico</p>';
+    container.innerHTML = '<p class="error-text">No se pudo cargar el pronostico</p>';
     return;
   }
   
-  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const days = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
+  const today = new Date();
   
   container.innerHTML = forecast.map((day, index) => {
     const date = new Date(day.date);
-    const dayName = index === 0 ? 'Hoy' : days[date.getDay()];
+    const dayName = index === 0 ? 'HOY' : days[date.getDay()];
     const icon = getWeatherIcon(day.description);
+    const tempMax = Math.round(day.temperatureMax);
+    const tempMin = Math.round(day.temperatureMin);
+    const isToday = index === 0;
     
     return `
-      <div class="daily-card">
-        <div class="daily-date">${dayName} ${index > 0 ? date.getDate() : ''}</div>
-        <div class="daily-icon">${icon}</div>
-        <div class="daily-temps">
-          <span class="high">${day.temperatureMax.toFixed(0)}°</span>
-          <span class="low">${day.temperatureMin.toFixed(0)}°</span>
+      <div class="day-card${isToday ? ' today' : ''}">
+        <div class="day-name">${dayName}</div>
+        <span class="day-icon">${icon}</span>
+        <div class="day-temps">
+          <span class="day-temp-max">${tempMax}°</span>
+          <span class="day-temp-min">${tempMin}°</span>
         </div>
       </div>
     `;

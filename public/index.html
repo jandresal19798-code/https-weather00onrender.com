@@ -122,154 +122,148 @@
 
   <div id="forecasts-page" class="page">
     <div class="loading" id="loading">
-      <div class="loading-content">
-        <div class="storm-animation">
-          <div class="storm-cloud"></div>
-          <div class="lightning"></div>
-          <div class="rain-drops">
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
-            <div class="rain-drop"></div>
+      <div class="loading-overlay">
+        <div class="loading-container">
+          <div class="weather-loader">
+            <div class="loader-cloud">
+              <div class="cloud-body"></div>
+              <div class="cloud-top"></div>
+              <div class="cloud-bottom"></div>
+            </div>
+            <div class="loader-lightning">
+              <svg viewBox="0 0 100 200">
+                <polygon points="50,0 70,80 55,80 85,200 30,100 45,100 10,0" fill="url(#lightningGradient)"/>
+                <defs>
+                  <linearGradient id="lightningGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#fff"/>
+                    <stop offset="50%" style="stop-color:#ffd700"/>
+                    <stop offset="100%" style="stop-color:#ff8c00"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="loader-rain">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <h2 class="loading-title">Zeus Meteo</h2>
+          <p class="loading-subtitle">Consultando estaciones meteorológicas...</p>
+          <div class="loading-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="loading-sources">
+            <span class="source-badge">🌐 OpenMeteo</span>
+            <span class="source-badge">🇺🇸 US-NWS</span>
+            <span class="source-badge">🇳🇴 MetNorway</span>
           </div>
         </div>
-        <p class="loading-text">Obteniendo datos meteorológicos...</p>
       </div>
     </div>
 
     <div class="container">
-      <div class="content-with-sidebar">
-        <div class="main-content">
-          <div class="weather-section">
-            <div class="weather-card" id="current-weather" style="display: none;">
-              <div class="weather-header">
-                <div class="location-info">
-                  <h2 id="city-name">Montevideo</h2>
-                  <p id="current-date">Domingo, 11 de enero</p>
+      <div class="main-content">
+        <div class="weather-hero-card">
+          <div class="hero-content">
+            <div class="search-section">
+              <h1 class="main-title">Clima en tiempo real</h1>
+              <p class="main-subtitle">Pronósticos precisos con inteligencia artificial</p>
+              <div class="search-box-large">
+                <div class="search-input-wrapper">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="location-input" placeholder="Buscar ciudad..." class="search-input"/>
+                  <button class="gps-btn-small" onclick="getCurrentLocation()" title="Mi ubicación">📍</button>
                 </div>
+                <button class="search-btn-large" onclick="searchWeather()">Buscar</button>
               </div>
-
-              <div class="weather-main-enhanced">
-                <div class="weather-icon-animated-container">
-                  <span class="weather-icon-animated" id="weather-icon">☀️</span>
-                </div>
-                <div class="temperature-enhanced">
-                  <span class="temp-value" id="current-temp">26</span>
-                  <span class="temp-unit">°C</span>
-                </div>
-                <div class="weather-condition-enhanced">
-                  <span id="weather-description">Soleado</span>
-                </div>
-              </div>
-
-              <div class="weather-details-row">
-                <div class="weather-detail-item">
-                  <span class="detail-icon-small">💧</span>
-                  <span class="detail-text">
-                    <span class="detail-label">Humedad</span>
-                    <span id="humidity" class="detail-value">65%</span>
-                  </span>
-                </div>
-                <div class="weather-detail-item">
-                  <span class="detail-icon-small">💨</span>
-                  <span class="detail-text">
-                    <span class="detail-label">Viento</span>
-                    <span id="wind" class="detail-value">12 km/h</span>
-                  </span>
-                </div>
-                <div class="weather-detail-item">
-                  <span class="detail-icon-small">🌡️</span>
-                  <span class="detail-text">
-                    <span class="detail-label">Sensación</span>
-                    <span id="feels-like" class="detail-value">28°</span>
-                  </span>
-                </div>
-                <div class="weather-detail-item">
-                  <span class="detail-icon-small">📊</span>
-                  <span class="detail-text">
-                    <span class="detail-label">Presión</span>
-                    <span id="pressure" class="detail-value">1015 hPa</span>
-                  </span>
-                </div>
+              <div class="quick-cities">
+                <button class="city-chip" onclick="quickSearch('Montevideo')">🇺🇾 Montevideo</button>
+                <button class="city-chip" onclick="quickSearch('Buenos Aires')">🇦🇷 Buenos Aires</button>
+                <button class="city-chip" onclick="quickSearch('Madrid')">🇪🇸 Madrid</button>
+                <button class="city-chip" onclick="quickSearch('New York')">🇺🇸 New York</button>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div id="temp-chart-container" class="temp-chart-container" style="display: none;">
-              <div class="temp-chart-header">
-                <span class="temp-chart-title">📈 Pronóstico de Temperatura</span>
-                <div class="temp-chart-legend">
-                  <span class="legend-item"><span class="legend-dot temp"></span> Máxima</span>
-                  <span class="legend-item"><span class="legend-dot feels"></span> Sensación</span>
-                </div>
-              </div>
-              <div id="tempChart"></div>
+        <div id="current-weather" class="weather-card main-weather-card" style="display: none;">
+          <div class="current-weather-header">
+            <div class="location-badge">
+              <span class="location-icon">📍</span>
+              <span id="city-name" class="city-name">Montevideo</span>
             </div>
-
-            <div id="result"></div>
+            <div class="date-badge">
+              <span id="current-date">Domingo, 11 de enero</span>
+            </div>
           </div>
 
-          <section class="weather-visual-section">
-            <div class="weather-visual" id="weather-visual">
-              <div class="visual-content">
-                <div class="sun-container">
-                  <div class="sun"></div>
-                </div>
-                <div class="clouds-container">
-                  <div class="cloud cloud-1"></div>
-                  <div class="cloud cloud-2"></div>
-                  <div class="cloud cloud-3"></div>
-                </div>
-                <div class="rain-container" id="rain-container"></div>
-                <div class="lightning-container" id="lightning-container"></div>
-                <div class="snow-container" id="snow-container"></div>
-              </div>
-              <div class="weather-visual-label" id="weather-visual-label">Elige una ciudad</div>
+          <div class="current-weather-main">
+            <div class="weather-icon-large">
+              <span class="weather-icon-animated" id="weather-icon">☀️</span>
             </div>
-          </section>
+            <div class="temperature-display">
+              <span class="temp-value-large" id="current-temp">26</span>
+              <span class="temp-unit-large">°C</span>
+            </div>
+            <div class="weather-condition-large">
+              <span id="weather-description">Soleado</span>
+            </div>
+          </div>
 
-          <section class="section">
-            <div class="section-header">
-              <h3 class="section-title">Pronóstico por hora</h3>
-              <div class="filter-tabs">
-                <button class="filter-tab active" onclick="filterHours(12, this)">12 horas</button>
-                <button class="filter-tab" onclick="filterHours(24, this)">24 horas</button>
+          <div class="current-weather-stats">
+            <div class="stat-pillar">
+              <div class="stat-icon">💧</div>
+              <div class="stat-info">
+                <span class="stat-label">Humedad</span>
+                <span id="humidity" class="stat-value">65%</span>
               </div>
             </div>
-            <div class="hourly-scroll" id="hourly-forecast"></div>
-          </section>
-
-          <section class="section">
-            <div class="section-header">
-              <h3 class="section-title">Pronóstico</h3>
-              <input type="date" id="forecast-date" class="forecast-date-picker">
+            <div class="stat-pillar">
+              <div class="stat-icon">💨</div>
+              <div class="stat-info">
+                <span class="stat-label">Viento</span>
+                <span id="wind" class="stat-value">12 km/h</span>
+              </div>
             </div>
-            <div class="daily-list" id="daily-forecast"></div>
-          </section>
+            <div class="stat-pillar">
+              <div class="stat-icon">🌡️</div>
+              <div class="stat-info">
+                <span class="stat-label">Sensación</span>
+                <span id="feels-like" class="stat-value">28°</span>
+              </div>
+            </div>
+            <div class="stat-pillar">
+              <div class="stat-icon">📊</div>
+              <div class="stat-info">
+                <span class="stat-label">Presión</span>
+                <span id="pressure" class="stat-value">1015 hPa</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <section class="section">
-            <h3 class="section-title">🌅 Sol y Luna</h3>
-            <div class="solar-section">
-              <div class="solar-item">
+        <div class="pillars-grid">
+          <div class="pillar-card">
+            <div class="pillar-header">
+              <span class="pillar-icon">🌅</span>
+              <h3>Sol y Luna</h3>
+            </div>
+            <div class="solar-moon-grid">
+              <div class="solar-moon-item">
                 <span class="solar-icon">🌅</span>
                 <div class="solar-data">
                   <div class="solar-label">Amanecer</div>
                   <div class="solar-value" id="sunrise">--:--</div>
                 </div>
               </div>
-              <div class="solar-item">
+              <div class="solar-moon-item">
                 <span class="solar-icon">🌇</span>
                 <div class="solar-data">
                   <div class="solar-label">Atardecer</div>
                   <div class="solar-value" id="sunset">--:--</div>
                 </div>
               </div>
-              <div class="moon-item">
+              <div class="solar-moon-item">
                 <span class="moon-icon" id="moon-icon">🌙</span>
                 <div class="moon-data">
                   <div class="moon-label" id="moon-phase-name">Luna</div>
@@ -277,10 +271,13 @@
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section class="section">
-            <h3 class="section-title">📅 Calendario - ENERO 2026</h3>
+          <div class="pillar-card">
+            <div class="pillar-header">
+              <span class="pillar-icon">📅</span>
+              <h3>Calendario</h3>
+            </div>
             <div class="calendar-container" id="calendar-container">
               <div class="calendar-header">
                 <button class="calendar-nav" onclick="changeMonth(-1)">❮</button>
@@ -292,220 +289,234 @@
               </div>
               <div class="calendar-days" id="calendar-days"></div>
             </div>
-          </section>
+          </div>
 
-          <section class="section">
-            <h3 class="section-title">🌙 Calendario Lunar 2026</h3>
-            <div class="lunar-calendar" id="lunar-calendar"></div>
-          </section>
-
-          <section class="section">
-            <h3 class="section-title">🌍 Datos Astronómicos</h3>
-            <div class="astronomy-section">
-              <div class="astronomy-item">
-                <div class="astronomy-icon">🌍</div>
-                <div class="astronomy-info">
-                  <h4>Distancia al Sol</h4>
-                  <p id="sun-distance">147.1 millones km</p>
-                </div>
+          <div class="pillar-card">
+            <div class="pillar-header">
+              <span class="pillar-icon">🌙</span>
+              <h3>Fase Lunar</h3>
+            </div>
+            <div class="lunar-display">
+              <div class="current-moon">
+                <span class="moon-large" id="moon-icon-large">🌑</span>
+                <span class="moon-phase-name" id="moon-phase-name-large">Luna Nueva</span>
+                <span class="moon-illumination" id="moon-illumination-large">0% iluminada</span>
               </div>
-              <div class="astronomy-item">
-                <div class="astronomy-icon">🌙</div>
-                <div class="astronomy-info">
-                  <h4>Distancia a la Luna</h4>
-                  <p id="moon-distance">384,400 km</p>
+              <div class="moon-details">
+                <div class="moon-detail">
+                  <span class="detail-label">Próxima Luna Llena</span>
+                  <span class="detail-value">26 de enero</span>
                 </div>
-              </div>
-              <div class="astronomy-item">
-                <div class="astronomy-icon">☀️</div>
-                <div class="astronomy-info">
-                  <h4>Hora Solar</h4>
-                  <p id="solar-noon">12:55 PM</p>
-                </div>
-              </div>
-              <div class="astronomy-item">
-                <div class="astronomy-icon">📐</div>
-                <div class="astronomy-info">
-                  <h4>Declinación Solar</h4>
-                  <p id="solar-declination">-23.1°</p>
-                </div>
-              </div>
-              <div class="astronomy-item">
-                <div class="astronomy-icon">🌟</div>
-                <div class="astronomy-info">
-                  <h4>Duración del Día</h4>
-                  <p id="day-length">14h 16m</p>
-                </div>
-              </div>
-              <div class="astronomy-item">
-                <div class="astronomy-icon">🎯</div>
-                <div class="astronomy-info">
-                  <h4>Tendencia Temperatura</h4>
-                  <p id="temp-trend">📈 Subiendo</p>
+                <div class="moon-detail">
+                  <span class="detail-label">Edad lunar</span>
+                  <span class="detail-value">21 días</span>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section class="section">
-            <h3 class="section-title">🎯 Actividades</h3>
+          <div class="pillar-card">
+            <div class="pillar-header">
+              <span class="pillar-icon">🌍</span>
+              <h3>Astronomía</h3>
+            </div>
+            <div class="astronomy-grid">
+              <div class="astro-item">
+                <span class="astro-icon">🌍</span>
+                <span class="astro-label">Dist. al Sol</span>
+                <span id="sun-distance" class="astro-value">147.1 M km</span>
+              </div>
+              <div class="astro-item">
+                <span class="astro-icon">🌙</span>
+                <span class="astro-label">Dist. a la Luna</span>
+                <span id="moon-distance" class="astro-value">384,400 km</span>
+              </div>
+              <div class="astro-item">
+                <span class="astro-icon">☀️</span>
+                <span class="astro-label">Medio día</span>
+                <span id="solar-noon" class="astro-value">12:55 PM</span>
+              </div>
+              <div class="astro-item">
+                <span class="astro-icon">📐</span>
+                <span class="astro-label">Declinación</span>
+                <span id="solar-declination" class="astro-value">-23.1°</span>
+              </div>
+              <div class="astro-item">
+                <span class="astro-icon">🌟</span>
+                <span class="astro-label">Día solar</span>
+                <span id="day-length" class="astro-value">14h 16m</span>
+              </div>
+              <div class="astro-item">
+                <span class="astro-icon">📈</span>
+                <span class="astro-label">Tendencia</span>
+                <span id="temp-trend" class="astro-value">Subiendo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pillar-card pillar-wide">
+            <div class="pillar-header">
+              <span class="pillar-icon">📊</span>
+              <h3>Pronóstico 7 Días</h3>
+            </div>
+            <div class="weekly-forecast" id="daily-forecast"></div>
+          </div>
+
+          <div class="pillar-card pillar-wide">
+            <div class="pillar-header">
+              <span class="pillar-icon">⏰</span>
+              <h3>Pronóstico Horario</h3>
+              <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterHours(12, this)">12h</button>
+                <button class="filter-tab" onclick="filterHours(24, this)">24h</button>
+              </div>
+            </div>
+            <div class="hourly-scroll" id="hourly-forecast"></div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-header">
+              <span class="pillar-icon">📈</span>
+              <h3>Temperatura</h3>
+            </div>
+            <div id="temp-chart-container" class="temp-chart-container" style="display: none;">
+              <div id="tempChart"></div>
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-header">
+              <span class="pillar-icon">🎯</span>
+              <h3>Actividades</h3>
+            </div>
             <div class="activities-grid" id="activities-grid"></div>
-          </section>
+          </div>
 
-          <section class="section">
-            <h3 class="section-title">Detalles adicionales</h3>
+          <div class="pillar-card pillar-wide">
+            <div class="pillar-header">
+              <span class="pillar-icon">💡</span>
+              <h3>Detalles Adicionales</h3>
+            </div>
             <div class="details-grid">
-              <div class="detail-card">
-                <div class="detail-icon uv">☀️</div>
-                <div class="detail-info">
+              <div class="detail-item">
+                <span class="detail-icon">☀️</span>
+                <div class="detail-content">
                   <h4>Índice UV</h4>
                   <p id="uv-value">Alto (7)</p>
                 </div>
               </div>
-              
-              <div class="detail-card">
-                <div class="detail-icon rain">💧</div>
-                <div class="detail-info">
+              <div class="detail-item">
+                <span class="detail-icon">💧</span>
+                <div class="detail-content">
                   <h4>Lluvia</h4>
                   <p id="rain-value">0 mm</p>
                 </div>
               </div>
-              
-              <div class="detail-card">
-                <div class="detail-icon storm">⛈️</div>
-                <div class="detail-info">
+              <div class="detail-item">
+                <span class="detail-icon">⛈️</span>
+                <div class="detail-content">
                   <h4>Prob. Tormenta</h4>
                   <p id="storm-value">10%</p>
                 </div>
               </div>
-              
-              <div class="detail-card">
-                <div class="detail-icon wind">💨</div>
-                <div class="detail-info">
+              <div class="detail-item">
+                <span class="detail-icon">💨</span>
+                <div class="detail-content">
                   <h4>Ráfagas</h4>
                   <p id="gusts-value">18 km/h</p>
                 </div>
               </div>
-              
-              <div class="detail-card">
-                <div class="detail-icon visibility">👁️</div>
-                <div class="detail-info">
+              <div class="detail-item">
+                <span class="detail-icon">👁️</span>
+                <div class="detail-content">
                   <h4>Visibilidad</h4>
                   <p id="visibility-value">10 km</p>
                 </div>
               </div>
-              
-              <div class="detail-card">
-                <div class="detail-icon clouds">☁️</div>
-                <div class="detail-info">
+              <div class="detail-item">
+                <span class="detail-icon">☁️</span>
+                <div class="detail-content">
                   <h4>Nubosidad</h4>
                   <p id="clouds-value">25%</p>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section class="section">
-            <h3 class="section-title">Noticias del clima</h3>
-            <div id="news-container" class="news-grid">
-              <div class="no-news">
-                <p>🔍 Busca una ciudad para ver noticias relacionadas</p>
+          <div class="pillar-card pillar-wide">
+            <div class="pillar-header">
+              <span class="pillar-icon">🗺️</span>
+              <h3>Mapas del Clima</h3>
+              <div class="map-controls">
+                <button class="map-btn active" onclick="changeMapType('satellite')">🛰️ Satélite</button>
+                <button class="map-btn" onclick="changeMapType('weather')">☀️ Clima</button>
+                <button class="map-btn" onclick="changeMapType('precipitation')">🌧️ Lluvia</button>
+                <button class="map-btn" onclick="changeMapType('wind')">💨 Viento</button>
               </div>
-            </div>
-          </section>
-
-          <section class="section">
-            <h3 class="section-title">Mapas del clima</h3>
-            <div class="map-controls">
-              <button class="map-btn active" onclick="changeMapType('satellite')">🛰️ Satelital</button>
-              <button class="map-btn" onclick="changeMapType('weather')">☀️ Clima</button>
-              <button class="map-btn" onclick="changeMapType('precipitation')">🌧️ Lluvia</button>
-              <button class="map-btn" onclick="changeMapType('wind')">💨 Viento</button>
             </div>
             <div class="map-container">
               <iframe id="map-frame" class="map-frame" frameborder="0"></iframe>
             </div>
-          </section>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">🌡️ Curiosidades</h3>
+          <div class="curiosity-card">
+            <div class="curiosity-icon">🌡️</div>
+            <h4>Más calor</h4>
+            <p>56.7°C en Furnace Creek, California (1913)</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="curiosity-icon">❄️</div>
+            <h4>Más frío</h4>
+            <p>-89.2°C en Vostok, Antártida (1983)</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="curiosity-icon">🌧️</div>
+            <h4>Más lluvia</h4>
+            <p>1.825 mm en 24h - Foc-Foc, Reunión</p>
+          </div>
+          <div class="curiosity-card">
+            <div class="curiosity-icon">⚡</div>
+            <h4>Más rayos</h4>
+            <p>Lago Maracaibo: 28 rayos/minuto</p>
+          </div>
         </div>
 
-        <aside class="sidebar">
-          <div class="sidebar-section">
-            <h3 class="sidebar-title">🌡️ Curiosidades Meteorológicas</h3>
-            
-            <div class="curiosity-card">
-              <div class="curiosity-icon">🌡️</div>
-              <h4>La temperatura más alta</h4>
-              <p>El récord de temperatura más alta en la Tierra es de 56.7°C, registrado en Furnace Creek, California (USA) en 1913.</p>
-            </div>
-            
-            <div class="curiosity-card">
-              <div class="curiosity-icon">❄️</div>
-              <h4>La temperatura más baja</h4>
-              <p>-89.2°C es la temperatura más baja registrada en la estación Vostok, Antártida, el 21 de julio de 1983.</p>
-            </div>
-            
-            <div class="curiosity-card">
-              <div class="curiosity-icon">🌧️</div>
-              <h4>Más lluvia en un día</h4>
-              <p>En Foc-Foc, Reunión, cayeron 1.825 mm de lluvia en 24 horas el 7 de enero de 1966.</p>
-            </div>
-            
-            <div class="curiosity-card">
-              <div class="curiosity-icon">⚡</div>
-              <h4>Rayos más frecuentes</h4>
-              <p>Elrayos más frecuentes del mundo cae en el Lago de Maracaibo, Venezuela, con hasta 28 rayos por minuto.</p>
-            </div>
-            
-            <div class="curiosity-card">
-              <div class="curiosity-icon">🌪️</div>
-              <h4>Viento más fuerte</h4>
-              <p>El viento más fuerte registrado fue de 408 km/h en el Monte Washington, USA, el 12 de abril de 1934.</p>
-            </div>
-            
-            <div class="curiosity-card">
-              <div class="curiosity-icon">🌪️</div>
-              <h4>Tornado más ancho</h4>
-              <p>El tornado más ancho tuvo 4.2 km de diámetro en El Reno, Oklahoma, el 31 de mayo de 2013.</p>
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">📅 Eventos</h3>
+          <div class="event-card">
+            <div class="event-date">ENE</div>
+            <div class="event-info">
+              <h4>Perihelio</h4>
+              <p>Tierra más cerca del Sol</p>
             </div>
           </div>
-          
-          <div class="sidebar-section">
-            <h3 class="sidebar-title">📅 Eventos del Mes</h3>
-            
-            <div class="event-card">
-              <div class="event-date">ENE</div>
-              <div class="event-info">
-                <h4>Perihelio</h4>
-                <p>La Tierra está más cerca del Sol, moviéndose más rápido en su órbita.</p>
-              </div>
-            </div>
-            
-            <div class="event-card">
-              <div class="event-date">ENE</div>
-              <div class="event-info">
-                <h4>Lluvia de Cuadrántidas</h4>
-                <p>Una de las lluvias de meteoros más intensas del año, con hasta 120 meteoros por hora.</p>
-              </div>
+          <div class="event-card">
+            <div class="event-date">ENE</div>
+            <div class="event-info">
+              <h4>Cuadrántidas</h4>
+              <p>120 meteoros/hora</p>
             </div>
           </div>
-          
-          <div class="sidebar-section">
-            <h3 class="sidebar-title">💡 ¿Sabías que?</h4>
-            <div class="tip-card">
-              <p>💨 <strong>El sonido del trueno:</strong> Un trueno puede escucharse hasta 16 km de distancia.</p>
-            </div>
-            <div class="tip-card">
-              <p>🌈 <strong>Arcoíris:</strong> Para ver un arcoíris necesitas estar entre el sol y la lluvia, con el sol detrás de ti.</p>
-            </div>
-            <div class="tip-card">
-              <p>⛈️ <strong>Rayos:</strong> Un rayo puede calentar el aire a 30.000°C, 5 veces más caliente que la superficie del Sol.</p>
-            </div>
-            <div class="tip-card">
-              <p>🌍 <strong>Estaciones:</strong> Las estaciones son causadas por la inclinación de 23.5° del eje terrestre, no por la distancia al Sol.</p>
-            </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">💡 ¿Sabías?</h3>
+          <div class="tip-card">
+            <p>🌈 Arcoíris: Necesitas estar entre el sol y la lluvia</p>
           </div>
-        </aside>
-      </div>
+          <div class="tip-card">
+            <p>⛈️ Rayos: 30.000°C, más caliente que el Sol</p>
+          </div>
+          <div class="tip-card">
+            <p>🌍 Estaciones: Inclinación de 23.5°, no distancia al Sol</p>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 
