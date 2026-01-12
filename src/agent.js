@@ -1,13 +1,13 @@
 import dotenv from 'dotenv';
 import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource } from './weatherSources.js';
-import { OllamaClient } from './reportGenerator.js';
+import { ReportGenerator } from './reportGenerator.js';
 
 dotenv.config();
 
 class WeatherAgent {
   constructor() {
     this.sources = [];
-    this.reportGenerator = new OllamaClient(process.env.OLLAMA_URL);
+    this.reportGenerator = new ReportGenerator();
     this.initializeSources();
     this.aiModels = this.initializeAIModels();
   }
