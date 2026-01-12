@@ -540,7 +540,9 @@ async function loadWeatherNews(location) {
     
     clearTimeout(timeout);
     
-    if (!response.ok) throw new Error('No se pudo obtener noticias');
+    if (!response.ok || response.status === 422) {
+      throw new Error('Noticias no disponibles');
+    }
     
     const data = await response.json();
     
@@ -571,7 +573,9 @@ async function loadWeatherNews(location) {
     `).join('');
     
   } catch (error) {
-    console.warn('Noticias no disponibles:', error.message);
+    if (!error.message.includes('422') && error.name !== 'AbortError') {
+      console.warn('Noticias no disponibles:', error.message);
+    }
     newsContainer.innerHTML = `
       <div class="no-news">
         <p>📰 Las noticias temporales no están disponibles en este momento.</p>
