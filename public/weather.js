@@ -56,7 +56,14 @@ async function searchWeather() {
   loading.classList.add('active');
   
   try {
-    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -67,7 +74,6 @@ async function searchWeather() {
     if (data.success) {
       updateCurrentWeather(data.report);
       currentReport = data.report;
-      const now = new Date();
       await Promise.all([
         loadHourlyForecast(location),
         loadDailyForecast(location),
@@ -75,14 +81,16 @@ async function searchWeather() {
         loadSatelliteImage(location),
         loadWeatherNews(location)
       ]);
-      updateSolarInfo(now);
-      updateMoonInfo(now);
     } else {
       showError(data.error, data.suggestion);
     }
   } catch (error) {
     console.error('Error:', error);
-    showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
+    if (error.name === 'AbortError') {
+      showError('Tiempo de espera agotado', 'El servidor está tardando mucho. Intenta más tarde.');
+    } else {
+      showError('Error de conexión', 'Por favor, verifica que el servidor esté funcionando.');
+    }
   } finally {
     loading.classList.remove('active');
   }
@@ -202,7 +210,7 @@ function getWeatherIcon(description) {
 async function loadHourlyForecast(location, retryCount = 0) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(),10000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
     
     const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`, {
       signal: controller.signal
@@ -220,8 +228,8 @@ async function loadHourlyForecast(location, retryCount = 0) {
     }
     
     const data = await response.json();
- 
-     if (data.success) {
+
+    if (data.success) {
       hourlyForecastData = data.forecast;
       displayHourlyForecast(hourlyForecastData);
     } else {
@@ -229,13 +237,9 @@ async function loadHourlyForecast(location, retryCount = 0) {
       displayHourlyForecast(getMockForecast());
     }
   } catch (error) {
-    if (error.name === 'AbortError') {
-      console.warn('Hourly forecast timeout, using mock data');
-      displayHourlyForecast(getMockForecast());
-    } else {
-      console.warn('Error pronóstico horario, usando datos demo:', error.message);
-      displayHourlyForecast(getMockForecast());
-    }
+    console.warn('Error pronóstico, usando datos demo:', error.message);
+    hourlyForecastData = getMockForecast();
+    displayHourlyForecast(hourlyForecastData);
   }
 }
 
@@ -275,38 +279,24 @@ async function loadDailyForecast(location, retryCount = 0) {
     }
     
     const data = await response.json();
-    
+
     if (data.success) {
       displayDailyForecast(data.forecast);
       updateWeatherDetails(data.forecast);
       renderTempChart(data.forecast);
-      updateSolarInfo(new Date());
-      updateMoonInfo(new Date());
-      generateActivities(data.forecast);
     } else {
       console.warn('Pronóstico diario no disponible');
       const mockData = getMockForecast();
       displayDailyForecast(mockData);
       updateWeatherDetails(mockData);
       renderTempChart(mockData);
-      generateActivities(mockData);
     }
   } catch (error) {
-    if (error.name === 'AbortError') {
-      console.warn('Daily forecast timeout, using mock data');
-      const mockData = getMockForecast();
-      displayDailyForecast(mockData);
-      updateWeatherDetails(mockData);
-      renderTempChart(mockData);
-      generateActivities(mockData);
-    } else {
-      console.warn('Error pronóstico diario, usando datos demo:', error.message);
-      const mockData = getMockForecast();
-      displayDailyForecast(mockData);
-      updateWeatherDetails(mockData);
-      renderTempChart(mockData);
-      generateActivities(mockData);
-    }
+    console.warn('Error pronóstico diario, usando datos demo:', error.message);
+    const mockData = getMockForecast();
+    displayDailyForecast(mockData);
+    updateWeatherDetails(mockData);
+    renderTempChart(mockData);
   }
 }
 
@@ -435,377 +425,89 @@ function animateValue(id, start, end, duration, suffix = '', textSuffix = '') {
     const displayValue = (id === 'uv-value') ? value.toFixed(0) : value.toFixed(1);
     obj.textContent = textSuffix ? `${textSuffix} (${displayValue})` : displayValue + suffix;
     
-    if (data.success && data.report) {
-      const description = extractWeatherDescription(data.report);
-      updateWeatherVisual(description);
-      visualLabel.textContent = description;
+    if (progress < 1) {
+      requestAnimationFrame(update);
     }
-  } catch (error) {
-    console.warn('Visual del clima:', error.message);
-    updateWeatherVisual('parcialmente nublado');
-    visualLabel.textContent = 'Clima estimado';
   }
+  
+  requestAnimationFrame(update);
 }
 
-function updateSolarInfo(date) {
-  const sunriseEl = document.getElementById('sunrise');
-  const sunsetEl = document.getElementById('sunset-time');
-  
-  try {
-    const lat = currentCoords?.lat || 0;
-    const lng = currentCoords?.lng || 0;
-    const dateStr = date.toISOString().split('T')[0];
-    
-    const response = await fetch('https://api.sunrisesunset.io/json?lat=' + lat + '&lng=' + lng + '&date=' + dateStr);
-    
-    if (response.ok) {
-      const data = await response.json();
-      
-      if (data.results && data.results.sunrise && data.results.sunset) {
-        const sunrise = new Date(data.results.sunrise);
-        const sunset = new Date(data.results.sunset);
-        
-        sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-        sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-      }
-    }
-  } catch (error) {
-    console.warn('Solar data error:', error);
-    const now = new Date();
-    const sunrise = new Date(now);
-    sunrise.setHours(6, 30, 0);
-    const sunset = new Date(now);
-    sunset.setHours(18, 30, 0);
-    
-    sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-    sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-  }
+function easeOutQuart(x) {
+  return 1 - Math.pow(1 - x, 4);
 }
-
-const synodic = 29.53058867;
-  const knownNewMoon = new Date('2023-01-21T20:53:00Z');
-  const daysSinceNewMoon = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
-  const newMoons = daysSinceNewMoon / synodic;
-  const phase = newMoons - Math.floor(newMoons);
-  
-  const phases = [
-    { name: 'Luna Nueva', icon: '🌑', illumination: 0 },
-    { name: 'Cuarto Creciente', icon: '🌒', illumination: 25 },
-    { name: 'Cuarto Creciente', icon: '🌓', illumination: 50 },
-    { name: 'Luna Llena', icon: '🌕', illumination: 100 },
-    { name: 'Cuarto Menguante', icon: '🌖', illumination: 75 },
-    { name: 'Cuarto Menguante', icon: '🌗', illumination: 50 },
-    { name: 'Luna Vieja', icon: '🌘', illumination: 25 }
-  ];
-  
-  const phaseIndex = Math.floor(phase * 8) % 8;
-  return phases[phaseIndex];
-}
-
-function updateMoonInfo(date) {
-  const moonNameEl = document.getElementById('moon-name');
-  const moonIlluminationEl = document.getElementById('moon-illumination');
-  const moonContainer = document.getElementById('moon-phase');
-  
-  const moon = calculateMoonPhase(date);
-  const moonIconEl = moonContainer.querySelector('.moon-icon');
-  
-  moonNameEl.textContent = moon.name;
-  moonIlluminationEl.textContent = `${moon.illumination}% iluminación`;
-  moonIconEl.textContent = moon.icon;
-}
-
-function generateActivities(forecast) {
-  const container = document.getElementById('activities-grid');
-  const today = forecast[0];
-  
-  if (!today) return;
-  
-  const temp = (today.temperatureMax + today.temperatureMin) / 2;
-  const weatherDesc = today.description?.toLowerCase() || '';
-  const weatherCode = today.weatherCode || 0;
-  
-  const activities = [];
-  
-  if (weatherDesc.includes('lluvia') || weatherDesc.includes('rain') || weatherDesc.includes('shower')) {
-    activities.push({
-      icon: '☔',
-      name: 'Mantenerse bajo techo',
-      recommendation: 'Lleva paraguas y ropa impermeable',
-      confidence: 85,
-      level: 'high'
-    });
-    activities.push({
-      icon: '📱',
-      name: 'Actividades interiores',
-      recommendation: 'Es buen momento para lectura, películas o proyectos en casa',
-      confidence: 90,
-      level: 'high'
-    });
-  }
-  
-  if (temp > 30) {
-    activities.push({
-      icon: '🏊',
-      name: 'Ir a la playa o piscina',
-      recommendation: 'Temperatura ideal para refrescarse en el agua',
-      confidence: 95,
-      level: 'high'
-    });
-    activities.push({
-      icon: '🧴',
-      name: 'Hidratarse frecuentemente',
-      recommendation: 'Bebe mucha agua y evita el sol directo',
-      confidence: 90,
-      level: 'high'
-    });
-  }
-  
-  if (weatherDesc.includes('soleado') || weatherDesc.includes('despejado')) {
-    activities.push({
-      icon: '🏃',
-      name: 'Correr al aire libre',
-      recommendation: 'Condiciones perfectas para ejercicio al exterior',
-      confidence: 90,
-      level: 'high'
-    });
-    activities.push({
-      icon: '🧘',
-      name: 'Usar protector solar',
-      recommendation: 'Aplica SPF 50+ cada 2 horas',
-      confidence: 95,
-      level: 'high'
-    });
-  }
-  
-  if (weatherDesc.includes('nublado') || weatherDesc.includes('cloudy')) {
-    activities.push({
-      icon: '🚶',
-      name: 'Caminar por la ciudad',
-      recommendation: 'Temperatura agradable, ideal para paseos',
-      confidence: 80,
-      level: 'medium'
-    });
-    activities.push({
-      icon: '📸',
-      name: 'Fotografía urbana',
-      recommendation: 'Luz difusa perfecta para retratos',
-      confidence: 75,
-      level: 'medium'
-    });
-  }
-  
-  if (weatherDesc.includes('nieve') || weatherDesc.includes('snow')) {
-    activities.push({
-      icon: '⛷️',
-      name: 'Esquiar o snowboard',
-      recommendation: 'Condiciones perfectas para deportes de nieve',
-      confidence: 90,
-      level: 'high'
-    });
-    activities.push({
-      icon: '⛄',
-      name: 'Construir muñeco de nieve',
-      recommendation: 'Actividad divertida para disfrutar con la familia',
-      confidence: 85,
-      level: 'medium'
-    });
-  }
-  
-  if (weatherDesc.includes('tormenta') || weatherDesc.includes('thunder') || weatherDesc.includes('storm')) {
-    activities.push({
-      icon: '🏠',
-      name: 'Quedarse en casa',
-      recommendation: 'Es lo más seguro durante tormentas eléctricas',
-      confidence: 95,
-      level: 'high'
-    });
-    activities.push({
-      icon: '📺',
-      name: 'Ver series o películas',
-      recommendation: 'Buen momento para maratones de tu programa favorito',
-      confidence: 90,
-      level: 'high'
-    });
-  }
-  
-  const moderateActivities = [
-    { icon: '📖', name: 'Leer un libro', recommendation: 'Momento ideal para disfrutar de una buena lectura', confidence: 70, level: 'medium' },
-    { icon: '🎮', name: 'Videojuegos', recommendation: 'Pasa tiempo jugando tus juegos favoritos', confidence: 65, level: 'medium' },
-    { icon: '🍳', name: 'Actividades al aire libre', recommendation: 'Disfruta del aire libre si las condiciones lo permiten', confidence: 60, level: 'low' },
-    { icon: '🎧', name: 'Escuchar música', recommendation: 'Crea tu playlist del momento según el clima', confidence: 65, level: 'low' },
-    { icon: '🍳', name: 'Picnic al aire libre', recommendation: 'Disfruta de un almuerzo o cena al aire libre', confidence: 70, level: 'medium' }
-  ];
-  
-  if (activities.length < 4) {
-    activities.push(...moderateActivities.slice(0, 4 - activities.length));
-  }
-  
-  container.innerHTML = activities.slice(0, 6).map(act => `
-    <div class="activity-card ${act.level === 'high' ? 'recommended' : ''}">
-      <div class="activity-header">
-        <span class="activity-icon">${act.icon}</span>
-        <span class="activity-name">${act.name}</span>
-      </div>
-      <div class="activity-recommendation">${act.recommendation}</div>
-      <div class="activity-confidence ${act.level}">
-        ${act.confidence}% recomendado
-      </div>
-    </div>
-  `).join('');
-}
-
-function setForecastDateConstraints() {
-  const datePicker = document.getElementById('forecast-date');
-  const today = new Date();
-  const maxDate = new Date();
-  maxDate.setDate(today.getDate() + 7);
-  
-  datePicker.min = today.toISOString().split('T')[0];
-  datePicker.max = maxDate.toISOString().split('T')[0];
-  datePicker.value = today.toISOString().split('T')[0];
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  setForecastDateConstraints();
-  
-  const datePicker = document.getElementById('forecast-date');
-  datePicker.addEventListener('change', (e) => {
-    const selectedDate = new Date(e.target.value);
-    loadDailyForecastForDate(currentLocation, selectedDate);
-    updateSolarInfo(selectedDate);
-    updateMoonInfo(selectedDate);
-  });
-});
-
-async function loadDailyForecastForDate(location, date) {
-  try {
-    const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`);
-    const data = await response.json();
-    
-    if (data.success) {
-      displayDailyForecast(data.forecast);
-      updateWeatherDetails(data.forecast);
-      generateActivities(data.forecast);
-    }
-  } catch (error) {
-    console.warn('Error loading forecast for date:', error);
-  }
 
 async function loadSatelliteImage(location) {
-  const visualContainer = document.getElementById('weather-visual');
-  const visualLabel = document.getElementById('weather-visual-label');
+  const satelliteContainer = document.getElementById('satellite-image');
+  const satelliteTime = document.getElementById('satellite-time');
+  
+  satelliteContainer.innerHTML = '<div class="weather-animation">🛰️ Cargando...</div>';
+  satelliteTime.innerHTML = '🛰️ Cargando...';
   
   try {
-    visualLabel.textContent = 'Cargando...';
-    
-    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
-    
-    if (!response.ok) throw new Error('No se pudo obtener clima');
-    
+    const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`);
     const data = await response.json();
-    
-    if (data.success && data.report) {
-      const description = extractWeatherDescription(data.report);
-      updateWeatherVisual(description);
-      visualLabel.textContent = description;
+
+    if (data.success) {
+      const { latitude, longitude } = data;
+      const now = new Date();
+      
+      const weatherResponse = await fetch(`/api/weather?location=${encodeURIComponent(location)}`);
+      const weatherData = await weatherResponse.json();
+      
+      let weatherCondition = 'parcialmente nublado';
+      if (weatherData.report) {
+        const match = weatherData.report.match(/Estado predominante:\s*(.+)/i);
+        if (match) weatherCondition = match[1].trim().toLowerCase();
+      }
+      
+      const emoji = getWeatherIcon(weatherCondition);
+      const animationClass = getWeatherAnimation(weatherCondition);
+      
+      satelliteContainer.innerHTML = `
+        <div class="weather-animation ${animationClass}">
+          <div class="weather-scene">
+            <div class="sun ${weatherCondition.includes('despejado') || weatherCondition.includes('soleado') ? 'visible' : ''}"></div>
+            <div class="moon ${!animationClass.includes('sun') && weatherCondition.includes('despejado') ? 'visible' : ''}"></div>
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+            <div class="rain ${animationClass.includes('rain') ? 'visible' : ''}">
+              <div class="drop drop-1"></div>
+              <div class="drop drop-2"></div>
+              <div class="drop drop-3"></div>
+              <div class="drop drop-4"></div>
+              <div class="drop drop-5"></div>
+            </div>
+            <div class="thunder ${animationClass.includes('thunder') ? 'visible' : ''}"></div>
+            <div class="lightning ${animationClass.includes('thunder') ? 'flash' : ''}"></div>
+            <div class="snow ${animationClass.includes('snow') ? 'visible' : ''}">
+              <div class="flake flake-1">❄</div>
+              <div class="flake flake-2">❄</div>
+              <div class="flake flake-3">❄</div>
+            </div>
+            <div class="weather-emoji">${emoji}</div>
+          </div>
+          <div class="weather-info">
+            <div class="weather-location">📍 ${data.location || location}</div>
+            <div class="weather-condition">${weatherCondition}</div>
+            <div class="weather-time">🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</div>
+          </div>
+        </div>
+      `;
+      
+      satelliteTime.innerHTML = `📍 ${data.location || location} • ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
     }
   } catch (error) {
-    console.warn('Visual del clima:', error.message);
-    updateWeatherVisual('parcialmente nublado');
-    visualLabel.textContent = 'Clima estimado';
-  }
-}
-
-
-
-function updateWeatherVisual(description) {
-  const visual = document.getElementById('weather-visual');
-  const desc = description.toLowerCase();
-  
-  visual.className = 'weather-visual';
-  
-  const isDarkMode = document.body.classList.contains('dark-mode');
-  const hour = new Date().getHours();
-  const isNight = hour < 6 || hour >= 20;
-  
-  if (isNight && !isDarkMode) {
-    document.body.classList.add('night');
-  }
-  
-  if (desc.includes('lluvia') || desc.includes('rain') || desc.includes('llovizna') || desc.includes('shower')) {
-    visual.classList.add('rainy');
-  } else if (desc.includes('tormenta') || desc.includes('thunder') || desc.includes('storm')) {
-    visual.classList.add('stormy');
-  } else if (desc.includes('nieve') || desc.includes('snow')) {
-    visual.classList.add('snowy');
-  } else if (desc.includes('nublado') || desc.includes('cloudy') || desc.includes('overcast')) {
-    visual.classList.add('cloudy');
-  } else {
-    visual.classList.add('sunny');
-  }
-  
-  const rainContainer = document.getElementById('rain-container');
-  const lightningContainer = document.getElementById('lightning-container');
-  const snowContainer = document.getElementById('snow-container');
-  
-  rainContainer.innerHTML = '';
-  lightningContainer.innerHTML = '';
-  snowContainer.innerHTML = '';
-  
-  if (visual.classList.contains('rainy') || visual.classList.contains('stormy')) {
-    generateRain();
-  }
-  
-  if (visual.classList.contains('stormy')) {
-    generateLightning();
-  }
-  
-  if (visual.classList.contains('snowy')) {
-    generateSnow();
-  }
-}
-
-function generateRain() {
-  const container = document.getElementById('rain-container');
-  container.innerHTML = '';
-  
-  for (let i = 0; i < 50; i++) {
-    const drop = document.createElement('div');
-    drop.className = 'rain-drop';
-    drop.style.left = Math.random() * 100 + '%';
-    drop.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
-    drop.style.animationDelay = Math.random() * 2 + 's';
-    container.appendChild(drop);
-  }
-}
-
-function generateLightning() {
-  const container = document.getElementById('lightning-container');
-  container.innerHTML = '';
-  
-  for (let i = 0; i < 3; i++) {
-    const lightning = document.createElement('div');
-    lightning.className = 'lightning';
-    lightning.style.left = (20 + Math.random() * 60) + '%';
-    lightning.style.animationDelay = (Math.random() * 5) + 's';
-    container.appendChild(lightning);
-  }
-}
-
-function generateSnow() {
-  const container = document.getElementById('snow-container');
-  container.innerHTML = '';
-  
-  for (let i = 0; i < 40; i++) {
-    const flake = document.createElement('div');
-    flake.className = 'snowflake';
-    flake.style.left = Math.random() * 100 + '%';
-    flake.style.animationDuration = (3 + Math.random() * 4) + 's';
-    flake.style.animationDelay = Math.random() * 3 + 's';
-    flake.style.width = (4 + Math.random() * 6) + 'px';
-    flake.style.height = flake.style.width;
-    container.appendChild(flake);
+    console.error('Error:', error);
+    satelliteContainer.innerHTML = `
+      <div class="weather-error">
+        <div class="weather-icon">🌤️</div>
+        <p>Clima en ${location}</p>
+        <p style="opacity: 0.7; font-size: 11px;">No se pudo cargar</p>
+      </div>
+    `;
+    satelliteTime.innerHTML = '⚠️ Error';
   }
 }
 
@@ -869,9 +571,7 @@ async function loadWeatherNews(location) {
     `).join('');
     
   } catch (error) {
-    if (error.name !== 'AbortError') {
-      console.warn('Noticias no disponibles:', error.message);
-    }
+    console.warn('Noticias no disponibles:', error.message);
     newsContainer.innerHTML = `
       <div class="no-news">
         <p>📰 Las noticias temporales no están disponibles en este momento.</p>
@@ -1899,39 +1599,3 @@ sendChatMessage = function() {
   originalSendChatMessage();
 };
 
-const synodic = 29.53058867;
-
-function updateSolarInfo(date) {
-  const sunriseEl = document.getElementById('sunrise');
-  const sunsetEl = document.getElementById('sunset-time');
-  
-  try {
-    const lat = currentCoords?.lat || 0;
-    const lng = currentCoords?.lng || 0;
-    const dateStr = date.toISOString().split('T')[0];
-    
-    const response = await fetch('https://api.sunrisesunset.io/json?lat=' + lat + '&lng=' + lng + '&date=' + dateStr);
-    
-    if (response.ok) {
-      const data = await response.json();
-      
-      if (data.results && data.results.sunrise && data.results.sunset) {
-        const sunrise = new Date(data.results.sunrise);
-        const sunset = new Date(data.results.sunset);
-        
-        sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-        sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-      }
-    }
-  } catch (error) {
-    console.warn('Solar data error:', error);
-    const now = new Date();
-    const sunrise = new Date(now);
-    sunrise.setHours(6, 30, 0);
-    const sunset = new Date(now);
-    sunset.setHours(18, 30, 0);
-    
-    sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-    sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-  }
-}

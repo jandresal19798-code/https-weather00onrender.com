@@ -200,22 +200,18 @@
           </div>
 
           <section class="satellite-section">
-            <div class="weather-visual-container" id="weather-visual">
-              <div class="weather-visual" id="weather-visual">
-                <div class="visual-content">
-                  <div class="sun-container">
-                    <div class="sun"></div>
-                  </div>
-                  <div class="clouds-container">
-                    <div class="cloud cloud-1"></div>
-                    <div class="cloud cloud-2"></div>
-                    <div class="cloud cloud-3"></div>
-                  </div>
-                  <div class="rain-container" id="rain-container"></div>
-                  <div class="lightning-container" id="lightning-container"></div>
-                  <div class="snow-container" id="snow-container"></div>
+            <div class="satellite-card">
+              <div class="satellite-header">
+                <h3 class="satellite-title">
+                  <span>🛰️</span> Imagen Satelital - Ahora
+                </h3>
+                <span class="satellite-meta" id="satellite-time">Actualizando...</span>
+              </div>
+              <div class="satellite-image" id="satellite-image">
+                <div class="satellite-placeholder">
+                  <div class="icon">🛰️</div>
+                  <p>Busca una ciudad para ver la imagen satelital</p>
                 </div>
-                <div class="weather-label" id="weather-visual-label">Elige una ciudad</div>
               </div>
             </div>
           </section>
@@ -232,45 +228,8 @@
           </section>
 
           <section class="section">
-            <div class="section-header">
-              <h3 class="section-title">Pronóstico</h3>
-              <input type="date" id="forecast-date" class="forecast-date-picker" min="" max="">
-            </div>
+            <h3 class="section-title">Próximos 7 días</h3>
             <div class="daily-list" id="daily-forecast"></div>
-          </section>
-
-          <section class="section">
-            <h3 class="section-title">🌅 Horario Solar</h3>
-            <div class="solar-info">
-              <div class="solar-item">
-                <span class="solar-icon">🌅</span>
-                <div class="solar-data">
-                  <div class="solar-label">Amanecer</div>
-                  <div class="solar-value" id="sunrise">--:--</div>
-                </div>
-              </div>
-              <div class="solar-item">
-                <span class="solar-icon">🌇</span>
-                <div class="solar-data">
-                  <div class="solar-label">Atardecer</div>
-                  <div class="solar-value" id="sunset-time">--:--</div>
-                </div>
-              </div>
-            </div>
-            <div class="moon-info">
-              <div class="moon-phase" id="moon-phase">
-                <div class="moon-icon">🌙</div>
-                <div class="moon-details">
-                  <div class="moon-name" id="moon-name">Luna Nueva</div>
-                  <div class="moon-illumination" id="moon-illumination">0%</div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="section">
-            <h3 class="section-title">🎯 Actividades Recomendadas</h3>
-            <div class="activities-grid" id="activities-grid"></div>
           </section>
 
           <section class="section">
@@ -488,6 +447,6 @@
     </div>
   </div>
 
-  <script src="weather.js?v=7&ts=20250112"></script>
+  <script src="weather.js?v=8&ts=20250112"></script>
 </body>
 </html>
