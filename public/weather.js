@@ -284,12 +284,16 @@ async function loadDailyForecast(location, retryCount = 0) {
       displayDailyForecast(data.forecast);
       updateWeatherDetails(data.forecast);
       renderTempChart(data.forecast);
+      generateActivities(data.forecast);
+      updateSolarInfo(new Date());
+      updateMoonInfo(new Date());
     } else {
       console.warn('Pronóstico diario no disponible');
       const mockData = getMockForecast();
       displayDailyForecast(mockData);
       updateWeatherDetails(mockData);
       renderTempChart(mockData);
+      generateActivities(mockData);
     }
   } catch (error) {
     console.warn('Error pronóstico diario, usando datos demo:', error.message);
@@ -297,8 +301,146 @@ async function loadDailyForecast(location, retryCount = 0) {
     displayDailyForecast(mockData);
     updateWeatherDetails(mockData);
     renderTempChart(mockData);
+    generateActivities(mockData);
   }
 }
+
+function setForecastDateConstraints() {
+  const datePicker = document.getElementById('forecast-date');
+  const today = new Date();
+  const maxDate = new Date();
+  maxDate.setDate(today.getDate() + 7);
+  
+  datePicker.min = today.toISOString().split('T')[0];
+  datePicker.max = maxDate.toISOString().split('T')[0];
+  datePicker.value = today.toISOString().split('T')[0];
+  
+  datePicker.addEventListener('change', function(e) {
+    const selectedDate = new Date(e.target.value);
+    updateSolarInfo(selectedDate);
+    updateMoonInfo(selectedDate);
+  });
+}
+
+function updateSolarInfo(date) {
+  const sunriseEl = document.getElementById('sunrise');
+  const sunsetEl = document.getElementById('sunset');
+  
+  const hour = date.getHours();
+  const isNight = hour < 6 || hour >= 20;
+  
+  const sunriseHour = 6 + Math.floor(Math.random() * 2);
+  const sunriseMinute = Math.floor(Math.random() * 60);
+  
+  const sunsetHour = 18 + Math.floor(Math.random() * 3);
+  const sunsetMinute = Math.floor(Math.random() * 60);
+  
+  const sunrise = new Date(date);
+  sunrise.setHours(sunriseHour, sunriseMinute, 0);
+  
+  const sunset = new Date(date);
+  sunset.setHours(sunsetHour, sunsetMinute, 0);
+  
+  sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+}
+
+const moonPhases = [
+  { name: 'Luna Nueva', icon: '🌑', illumination: 0 },
+  { name: 'Cuarto Creciente', icon: '🌓', illumination: 25 },
+  { name: 'Gibosa Creciente', icon: '🌔', illumination: 75 },
+  { name: 'Luna Llena', icon: '🌕', illumination: 100 },
+  { name: 'Gibosa Menguante', icon: '🌖', illumination: 75 },
+  { name: 'Cuarto Menguante', icon: '🌗', illumination: 25 }
+];
+
+function calculateMoonPhase(date) {
+  const synodic = 29.53058867;
+  const knownNewMoon = new Date('2023-01-21T20:53:00Z');
+  const daysSinceNewMoon = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
+  const newMoons = daysSinceNewMoon / synodic;
+  const phase = newMoons - Math.floor(newMoons);
+  
+  const phaseIndex = Math.floor(phase * 6) % 6;
+  return moonPhases[phaseIndex];
+}
+
+function updateMoonInfo(date) {
+  const moonIconEl = document.getElementById('moon-icon');
+  const moonPhaseNameEl = document.getElementById('moon-phase-name');
+  const moonIlluminationEl = document.getElementById('moon-illumination');
+  
+  const moon = calculateMoonPhase(date);
+  
+  moonIconEl.textContent = moon.icon;
+  moonPhaseNameEl.textContent = moon.name;
+  moonIlluminationEl.textContent = moon.illumination + '%';
+}
+
+function generateActivities(forecast) {
+  const container = document.getElementById('activities-grid');
+  const today = forecast[0];
+  
+  if (!today) return;
+  
+  const temp = (today.temperatureMax + today.temperatureMin) / 2;
+  const weatherDesc = today.description?.toLowerCase() || '';
+  const weatherCode = today.weatherCode || 0;
+  
+  const activities = [];
+  
+  if (weatherDesc.includes('lluvia') || weatherDesc.includes('rain') || weatherDesc.includes('shower')) {
+    activities.push({ icon: '☔', name: 'Paraguas', recommendation: 'Lleva paraguas impermeable', confidence: 90, level: 'high' });
+    activities.push({ icon: '🏠', name: 'Interior', recommendation: 'Actividades en casa', confidence: 85, level: 'high' });
+  }
+  
+  if (temp > 30) {
+    activities.push({ icon: '🏊', name: 'Piscina', recommendation: 'Ideal para nadar', confidence: 95, level: 'high' });
+    activities.push({ icon: '💧', name: 'Hidratarse', recommendation: 'Bebe agua frecuentemente', confidence: 90, level: 'high' });
+  } else if (temp < 10) {
+    activities.push({ icon: '🧥', name: 'Abrigarse', recommendation: 'Capas de ropa caliente', confidence: 95, level: 'high' });
+    activities.push({ icon: '☕', name: 'Caliente', recommendation: 'Bebidas calientes', confidence: 85, level: 'medium' });
+  }
+  
+  if (weatherDesc.includes('soleado') || weatherDesc.includes('despejado')) {
+    activities.push({ icon: '🏃', name: 'Correr', recommendation: 'Ejercicio al aire libre', confidence: 90, level: 'high' });
+    activities.push({ icon: '🧴', name: ' Protector', recommendation: 'Usa protector solar SPF 50+', confidence: 95, level: 'high' });
+  }
+  
+  if (weatherDesc.includes('nublado') || weatherDesc.includes('cloudy')) {
+    activities.push({ icon: '🚶', name: 'Caminar', recommendation: 'Paseo agradável', confidence: 80, level: 'medium' });
+    activities.push({ icon: '📸', name: 'Fotos', recommendation: 'Luz difusa perfecta', confidence: 75, level: 'medium' });
+  }
+  
+  if (weatherDesc.includes('tormenta') || weatherDesc.includes('thunder')) {
+    activities.push({ icon: '🏠', name: 'Casa', recommendation: 'Quédate bajo techo', confidence: 95, level: 'high' });
+    activities.push({ icon: '📺', name: 'Relax', recommendation: 'Series o películas', confidence: 90, level: 'high' });
+  }
+  
+  if (weatherDesc.includes('nieve') || weatherDesc.includes('snow')) {
+    activities.push({ icon: '⛷️', name: 'Esquiar', recommendation: 'Deportes de nieve', confidence: 90, level: 'high' });
+    activities.push({ icon: '☕', name: 'Caliente', recommendation: 'Chocolate caliente', confidence: 85, level: 'medium' });
+  }
+  
+  activities.push({ icon: '🧺', name: 'Lavar ropa', recommendation: 'Según pronóstico', confidence: 70, level: 'medium' });
+  activities.push({ icon: '🛒', name: 'Compras', recommendation: 'Centro comercial', confidence: 65, level: 'low' });
+  activities.push({ icon: '🎮', name: 'Juegos', recommendation: 'Videojuegos en casa', confidence: 70, level: 'medium' });
+  
+  container.innerHTML = activities.slice(0, 6).map(act => `
+    <div class="activity-card ${act.level === 'high' ? 'recommended' : ''}">
+      <div class="activity-header">
+        <span class="activity-icon">${act.icon}</span>
+        <span class="activity-name">${act.name}</span>
+      </div>
+      <div class="activity-recommendation">${act.recommendation}</div>
+      <div class="activity-confidence ${act.level}">${act.confidence}%</div>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  setForecastDateConstraints();
+});
 
 function filterHours(hours, btn) {
   filterHoursValue = hours;

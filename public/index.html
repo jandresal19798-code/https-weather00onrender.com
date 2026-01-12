@@ -228,8 +228,43 @@
           </section>
 
           <section class="section">
-            <h3 class="section-title">Próximos 7 días</h3>
+            <div class="section-header">
+              <h3 class="section-title">Pronóstico</h3>
+              <input type="date" id="forecast-date" class="forecast-date-picker">
+            </div>
             <div class="daily-list" id="daily-forecast"></div>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">🌅 Sol y Luna</h3>
+            <div class="solar-section">
+              <div class="solar-item">
+                <span class="solar-icon">🌅</span>
+                <div class="solar-data">
+                  <div class="solar-label">Amanecer</div>
+                  <div class="solar-value" id="sunrise">--:--</div>
+                </div>
+              </div>
+              <div class="solar-item">
+                <span class="solar-icon">🌇</span>
+                <div class="solar-data">
+                  <div class="solar-label">Atardecer</div>
+                  <div class="solar-value" id="sunset">--:--</div>
+                </div>
+              </div>
+              <div class="moon-item">
+                <span class="moon-icon" id="moon-icon">🌙</span>
+                <div class="moon-data">
+                  <div class="moon-label" id="moon-phase-name">Luna</div>
+                  <div class="moon-value" id="moon-illumination">0%</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">🎯 Actividades</h3>
+            <div class="activities-grid" id="activities-grid"></div>
           </section>
 
           <section class="section">
