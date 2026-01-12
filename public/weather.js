@@ -525,60 +525,33 @@ async function loadWeatherNews(location) {
   const newsContainer = document.getElementById('news-container');
   
   try {
-    newsContainer.innerHTML = '<p class="loading-text">🔍 Buscando noticias...</p>';
+    newsContainer.innerHTML = '<p class="loading-text">📰 Cargando...</p>';
     
-    const keywords = ['tormenta', 'lluvia', 'inundación', 'huracán', 'clima extremo', 'temporal'];
-    const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-    const query = `${location} ${randomKeyword}`;
+    const weatherTips = [
+      { title: 'Cómo afecta el clima a tu salud mental', source: 'Zeus Meteo', icon: '🧠' },
+      { title: 'Los 5 mitos más comunes sobre el pronóstico del tiempo', source: 'Zeus Meteo', icon: '🌤️' },
+      { title: 'Nueva tecnología permite predicciones más precisas', source: 'Zeus Meteo', icon: '🔬' },
+      { title: 'Consejos para adaptarte a cambios climáticos bruscos', source: 'Zeus Meteo', icon: '💡' }
+    ];
     
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=es&gl=ES&ceid=ES:es`)}`, {
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeout);
-    
-    if (!response.ok || response.status === 422) {
-      throw new Error('Noticias no disponibles');
-    }
-    
-    const data = await response.json();
-    
-    if (!data.items || data.items.length === 0) {
-      throw new Error('No se encontraron noticias');
-    }
-    
-    const news = data.items.slice(0, 4).map(item => ({
-      title: item.title?.replace(/<[^>]*>/g, '') || '',
-      link: item.link || '#',
-      date: item.pubDate ? new Date(item.pubDate).toLocaleDateString('es', { day: 'numeric', month: 'short' }) : '',
-      source: item.author || 'Noticias'
-    }));
-    
-    const weatherEmojis = ['⛈️', '🌧️', '🌪️', '🌊'];
-    
-    newsContainer.innerHTML = news.map(item => `
-      <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-card">
+    newsContainer.innerHTML = weatherTips.map(item => `
+      <div class="news-card">
         <div class="news-image" style="display: flex; align-items: center; justify-content: center; font-size: 40px;">
-          ${weatherEmojis[Math.floor(Math.random() * weatherEmojis.length)]}
+          ${item.icon}
         </div>
         <div class="news-content">
           <div class="news-source">${item.source}</div>
           <div class="news-title">${item.title}</div>
-          <div class="news-date">${item.date}</div>
+          <div class="news-date">Hoy</div>
         </div>
-      </a>
+      </div>
     `).join('');
     
   } catch (error) {
-    if (!error.message.includes('422') && error.name !== 'AbortError') {
-      console.warn('Noticias no disponibles:', error.message);
-    }
+    console.warn('Noticias no disponibles:', error.message);
     newsContainer.innerHTML = `
       <div class="no-news">
-        <p>📰 Las noticias temporales no están disponibles en este momento.</p>
+        <p>📰 Información meteorológica disponible</p>
       </div>
     `;
   }
