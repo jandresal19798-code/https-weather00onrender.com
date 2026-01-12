@@ -812,7 +812,9 @@ async function downloadPDF() {
   const uv = document.getElementById('uv-value')?.textContent || 'Moderado';
   const sunrise = document.getElementById('sunrise')?.textContent || '--:--';
   const sunset = document.getElementById('sunset')?.textContent || '--:--';
-  const moonPhase = document.getElementById('moon-phase-name')?.textContent || '🌑';
+  const moonIcon = document.getElementById('moon-icon')?.textContent || '*';
+  const moonPhase = document.getElementById('moon-phase-name')?.textContent || 'Luna Nueva';
+  const moonIllum = document.getElementById('moon-illumination')?.textContent || '0%';
   
   doc.setFillColor(25, 118, 210);
   doc.rect(0, 0, 210, 45, 'F');
@@ -820,35 +822,44 @@ async function downloadPDF() {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(26);
   doc.setFont('helvetica', 'bold');
-  doc.text('⚡ Zeus Meteo', 20, 28);
+  doc.text('Zeus Meteo', 20, 28);
   
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  doc.text('📊 Reporte Meteorológico Inteligente', 125, 28);
+  doc.text('Reporte Meteorologico Inteligente', 105, 28);
   
   doc.setTextColor(30, 30, 30);
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text(`📍 ${city}`, 20, 62);
+  doc.text(city, 20, 62);
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 100, 100);
-  doc.text(`${now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} 🕐 ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`, 20, 72);
+  const dateStr = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  doc.text(`${dateStr} ${timeStr}`, 20, 72);
   
   doc.setFillColor(240, 245, 255);
   doc.roundedRect(15, 82, 180, 60, 4, 4, 'F');
   
-  const mainIcon = getWeatherIcon(desc);
-  doc.setFontSize(50);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(25, 118, 210);
-  doc.text(mainIcon, 30, 125);
+  const iconMap = {
+    'cielo despejado': '[SOL]', 'mayormente despejado': '[SOL]',
+    'parcialmente nublado': '[NUBLADO PARCIAL]', 'nublado': '[NUBLADO]',
+    'llovizna': '[LLUVIA LIGERA]', 'lluvia ligera': '[LLUVIA]',
+    'lluvia moderada': '[LLUVIA]', 'lluvia fuerte': '[LLUVIA FUERTE]',
+    'nieve': '[NIEVE]', 'chubascos': '[CHUBASCOS]',
+    'tormenta': '[TORMENTA]', 'thunderstorm': '[TORMENTA]',
+    'clear': '[SOL]', 'cloudy': '[NUBLADO]', 'sunny': '[SOL]',
+    'partly cloudy': '[NUBLADO PARCIAL]', 'rain': '[LLUVIA]',
+    'snow': '[NIEVE]'
+  };
+  const mainIcon = iconMap[desc.toLowerCase()] || '[CLIMA]';
   
   doc.setTextColor(30, 30, 30);
   doc.setFontSize(42);
   doc.setFont('helvetica', '300');
-  doc.text(`${temp}°C`, 70, 125);
+  doc.text(`${temp}C`, 70, 125);
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
@@ -857,28 +868,24 @@ async function downloadPDF() {
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(80, 80, 80);
-  doc.text(`Sensación: ${feelsLike}`, 70, 148);
+  doc.text(`Sensacion: ${feelsLike}`, 70, 148);
   
   const stats = [
-    { icon: '💧', label: 'Humedad', value: humidity },
-    { icon: '💨', label: 'Viento', value: wind },
-    { icon: '🌅', label: 'Salida sol', value: sunrise },
-    { icon: '🌇', label: 'Puesta sol', value: sunset }
+    { label: 'Humedad', value: humidity },
+    { label: 'Viento', value: wind },
+    { label: 'Sol: Amanecer', value: sunrise },
+    { label: 'Sol: Atardecer', value: sunset }
   ];
   
   stats.forEach((stat, index) => {
-    const x = 105 + (index * 42);
-    doc.setFontSize(16);
-    doc.text(stat.icon, x + 5, 105);
-    
+    const x = 90 + (index * 43);
     doc.setFontSize(8);
     doc.setTextColor(120, 120, 120);
-    doc.text(stat.label, x, 118);
-    
+    doc.text(stat.label, x, 110);
     doc.setTextColor(30, 30, 30);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text(stat.value, x, 130);
+    doc.text(stat.value, x, 122);
   });
   
   doc.setDrawColor(200, 210, 230);
@@ -889,20 +896,20 @@ async function downloadPDF() {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('📅 Pronóstico de 7 Días', 18, 171);
+  doc.text('Pronostico 7 Dias', 18, 171);
   
   const forecast = typeof hourlyForecastData !== 'undefined' && hourlyForecastData.length > 0 ? hourlyForecastData.slice(0, 7) : [];
   
   if (forecast.length > 0) {
-    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
     const startY = 185;
-    const dayWidth = 24;
+    const dayWidth = 25;
     
     forecast.forEach((day, index) => {
-      const x = 18 + (index * dayWidth);
+      const x = 16 + (index * dayWidth);
       const date = new Date(day.date);
       const dayName = index === 0 ? 'Hoy' : days[date.getDay()];
-      const icon = getWeatherIcon(day.description);
+      const icon = iconMap[day.description.toLowerCase()] || '[*]';
       const tempMax = Math.round(day.temperatureMax);
       const tempMin = Math.round(day.temperatureMin);
       
@@ -914,14 +921,73 @@ async function downloadPDF() {
       doc.setFont('helvetica', 'bold');
       doc.text(dayName, x + 11, startY + 8, { align: 'center' });
       
-      doc.setFontSize(16);
-      doc.text(icon, x + 11, startY + 22, { align: 'center' });
+      doc.setFontSize(10);
+      doc.text(icon, x + 11, startY + 20, { align: 'center' });
       
       doc.setFontSize(9);
       doc.setTextColor(220, 53, 69);
-      doc.text(`${tempMax}°`, x + 11, startY + 32, { align: 'center' });
+      doc.text(`${tempMax}C`, x + 11, startY + 32, { align: 'center' });
       
       doc.setTextColor(50, 100, 180);
+      doc.text(`${tempMin}C`, x + 11, startY + 40, { align: 'center' });
+    });
+    
+    const maxTemp = Math.max(...forecast.map(d => d.temperatureMax));
+    const minTemp = Math.min(...forecast.map(d => d.temperatureMin));
+    
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(7);
+    doc.text(`Rango semanal: ${Math.round(minTemp)}C - ${Math.round(maxTemp)}C`, 105, 240);
+  } else {
+    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(9);
+    doc.text('Pronostico no disponible', 18, 200);
+  }
+  
+  doc.setDrawColor(200, 210, 230);
+  doc.line(15, 248, 195, 248);
+  
+  doc.setFillColor(25, 118, 210);
+  doc.roundedRect(15, 253, 88, 35, 3, 3, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Fase Lunar', 20, 262);
+  doc.setFontSize(14);
+  doc.text(moonIcon, 25, 278);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${moonIllum} iluminada`, 42, 278);
+  doc.setFontSize(8);
+  doc.text(moonPhase, 20, 286);
+  
+  doc.setFillColor(76, 175, 80);
+  doc.roundedRect(108, 253, 87, 35, 3, 3, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Datos Adicionales', 113, 262);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Nubosidad: ${clouds}`, 113, 270);
+  doc.text(`Indice UV: ${uv}`, 113, 277);
+  doc.text(`Presion: ${pressure}`, 113, 284);
+  
+  doc.setTextColor(100, 100, 100);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Generado por Zeus Meteo AI', 15, 298);
+  doc.text('Fuentes: OpenMeteo, MetNorway, Wttr.in', 15, 304);
+  doc.text(`Coordenadas: ${currentCoords?.lat?.toFixed(4) || 'N/A'}, ${currentCoords?.lng?.toFixed(4) || 'N/A'}`, 15, 310);
+  
+  doc.setFillColor(25, 118, 210);
+  doc.rect(0, 315, 210, 12, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8);
+  doc.text('Zeus Meteo 2025 - Pronosticos con Inteligencia Artificial', 105, 323, { align: 'center' });
+  
+  doc.save(`ZeusMeteo_${city.replace(/\s+/g, '_')}_${now.toISOString().split('T')[0]}.pdf`);
+}
       doc.text(`${tempMin}°`, x + 11, startY + 40, { align: 'center' });
     });
     
