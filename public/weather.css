@@ -892,8 +892,24 @@ a:hover {
   grid-column: span 2;
 }
 
+.pillar-map {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1024px) {
+  .pillar-wide {
+    grid-column: span 2;
+  }
+  .pillar-map {
+    grid-column: span 2;
+  }
+}
+
 @media (max-width: 640px) {
   .pillar-wide {
+    grid-column: span 1;
+  }
+  .pillar-map {
     grid-column: span 1;
   }
 }
@@ -1086,6 +1102,129 @@ a:hover {
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+/* Enhanced Sun and Moon */
+.sun-moon-enhanced {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.sun-moon-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sun-moon-visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sun-icon {
+  font-size: 56px;
+  animation: sunPulse 3s ease-in-out infinite;
+}
+
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.sun-times {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sun-time-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.sun-time-icon {
+  font-size: 24px;
+}
+
+.sun-time-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sun-time-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.sun-time-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.day-duration {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.moon-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: var(--radius-lg);
+}
+
+.moon-visual {
+  position: relative;
+}
+
+.moon-large {
+  font-size: 64px;
+  animation: moonGlow 3s ease-in-out infinite;
+}
+
+@keyframes moonGlow {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4)); }
+  50% { filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.7)); }
+}
+
+.moon-info {
+  text-align: center;
+  color: white;
+}
+
+.moon-phase-text {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.moon-illumination {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.moon-next {
+  font-size: 11px;
+  opacity: 0.6;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
 }
 
 /* Calendar */
@@ -1352,6 +1491,93 @@ a:hover {
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* Enhanced Weekly Forecast */
+.forecast-summary {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+}
+
+.weekly-forecast-enhanced {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 12px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.weekly-forecast-enhanced::-webkit-scrollbar {
+  height: 6px;
+}
+
+.weekly-forecast-enhanced::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+}
+
+.weekly-forecast-enhanced::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.day-card {
+  flex: 0 0 auto;
+  width: 85px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  padding: 14px 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+  min-width: 85px;
+  cursor: pointer;
+}
+
+.day-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.day-card.today {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+}
+
+.day-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.day-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.day-temps {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.day-temp-max {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.day-temp-min {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.day-card.today .day-temp-min {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* Hourly Scroll */
 .hourly-scroll {
   display: flex;
@@ -1515,6 +1741,84 @@ a:hover {
   color: var(--text-primary);
 }
 
+/* Enhanced Details */
+.details-enhanced {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.detail-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.detail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  color: white;
+}
+
+.detail-card-header.uv {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.detail-card-header.rain {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.detail-card-header.storm {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+.detail-card-header.wind {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.detail-card-header.visibility {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.detail-card-header.clouds {
+  background: linear-gradient(135deg, #64748b, #475569);
+}
+
+.detail-card-icon {
+  font-size: 18px;
+}
+
+.detail-card-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.detail-card-body {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-card-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detail-card-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
 /* Filter Tabs */
 .filter-tabs {
   display: flex;
@@ -1553,12 +1857,15 @@ a:hover {
 .map-btn {
   background: var(--bg-tertiary);
   border: none;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .map-btn:hover {
@@ -1576,9 +1883,22 @@ a:hover {
   overflow: hidden;
   box-shadow: var(--shadow-md);
   width: 100%;
+  height: 400px;
 }
 
 .map-frame {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .map-container {
+    height: 300px;
+  }
+}
   width: 100%;
   max-width: 100%;
   height: 300px;

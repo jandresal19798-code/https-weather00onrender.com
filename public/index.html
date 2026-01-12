@@ -244,6 +244,142 @@
               <span class="pillar-icon">🌅</span>
               <h3>Sol y Luna</h3>
             </div>
+            <div class="sun-moon-enhanced">
+              <div class="sun-moon-section">
+                <div class="sun-moon-visual">
+                  <div class="sun-icon">☀️</div>
+                  <div class="sun-rays"></div>
+                </div>
+                <div class="sun-times">
+                  <div class="sun-time-row">
+                    <span class="sun-time-icon">🌅</span>
+                    <div class="sun-time-info">
+                      <span class="sun-time-label">Amanecer</span>
+                      <span class="sun-time-value" id="sunrise">--:--</span>
+                    </div>
+                  </div>
+                  <div class="sun-time-row">
+                    <span class="sun-time-icon">🌇</span>
+                    <div class="sun-time-info">
+                      <span class="sun-time-label">Atardecer</span>
+                      <span class="sun-time-value" id="sunset">--:--</span>
+                    </div>
+                  </div>
+                  <div class="day-duration">
+                    <span>📅 Día: <span id="day-length">14h 16m</span></span>
+                  </div>
+                </div>
+              </div>
+              <div class="moon-section">
+                <div class="moon-visual">
+                  <span class="moon-large" id="moon-icon">🌙</span>
+                </div>
+                <div class="moon-info">
+                  <div class="moon-phase-text" id="moon-phase-name">Luna Nueva</div>
+                  <div class="moon-illumination" id="moon-illumination">0% iluminada</div>
+                  <div class="moon-next">
+                    <span>Luna Llena: 26 ene</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pillar-card pillar-wide">
+            <div class="pillar-header">
+              <span class="pillar-icon">📊</span>
+              <h3>Pronóstico 7 Días</h3>
+              <div class="forecast-summary" id="forecast-summary">
+                <span class="summary-temp">⏱️ 14h día • Rango: 18°C-32°C</span>
+              </div>
+            </div>
+            <div class="weekly-forecast-enhanced" id="daily-forecast"></div>
+          </div>
+
+          <div class="pillar-card pillar-wide">
+            <div class="pillar-header">
+              <span class="pillar-icon">💡</span>
+              <h3>Detalles Adicionales</h3>
+            </div>
+            <div class="details-enhanced">
+              <div class="detail-card">
+                <div class="detail-card-header uv">
+                  <span class="detail-card-icon">☀️</span>
+                  <span class="detail-card-title">Índice UV</span>
+                </div>
+                <div class="detail-card-body">
+                  <span class="detail-card-value" id="uv-value">Alto (7)</span>
+                  <span class="detail-card-desc">Protección necesaria</span>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-card-header rain">
+                  <span class="detail-card-icon">💧</span>
+                  <span class="detail-card-title">Precipitación</span>
+                </div>
+                <div class="detail-card-body">
+                  <span class="detail-card-value" id="rain-value">0 mm</span>
+                  <span class="detail-card-desc">Sin lluvia prevista</span>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-card-header storm">
+                  <span class="detail-card-icon">⛈️</span>
+                  <span class="detail-card-title">Prob. Tormenta</span>
+                </div>
+                <div class="detail-card-body">
+                  <span class="detail-card-value" id="storm-value">10%</span>
+                  <span class="detail-card-desc">Baja probabilidad</span>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-card-header wind">
+                  <span class="detail-card-icon">💨</span>
+                  <span class="detail-card-title">Ráfagas máx</span>
+                </div>
+                <div class="detail-card-body">
+                  <span class="detail-card-value" id="gusts-value">18 km/h</span>
+                  <span class="detail-card-desc">Viento moderado</span>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-card-header visibility">
+                  <span class="detail-card-icon">👁️</span>
+                  <span class="detail-card-title">Visibilidad</span>
+                </div>
+                <div class="detail-card-body">
+                  <span class="detail-card-value" id="visibility-value">10 km</span>
+                  <span class="detail-card-desc">Buena visibilidad</span>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-card-header clouds">
+                  <span class="detail-card-icon">☁️</span>
+                  <span class="detail-card-title">Nubosidad</span>
+                </div>
+                <div class="detail-card-body">
+                  <span class="detail-card-value" id="clouds-value">25%</span>
+                  <span class="detail-card-desc">Cielo despejado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pillar-card pillar-map">
+            <div class="pillar-header">
+              <span class="pillar-icon">🗺️</span>
+              <h3>Mapa del Clima</h3>
+              <div class="map-controls">
+                <button class="map-btn active" onclick="changeMapType('satellite')">🛰️</button>
+                <button class="map-btn" onclick="changeMapType('weather')">☀️</button>
+                <button class="map-btn" onclick="changeMapType('precipitation')">🌧️</button>
+                <button class="map-btn" onclick="changeMapType('wind')">💨</button>
+              </div>
+            </div>
+            <div class="map-container">
+              <iframe id="map-frame" class="map-frame" frameborder="0"></iframe>
+            </div>
+          </div>
             <div class="solar-moon-grid">
               <div class="solar-moon-item">
                 <span class="solar-icon">🌅</span>
@@ -355,7 +491,7 @@
               <span class="pillar-icon">📊</span>
               <h3>Pronóstico 7 Días</h3>
             </div>
-            <div class="weekly-forecast" id="daily-forecast"></div>
+            <div class="weekly-forecast-enhanced" id="daily-forecast"></div>
           </div>
 
           <div class="pillar-card pillar-wide">
