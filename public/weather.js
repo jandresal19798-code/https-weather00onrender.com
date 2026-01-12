@@ -97,14 +97,7 @@ async function searchWeather() {
 }
 
 function showError(message, suggestion = '') {
-  const result = document.getElementById('result');
-  result.innerHTML = `
-    <div class="error">
-      <strong>⚠️ ${message}</strong>
-      ${suggestion ? `<br><br><strong>💡 Sugerencia:</strong><br>${suggestion}` : ''}
-    </div>
-  `;
-  result.style.display = 'block';
+  console.error(message, suggestion);
 }
 
 function updateCurrentWeather(report) {
@@ -305,23 +298,6 @@ async function loadDailyForecast(location, retryCount = 0) {
   }
 }
 
-function setForecastDateConstraints() {
-  const datePicker = document.getElementById('forecast-date');
-  const today = new Date();
-  const maxDate = new Date();
-  maxDate.setDate(today.getDate() + 7);
-  
-  datePicker.min = today.toISOString().split('T')[0];
-  datePicker.max = maxDate.toISOString().split('T')[0];
-  datePicker.value = today.toISOString().split('T')[0];
-  
-  datePicker.addEventListener('change', function(e) {
-    const selectedDate = new Date(e.target.value);
-    updateSolarInfo(selectedDate);
-    updateMoonInfo(selectedDate);
-  });
-}
-
 async function updateSolarInfo(date) {
   const sunriseEl = document.getElementById('sunrise');
   const sunsetEl = document.getElementById('sunset');
@@ -423,7 +399,6 @@ let currentCalendarDate = new Date();
 
 function initCalendar() {
   renderCalendar(currentCalendarDate);
-  renderLunarCalendar();
   updateAstronomy();
 }
 
@@ -609,7 +584,6 @@ function generateActivities(forecast) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  setForecastDateConstraints();
 });
 
 function filterHours(hours, btn) {
@@ -848,6 +822,7 @@ function getWeatherAnimation(condition) {
 
 async function loadWeatherNews(location) {
   const newsContainer = document.getElementById('news-container');
+  if (!newsContainer) return;
   
   try {
     newsContainer.innerHTML = '<p class="loading-text">📰 Cargando...</p>';
