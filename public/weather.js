@@ -988,18 +988,6 @@ async function downloadPDF() {
   
   doc.save(`ZeusMeteo_${city.replace(/\s+/g, '_')}_${now.toISOString().split('T')[0]}.pdf`);
 }
-  doc.text('🤖 Generado por Zeus Meteo AI', 15, 298);
-  doc.text(`📡 Fuentes: OpenMeteo, MetNorway, Wttr.in`, 15, 304);
-  doc.text(`📍 Coordenadas: ${currentCoords?.lat?.toFixed(4) || 'N/A'}, ${currentCoords?.lng?.toFixed(4) || 'N/A'}`, 15, 310);
-  
-  doc.setFillColor(25, 118, 210);
-  doc.rect(0, 315, 210, 12, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(8);
-  doc.text('⚡ Zeus Meteo © 2025 - Pronósticos con Inteligencia Artificial', 105, 323, { align: 'center' });
-  
-  doc.save(`ZeusMeteo_${city.replace(/\s+/g, '_')}_${now.toISOString().split('T')[0]}.pdf`);
-}
 
 document.getElementById('location-input').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
