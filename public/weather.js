@@ -322,18 +322,58 @@ function setForecastDateConstraints() {
   });
 }
 
-function updateSolarInfo(date) {
+async function updateSolarInfo(date) {
   const sunriseEl = document.getElementById('sunrise');
   const sunsetEl = document.getElementById('sunset');
   
+  try {
+    const lat = currentCoords?.lat || -34.9;
+    const lng = currentCoords?.lng || -56.7;
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const response = await fetch('https://api.sunrisesunset.io/json?lat=' + lat + '&lng=' + lng + '&date=' + dateStr);
+    
+    if (response.ok) {
+      const data = await response.json();
+      
+      if (data.results && data.results.sunrise && data.results.sunset) {
+        const sunriseStr = data.results.sunrise;
+        const sunsetStr = data.results.sunset;
+        
+        const sunriseParts = sunriseStr.split(':');
+        const sunsetParts = sunsetStr.split(':');
+        
+        let sunriseHour = parseInt(sunriseParts[0]);
+        let sunsetHour = parseInt(sunsetParts[0]);
+        const sunriseMinute = parseInt(sunriseParts[1]);
+        const sunsetMinute = parseInt(sunsetParts[1]);
+        
+        if (sunriseStr.includes('PM') && sunriseHour < 12) sunriseHour += 12;
+        if (sunriseStr.includes('AM') && sunriseHour === 12) sunriseHour = 0;
+        
+        if (sunsetStr.includes('PM') && sunsetHour < 12) sunsetHour += 12;
+        if (sunsetStr.includes('AM') && sunsetHour === 12) sunsetHour = 0;
+        
+        sunriseEl.textContent = String(sunriseHour).padStart(2, '0') + ':' + String(sunriseMinute).padStart(2, '0');
+        sunsetEl.textContent = String(sunsetHour).padStart(2, '0') + ':' + String(sunsetMinute).padStart(2, '0');
+        return;
+      }
+    }
+  } catch (error) {
+    console.warn('Solar API error:', error.message);
+  }
+  
   const lat = currentCoords?.lat || -34.9;
+  const lng = currentCoords?.lng || -56.7;
   const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-  
   const declination = 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
-  const hourAngle = Math.acos(-Math.tan(lat * Math.PI / 180) * Math.tan(declination * Math.PI / 180));
-  
-  const dayLength = 2 * hourAngle * 12 / Math.PI;
-  const solarNoon = 12 - (4 * (15 - 0) / 60);
+  const latRad = lat * Math.PI / 180;
+  const decRad = declination * Math.PI / 180;
+  const cosHourAngle = -Math.tan(latRad) * Math.tan(decRad);
+  const hourAngle = Math.acos(Math.max(-1, Math.min(1, cosHourAngle)));
+  const timezoneLng = -45;
+  const solarNoon = 12 - (4 * (timezoneLng - lng)) / 60;
+  const dayLength = hourAngle * 2 * 12 / Math.PI;
   const sunriseTime = solarNoon - dayLength / 2;
   const sunsetTime = solarNoon + dayLength / 2;
   
@@ -343,14 +383,8 @@ function updateSolarInfo(date) {
   const sunsetHours = Math.floor(sunsetTime);
   const sunsetMinutes = Math.floor((sunsetTime - sunsetHours) * 60);
   
-  const sunrise = new Date(date);
-  sunrise.setHours(Math.max(0, Math.min(23, sunriseHours)), Math.max(0, Math.min(59, sunriseMinutes)), 0);
-  
-  const sunset = new Date(date);
-  sunset.setHours(Math.max(0, Math.min(23, sunsetHours)), Math.max(0, Math.min(59, sunsetMinutes)), 0);
-  
-  sunriseEl.textContent = sunrise.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-  sunsetEl.textContent = sunset.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  sunriseEl.textContent = String(sunriseHours).padStart(2, '0') + ':' + String(Math.abs(sunriseMinutes)).padStart(2, '0');
+  sunsetEl.textContent = String(sunsetHours).padStart(2, '0') + ':' + String(Math.abs(sunsetMinutes)).padStart(2, '0');
 }
 
 const moonPhases = [
