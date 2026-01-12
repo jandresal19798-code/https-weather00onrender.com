@@ -15,6 +15,135 @@ function toggleTheme() {
   document.body.classList.toggle('dark-mode');
   const isDark = document.body.classList.contains('dark-mode');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+function showHome() {
+  document.getElementById('home-page').classList.add('active');
+  document.getElementById('forecasts-page').classList.remove('active');
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector('.nav-btn:first-child').classList.add('active');
+}
+
+function showForecasts() {
+  document.getElementById('home-page').classList.remove('active');
+  document.getElementById('forecasts-page').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
+}
+
+function quickSearch(city) {
+  event.preventDefault();
+  document.getElementById('location-input').value = city;
+  searchWeather();
+}
+
+async function searchWeather() {
+  const location = document.getElementById('location-input').value.trim();
+  
+  if (!location) {
+    alert('Please enter a city name');
+    return;
+  }
+
+  currentLocation = location;
+  saveRecentSearch(location);
+  showForecasts();
+  
+  const loading = document.getElementById('loading');
+  loading.classList.add('active');
+  
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    
+    const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      updateCurrentWeather(data.report);
+      currentReport = data.report;
+      await Promise.all([
+        loadHourlyForecast(location),
+        loadDailyForecast(location),
+        loadMap(location)
+      ]);
+    } else {
+      console.error(data.error);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    if (error.name === 'AbortError') {
+      console.log('Request timed out');
+    }
+  } finally {
+    loading.classList.remove('active');
+  }
+}
+
+function showError(message, suggestion = '') {
+  console.error(message, suggestion);
+}
+
+function updateCurrentWeather(report) {
+  const container = document.getElementById('current-weather');
+  container.style.display = 'block';
+  
+  const lines = report.split('\n');
+  let city = currentLocation;
+  
+  lines.forEach(line => {
+    if (line.includes('Ubicación:') || line.includes('📍')) {
+      const cityMatch = line.match(/:(.+)/);
+      if (cityMatch) city = cityMatch[1].trim();
+    }
+  });
+  
+  document.getElementById('city-name').textContent = city;
+  
+  const tempMatch = report.match(/Promedio:\s*([\d.]+)/);
+  if (tempMatch) {
+    document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
+  }
+  
+  const descMatch = report.match(/Estado predominante:\s*(.+)/i);
+  const description = descMatch ? descMatch[1].trim() : 'Clear sky';
+  document.getElementById('weather-description').textContent = description;
+  document.getElementById('weather-icon').textContent = getWeatherIcon(description);
+  
+  const humidityMatch = report.match(/Humedad.*?(\d+)/);
+  document.getElementById('humidity').textContent = humidityMatch ? humidityMatch[1] + '%' : '--%';
+  
+  const windMatch = report.match(/Viento.*?(\d+\.?\d*)/);
+  document.getElementById('wind').textContent = windMatch ? windMatch[1] + ' km/h' : '-- km/h';
+  
+  const feelsMatch = report.match(/Sensaci[óo]n.*?(\d+)/);
+  document.getElementById('feels-like').textContent = feelsMatch ? feelsMatch[1] + '°' : '--°';
+  
+  const pressureMatch = report.match(/Presi[óo]n.*?(\d+)/);
+  document.getElementById('pressure').textContent = pressureMatch ? pressureMatch[1] + ' hPa' : '-- hPa';
+  
+  const now = new Date();
+  const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+  
+  updateMoonInfo(now);
+  updateAstronomy();
+}
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
   
   const themeBtn = document.querySelector('.icon-btn:last-child');
   themeBtn.textContent = isDark ? '☀️' : '🌙';
@@ -593,10 +722,9 @@ function filterHours(hours, btn) {
 
 function displayHourlyForecast(forecast) {
   const container = document.getElementById('hourly-forecast');
-  const containerWrapper = document.querySelector('.hourly-scroll-container');
   
   if (!forecast || forecast.length === 0) {
-    container.innerHTML = '<p class="error-text">No se pudo cargar el pronóstico</p>';
+    container.innerHTML = '<p style="padding: 20px; color: #888;">Hourly forecast not available</p>';
     return;
   }
   
@@ -617,23 +745,18 @@ function displayHourlyForecast(forecast) {
     const baseIcon = getWeatherIcon(todayData.description);
     const icon = isDaytime ? baseIcon : baseIcon.replace('☀️', '🌙').replace('🌤️', '🌙').replace('⛅', '☁️');
     
-    const precipChance = Math.random() * 20;
-    
     hours.push({
-      time: i === 0 ? 'Ahora' : `${String(displayHour).padStart(2, '0')}:00`,
+      time: i === 0 ? 'Now' : `${String(displayHour).padStart(2, '0')}:00`,
       temp: temp,
-      icon: i === 0 ? '🕐' : icon,
-      isNow: i === 0,
-      precip: precipChance
+      icon: i === 0 ? '🕐' : icon
     });
   }
 
   container.innerHTML = hours.map(hour => `
-    <div class="hourly-card ${hour.isNow ? 'selected' : ''}">
-      <div class="hourly-time">${hour.time}</div>
-      <div class="hourly-icon">${hour.icon}</div>
-      <div class="hourly-temp">${hour.temp.toFixed(0)}°</div>
-      ${hour.precip > 5 ? `<div class="hourly-precip">💧 ${hour.precip.toFixed(0)}%</div>` : ''}
+    <div class="hourly-card-nasa">
+      <div class="hourly-time-nasa">${hour.time}</div>
+      <span class="hourly-icon-nasa">${hour.icon}</span>
+      <div class="hourly-temp-nasa">${hour.temp.toFixed(0)}°</div>
     </div>
   `).join('');
 }
@@ -642,28 +765,28 @@ function displayDailyForecast(forecast) {
   const container = document.getElementById('daily-forecast');
   
   if (!forecast || forecast.length === 0) {
-    container.innerHTML = '<p class="error-text">No se pudo cargar el pronostico</p>';
+    container.innerHTML = '<p style="padding: 20px; color: #888;">Forecast not available</p>';
     return;
   }
   
-  const days = ['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
+  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const today = new Date();
   
   container.innerHTML = forecast.map((day, index) => {
     const date = new Date(day.date);
-    const dayName = index === 0 ? 'HOY' : days[date.getDay()];
+    const dayName = index === 0 ? 'TODAY' : days[date.getDay()];
     const icon = getWeatherIcon(day.description);
     const tempMax = Math.round(day.temperatureMax);
     const tempMin = Math.round(day.temperatureMin);
     const isToday = index === 0;
     
     return `
-      <div class="day-card${isToday ? ' today' : ''}">
-        <div class="day-name">${dayName}</div>
-        <span class="day-icon">${icon}</span>
-        <div class="day-temps">
-          <span class="day-temp-max">${tempMax}°</span>
-          <span class="day-temp-min">${tempMin}°</span>
+      <div class="day-card-nasa${isToday ? ' today' : ''}">
+        <div class="day-name-nasa">${dayName}</div>
+        <span class="day-icon-nasa">${icon}</span>
+        <div class="day-temps-nasa">
+          <span class="day-temp-max-nasa">${tempMax}°</span>
+          <span class="day-temp-min-nasa">${tempMin}°</span>
         </div>
       </div>
     `;
