@@ -525,15 +525,14 @@ a:hover {
   line-height: 1.7;
 }
 
-/* Loading */
+/* Loading - Storm Animation */
 .loading {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--bg-glass);
-  backdrop-filter: var(--glass-backdrop);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   display: none;
   align-items: center;
   justify-content: center;
@@ -548,31 +547,370 @@ a:hover {
   text-align: center;
 }
 
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid var(--bg-tertiary);
-  border-top-color: var(--primary);
+.storm-animation {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 30px;
+}
+
+.storm-cloud {
+  position: absolute;
+  width: 120px;
+  height: 60px;
+  background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%);
+  border-radius: 50px;
+  top: 40px;
+  left: 40px;
+  animation: cloudFloat 2s ease-in-out infinite;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.storm-cloud::before,
+.storm-cloud::after {
+  content: '';
+  position: absolute;
+  background: inherit;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.storm-cloud::before {
+  width: 50px;
+  height: 50px;
+  top: -25px;
+  left: 15px;
 }
 
-.loading p {
+.storm-cloud::after {
+  width: 35px;
+  height: 35px;
+  top: -15px;
+  right: 15px;
+}
+
+.lightning {
+  position: absolute;
+  width: 8px;
+  height: 60px;
+  background: linear-gradient(to bottom, #fff 0%, #ffd700 50%, #ff8c00 100%);
+  top: 100px;
+  left: 95px;
+  border-radius: 4px;
+  opacity: 0;
+  animation: lightningFlash 3s ease-in-out infinite;
+  box-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00;
+}
+
+.lightning::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, #fff 0%, transparent 70%);
+  top: -20px;
+  left: -11px;
+  animation: lightningGlow 3s ease-in-out infinite;
+}
+
+@keyframes cloudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes lightningFlash {
+  0%, 90%, 100% { opacity: 0; height: 60px; }
+  92%, 94% { opacity: 1; height: 80px; }
+  93%, 95% { opacity: 0; }
+  96% { opacity: 1; height: 70px; }
+}
+
+@keyframes lightningGlow {
+  0%, 90%, 100% { opacity: 0; }
+  92%, 94% { opacity: 1; }
+  93%, 95% { opacity: 0; }
+  96% { opacity: 0.8; }
+}
+
+.rain-drops {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.rain-drop {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(100, 149, 237, 0.6) 100%);
+  bottom: 100%;
+  animation: rainFall 1s linear infinite;
+}
+
+.rain-drop:nth-child(1) { left: 30%; animation-delay: 0s; }
+.rain-drop:nth-child(2) { left: 50%; animation-delay: 0.2s; }
+.rain-drop:nth-child(3) { left: 70%; animation-delay: 0.4s; }
+.rain-drop:nth-child(4) { left: 40%; animation-delay: 0.6s; }
+.rain-drop:nth-child(5) { left: 60%; animation-delay: 0.1s; }
+.rain-drop:nth-child(6) { left: 80%; animation-delay: 0.3s; }
+.rain-drop:nth-child(7) { left: 25%; animation-delay: 0.5s; }
+.rain-drop:nth-child(8) { left: 55%; animation-delay: 0.7s; }
+.rain-drop:nth-child(9) { left: 75%; animation-delay: 0.15s; }
+.rain-drop:nth-child(10) { left: 45%; animation-delay: 0.35s; }
+
+@keyframes rainFall {
+  0% { transform: translateY(-50px); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(150px); opacity: 0; }
+}
+
+.loading-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Calendar */
+.calendar-container {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: var(--glass-backdrop);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.calendar-nav {
+  background: var(--primary);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.calendar-nav:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+#calendar-month-year {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.calendar-weekdays span {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
+  padding: 8px 0;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.calendar-day:hover {
+  background: var(--primary-light);
+  color: white;
+}
+
+.calendar-day.other-month {
+  color: var(--text-tertiary);
+}
+
+.calendar-day.today {
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+.calendar-day.selected {
+  background: var(--accent);
+  color: white;
+}
+
+/* Lunar Calendar */
+.lunar-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.lunar-day {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 10px 5px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.lunar-day:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.lunar-phase-icon {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.lunar-date {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+}
+
+.lunar-phase-name {
+  font-size: 10px;
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
-/* Content with Sidebar */
-.content-with-sidebar {
+/* Astronomy Section */
+.astronomy-section {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
-  padding: 32px 0;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.astronomy-item {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.astronomy-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.astronomy-icon {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.astronomy-info h4 {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.astronomy-info p {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .header-content {
+    flex-wrap: wrap;
+  }
+  
+  .nav-tabs {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .search-box {
+    flex-direction: column;
+  }
+  
+  .gps-btn, .search-btn {
+    width: 100%;
+  }
+  
+  .chatbot-container {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    width: 100%;
+    max-width: none;
+  }
+  
+  .chatbot-fab {
+    bottom: 16px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+  
+  .lunar-calendar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .astronomy-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Print */
+@media print {
+  .header, .chatbot-fab, .chatbot-container, .sidebar {
+    display: none !important;
+  }
+  
+  .weather-card, .section {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
 }
 
 @media (min-width: 1024px) {

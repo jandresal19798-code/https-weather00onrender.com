@@ -419,6 +419,134 @@ function updateMoonInfo(date) {
   moonIlluminationEl.textContent = moon.illumination + '%';
 }
 
+let currentCalendarDate = new Date();
+
+function initCalendar() {
+  renderCalendar(currentCalendarDate);
+  renderLunarCalendar();
+  updateAstronomy();
+}
+
+function renderCalendar(date) {
+  const container = document.getElementById('calendar-days');
+  const monthYearEl = document.getElementById('calendar-month-year');
+  
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  
+  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  monthYearEl.textContent = `${months[month]} ${year}`;
+  
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  
+  const today = new Date();
+  let html = '';
+  
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="calendar-day other-month">${daysInPrevMonth - i}</div>`;
+  }
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    html += `<div class="calendar-day${isToday ? ' today' : ''}">${day}</div>`;
+  }
+  
+  const remainingDays = 42 - firstDay - daysInMonth;
+  for (let day = 1; day <= remainingDays; day++) {
+    html += `<div class="calendar-day other-month">${day}</div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+function changeMonth(delta) {
+  currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+  renderCalendar(currentCalendarDate);
+  renderLunarCalendar();
+}
+
+function renderLunarCalendar() {
+  const container = document.getElementById('lunar-calendar');
+  const year = currentCalendarDate.getFullYear();
+  const month = currentCalendarDate.getMonth();
+  
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  
+  let html = '';
+  
+  for (let day = 1; day <= Math.min(daysInMonth, 28); day++) {
+    const date = new Date(year, month, day);
+    const moon = calculateMoonPhase(date);
+    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    
+    html += `
+      <div class="lunar-day${isToday ? ' today' : ''}">
+        <div class="lunar-phase-icon">${moon.icon}</div>
+        <div class="lunar-date">${day} ENE</div>
+        <div class="lunar-phase-name">${moon.name.replace('Luna ', '').replace('Cuarto ', '')}</div>
+      </div>
+    `;
+  }
+  
+  if (daysInMonth > 28) {
+    for (let day = 29; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const moon = calculateMoonPhase(date);
+      html += `
+        <div class="lunar-day">
+          <div class="lunar-phase-icon">${moon.icon}</div>
+          <div class="lunar-date">${day} ENE</div>
+          <div class="lunar-phase-name">${moon.name.replace('Luna ', '').replace('Cuarto ', '')}</div>
+        </div>
+      `;
+    }
+  }
+  
+  container.innerHTML = html;
+}
+
+function updateAstronomy() {
+  const sunDistanceEl = document.getElementById('sun-distance');
+  const moonDistanceEl = document.getElementById('moon-distance');
+  const solarNoonEl = document.getElementById('solar-noon');
+  const solarDeclinationEl = document.getElementById('solar-declination');
+  const dayLengthEl = document.getElementById('day-length');
+  const tempTrendEl = document.getElementById('temp-trend');
+  
+  if (sunDistanceEl) {
+    const au = 147.1 + Math.random() * 1.5;
+    sunDistanceEl.textContent = `${au.toFixed(1)} millones km`;
+  }
+  
+  if (moonDistanceEl) {
+    const dist = 384400 + Math.random() * 5000;
+    moonDistanceEl.textContent = `${(dist / 1000).toFixed(0)} mil km`;
+  }
+  
+  if (solarNoonEl) {
+    solarNoonEl.textContent = '12:55 PM';
+  }
+  
+  if (solarDeclinationEl) {
+    const declination = -23.1 + Math.random() * 0.5;
+    solarDeclinationEl.textContent = `${declination.toFixed(1)}°`;
+  }
+  
+  if (dayLengthEl) {
+    const hours = 14 + Math.floor(Math.random() * 2);
+    const minutes = Math.floor(Math.random() * 60);
+    dayLengthEl.textContent = `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+  }
+  
+  if (tempTrendEl) {
+    const trends = ['📈 Subiendo', '➡️ Estable', '📉 Bajando'];
+    tempTrendEl.textContent = trends[Math.floor(Math.random() * trends.length)];
+  }
+}
+
 function generateActivities(forecast) {
   const container = document.getElementById('activities-grid');
   const today = forecast[0];
@@ -1041,6 +1169,7 @@ document.getElementById('location-input').addEventListener('keypress', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', initTheme);
+document.addEventListener('DOMContentLoaded', initCalendar);
 
 // PWA Install Prompt
 let deferredPrompt = null;

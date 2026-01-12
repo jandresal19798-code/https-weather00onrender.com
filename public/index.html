@@ -123,8 +123,23 @@
   <div id="forecasts-page" class="page">
     <div class="loading" id="loading">
       <div class="loading-content">
-        <div class="spinner"></div>
-        <p>Cargando datos meteorológicos...</p>
+        <div class="storm-animation">
+          <div class="storm-cloud"></div>
+          <div class="lightning"></div>
+          <div class="rain-drops">
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+            <div class="rain-drop"></div>
+          </div>
+        </div>
+        <p class="loading-text">Obteniendo datos meteorológicos...</p>
       </div>
     </div>
 
@@ -259,6 +274,74 @@
                 <div class="moon-data">
                   <div class="moon-label" id="moon-phase-name">Luna</div>
                   <div class="moon-value" id="moon-illumination">0%</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">📅 Calendario - ENERO 2026</h3>
+            <div class="calendar-container" id="calendar-container">
+              <div class="calendar-header">
+                <button class="calendar-nav" onclick="changeMonth(-1)">❮</button>
+                <span id="calendar-month-year">Enero 2026</span>
+                <button class="calendar-nav" onclick="changeMonth(1)">❯</button>
+              </div>
+              <div class="calendar-weekdays">
+                <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+              </div>
+              <div class="calendar-days" id="calendar-days"></div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">🌙 Calendario Lunar 2026</h3>
+            <div class="lunar-calendar" id="lunar-calendar"></div>
+          </section>
+
+          <section class="section">
+            <h3 class="section-title">🌍 Datos Astronómicos</h3>
+            <div class="astronomy-section">
+              <div class="astronomy-item">
+                <div class="astronomy-icon">🌍</div>
+                <div class="astronomy-info">
+                  <h4>Distancia al Sol</h4>
+                  <p id="sun-distance">147.1 millones km</p>
+                </div>
+              </div>
+              <div class="astronomy-item">
+                <div class="astronomy-icon">🌙</div>
+                <div class="astronomy-info">
+                  <h4>Distancia a la Luna</h4>
+                  <p id="moon-distance">384,400 km</p>
+                </div>
+              </div>
+              <div class="astronomy-item">
+                <div class="astronomy-icon">☀️</div>
+                <div class="astronomy-info">
+                  <h4>Hora Solar</h4>
+                  <p id="solar-noon">12:55 PM</p>
+                </div>
+              </div>
+              <div class="astronomy-item">
+                <div class="astronomy-icon">📐</div>
+                <div class="astronomy-info">
+                  <h4>Declinación Solar</h4>
+                  <p id="solar-declination">-23.1°</p>
+                </div>
+              </div>
+              <div class="astronomy-item">
+                <div class="astronomy-icon">🌟</div>
+                <div class="astronomy-info">
+                  <h4>Duración del Día</h4>
+                  <p id="day-length">14h 16m</p>
+                </div>
+              </div>
+              <div class="astronomy-item">
+                <div class="astronomy-icon">🎯</div>
+                <div class="astronomy-info">
+                  <h4>Tendencia Temperatura</h4>
+                  <p id="temp-trend">📈 Subiendo</p>
                 </div>
               </div>
             </div>
