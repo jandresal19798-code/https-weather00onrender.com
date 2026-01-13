@@ -1652,25 +1652,36 @@ Instrucciones:
 `;
 
 async function toggleChatbot() {
-  const container = document.getElementById('chatbot-container');
-  if (!container) return;
-  const fab = document.getElementById('chatbot-fab-nasa');
-  if (!fab) return;
+  var container = document.getElementById('chatbot-container');
+  var fab = document.getElementById('chatbot-fab-nasa');
+  
+  if (!container) {
+    console.error('Chatbot container not found');
+    return;
+  }
+  
+  if (!fab) {
+    console.error('Chatbot FAB not found');
+  }
   
   container.classList.toggle('active');
-  fab.style.display = container.classList.contains('active') ? 'none' : 'flex';
   
   if (container.classList.contains('active')) {
-    setTimeout(() => {
-      const input = document.getElementById('chatbot-input-nasa');
+    container.style.display = 'block';
+    if (fab) fab.style.display = 'none';
+    setTimeout(function() {
+      var input = document.getElementById('chatbot-input-nasa');
       if (input) input.focus();
     }, 300);
+  } else {
+    container.style.display = 'none';
+    if (fab) fab.style.display = 'flex';
   }
 }
 
 function handleChatKeyPress(event) {
   if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault();
+    if (event.preventDefault) event.preventDefault();
     sendChatMessage();
   }
 }
