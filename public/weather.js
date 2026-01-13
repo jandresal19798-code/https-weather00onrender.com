@@ -120,9 +120,11 @@ function showError(message, suggestion = '') {
 }
 
 function updateCurrentWeather(report) {
-  const container = document.getElementById('current-weather');
-  if (!container) return;
-  container.style.display = 'block';
+  const banner = document.getElementById('weather-banner');
+  if (!banner) return;
+  
+  banner.style.display = 'block';
+  banner.classList.add('active');
   
   const lines = report.split('\n');
   let city = currentLocation;
@@ -324,6 +326,7 @@ async function loadDailyForecast(location, retryCount = 0) {
       generateActivities(data.forecast);
       updateSolarInfo(new Date());
       updateMoonInfo(new Date());
+      updateCityInfo();
     } else {
       console.warn('Pronóstico diario no disponible');
       const mockData = getMockForecast();
@@ -331,6 +334,7 @@ async function loadDailyForecast(location, retryCount = 0) {
       updateWeatherDetails(mockData);
       renderTempChart(mockData);
       generateActivities(mockData);
+      updateCityInfo();
     }
   } catch (error) {
     console.warn('Error pronóstico diario, usando datos demo:', error.message);
@@ -339,6 +343,7 @@ async function loadDailyForecast(location, retryCount = 0) {
     updateWeatherDetails(mockData);
     renderTempChart(mockData);
     generateActivities(mockData);
+    updateCityInfo();
   }
 }
 
@@ -535,6 +540,35 @@ function renderLunarCalendar() {
   container.innerHTML = html;
 }
 
+function calculateSunDistance(date) {
+  const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  const eccentricity = 0.0167;
+  const semiMajorAxis = 149.6;
+  const angle = (2 * Math.PI / 365) * (dayOfYear - 3);
+  return semiMajorAxis * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(angle));
+}
+
+function calculateMoonDistance(date) {
+  const synodic = 29.53058867;
+  const knownNewMoon = new Date('2023-01-21T20:53:00Z');
+  const daysSinceNewMoon = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
+  const newMoons = daysSinceNewMoon / synodic;
+  const phase = newMoons - Math.floor(newMoons);
+  const perigee = 363300;
+  const apogee = 405500;
+  const variation = (apogee - perigee) / 2;
+  return (perigee + apogee) / 2 + variation * Math.cos(2 * Math.PI * phase);
+}
+
+function calculateSolarNoon(longitude, timezoneOffset) {
+  return 12 - (timezoneOffset * 60 + longitude * 4) / 60;
+}
+
+function calculateSolarDeclination(date) {
+  const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  return 23.45 * Math.sin((2 * Math.PI / 365) * (dayOfYear - 81));
+}
+
 function updateAstronomy() {
   const sunDistanceEl = document.getElementById('sun-distance');
   const moonDistanceEl = document.getElementById('moon-distance');
@@ -543,34 +577,59 @@ function updateAstronomy() {
   const dayLengthEl = document.getElementById('day-length');
   const tempTrendEl = document.getElementById('temp-trend');
   
+  const now = new Date();
+  const lat = currentCoords?.lat || -34.9;
+  const lng = currentCoords?.lng || -56.7;
+  
   if (sunDistanceEl) {
-    const au = 147.1 + Math.random() * 1.5;
-    sunDistanceEl.textContent = `${au.toFixed(1)} millones km`;
+    const sunDist = calculateSunDistance(now);
+    sunDistanceEl.textContent = `${sunDist.toFixed(1)} M km`;
   }
   
   if (moonDistanceEl) {
-    const dist = 384400 + Math.random() * 5000;
-    moonDistanceEl.textContent = `${(dist / 1000).toFixed(0)} mil km`;
+    const moonDist = calculateMoonDistance(now);
+    moonDistanceEl.textContent = `${(moonDist / 1000).toFixed(0)} mil km`;
   }
   
   if (solarNoonEl) {
-    solarNoonEl.textContent = '12:55 PM';
+    const timezoneOffset = Intl.DateTimeFormat(undefined, { timeZoneName: 'shortOffset' }).format(now).includes('+') ? -3 : -3;
+    const noon = calculateSolarNoon(lng, timezoneOffset);
+    const hours = Math.floor(noon);
+    const minutes = Math.floor((noon - hours) * 60);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+    solarNoonEl.textContent = `${displayHours}:${String(Math.abs(minutes)).padStart(2, '0')} ${ampm}`;
   }
   
   if (solarDeclinationEl) {
-    const declination = -23.1 + Math.random() * 0.5;
-    solarDeclinationEl.textContent = `${declination.toFixed(1)}°`;
+    const declination = calculateSolarDeclination(now);
+    const direction = declination >= 0 ? 'N' : 'S';
+    solarDeclinationEl.textContent = `${Math.abs(declination).toFixed(1)}°${direction}`;
   }
   
   if (dayLengthEl) {
-    const hours = 14 + Math.floor(Math.random() * 2);
-    const minutes = Math.floor(Math.random() * 60);
-    dayLengthEl.textContent = `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+    const sunrise = document.getElementById('sunrise')?.textContent;
+    const sunset = document.getElementById('sunset')?.textContent;
+    if (sunrise && sunset && sunrise !== '--:--' && sunset !== '--:--') {
+      try {
+        const [sunriseH, sunriseM] = sunrise.split(':').map(Number);
+        const [sunsetH, sunsetM] = sunset.split(':').map(Number);
+        const sunriseMinutes = sunriseH * 60 + sunriseM;
+        const sunsetMinutes = sunsetH * 60 + sunsetM;
+        const dayLength = sunsetMinutes - sunriseMinutes;
+        const hours = Math.floor(dayLength / 60);
+        const minutes = dayLength % 60;
+        dayLengthEl.textContent = `${hours}h ${String(minutes).padStart(2, '0')}m`;
+      } catch (e) {
+        const hours = 14 + Math.floor(Math.random() * 2);
+        const minutes = Math.floor(Math.random() * 60);
+        dayLengthEl.textContent = `${hours}h ${String(minutes).padStart(2, '0')}m`;
+      }
+    }
   }
   
   if (tempTrendEl) {
-    const trends = ['📈 Subiendo', '➡️ Estable', '📉 Bajando'];
-    tempTrendEl.textContent = trends[Math.floor(Math.random() * trends.length)];
+    tempTrendEl.textContent = '➡️ Estable';
   }
 }
 
@@ -720,32 +779,95 @@ function displayDailyForecast(forecast) {
 
 function updateWeatherDetails(forecast) {
   const today = forecast[0];
+  if (!today) return;
+
+  const weatherCode = today.weatherCode || 0;
+  const description = (today.description || '').toLowerCase();
   
-  const uvIndex = Math.max(0, 11 - (today.weatherCode / 10)).toFixed(0);
+  const isDaytime = new Date().getHours() >= 6 && new Date().getHours() < 20;
+  const baseUv = isDaytime ? 5 : 0;
+  const uvIndex = Math.max(0, Math.min(11, baseUv + Math.floor(Math.random() * 3) - 1));
   let uvLevel = 'Bajo';
   if (uvIndex >= 8) uvLevel = 'Extremo';
   else if (uvIndex >= 6) uvLevel = 'Alto';
   else if (uvIndex >= 3) uvLevel = 'Moderado';
   
-  const stormCodes = [95, 96, 99];
-  const rainCodes = [61, 63, 65, 66, 67, 80, 81, 82, 85, 86];
-  const stormProbability = stormCodes.includes(today.weatherCode) ? 
-    Math.floor(Math.random() * 30) + 70 : 
-    rainCodes.includes(today.weatherCode) ? 
-    Math.floor(Math.random() * 40) + 20 : 
-    Math.floor(Math.random() * 15);
+  const stormCodes = [95, 96, 99, 210, 211, 212, 221, 230, 231, 232];
+  const rainCodes = [61, 63, 65, 66, 67, 80, 81, 82, 85, 86, 51, 53, 55, 95, 96, 99];
+  let stormProbability = 0;
+  if (stormCodes.includes(weatherCode)) {
+    stormProbability = Math.floor(Math.random() * 20) + 60;
+  } else if (rainCodes.includes(weatherCode) || description.includes('lluv') || description.includes('storm')) {
+    stormProbability = Math.floor(Math.random() * 30) + 20;
+  } else {
+    stormProbability = Math.floor(Math.random() * 10);
+  }
   
-  const rainfall = today.precipitation || 0;
-  const gusts = (today.windMax * 3.6 * 1.3).toFixed(0);
-  const visibility = Math.max(0, 10 - (today.weatherCode / 20));
-  const clouds = Math.min(100, Math.max(0, today.weatherCode * 10));
+  const rainfall = today.precipitation || (description.includes('lluv') ? Math.random() * 10 : 0);
+  const gusts = today.windMax ? Math.round(today.windMax * 3.6) : Math.floor(Math.random() * 30) + 5;
+  const visibility = description.includes('niebla') || description.includes('fog') ? Math.random() * 3 + 1 : Math.random() * 5 + 8;
+  const clouds = description.includes('nublado') ? 70 + Math.floor(Math.random() * 30) : (description.includes('parcial') ? 40 : 20);
   
-  animateValue('uv-value', 0, uvIndex, 1000, '', uvLevel);
-  animateValue('rain-value', 0, rainfall, 1000, ' mm');
-  animateValue('storm-value', 0, stormProbability, 1000, '%');
-  animateValue('gusts-value', 0, gusts, 1000, ' km/h');
-  animateValue('visibility-value', 0, visibility, 1000, ' km');
-  animateValue('clouds-value', 0, clouds, 1000, '%');
+  animateValue('uv-value', 0, uvIndex, 800, '', uvLevel);
+  animateValue('rain-value', 0, rainfall, 800, ' mm');
+  animateValue('storm-value', 0, stormProbability, 800, '%');
+  animateValue('gusts-value', 0, gusts, 800, ' km/h');
+  animateValue('visibility-value', 0, visibility, 800, ' km');
+  animateValue('clouds-value', 0, clouds, 800, '%');
+}
+
+const cityDataCache = new Map();
+
+async function updateCityInfo() {
+  const countryEl = document.getElementById('city-country');
+  const coordsEl = document.getElementById('city-coords');
+  const timezoneEl = document.getElementById('city-timezone');
+  const populationEl = document.getElementById('city-population');
+  const elevationEl = document.getElementById('city-elevation');
+  
+  if (!countryEl) return;
+  
+  if (currentCoords?.lat && currentCoords?.lng) {
+    const coordsKey = `${currentCoords.lat.toFixed(2)},${currentCoords.lng.toFixed(2)}`;
+    
+    if (cityDataCache.has(coordsKey)) {
+      const cached = cityDataCache.get(coordsKey);
+      if (countryEl) countryEl.textContent = cached.country || '--';
+      if (coordsEl) coordsEl.textContent = `${currentCoords.lat.toFixed(2)}°, ${currentCoords.lng.toFixed(2)}°`;
+      if (timezoneEl) timezoneEl.textContent = cached.timezone || '--';
+      if (populationEl) populationEl.textContent = cached.population || '--';
+      if (elevationEl) elevationEl.textContent = cached.elevation ? `${cached.elevation} m` : '--';
+      return;
+    }
+    
+    const country = currentLocationData?.country || '--';
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '--';
+    const coords = `${currentCoords.lat.toFixed(2)}°, ${currentCoords.lng.toFixed(2)}°`;
+    
+    let population = '--';
+    let elevation = '--';
+    
+    try {
+      const geoResponse = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${currentCoords.lat}&longitude=${currentCoords.lng}`);
+      if (geoResponse.ok) {
+        const geoData = await geoResponse.json();
+        if (geoData.elevation && geoData.elevation.length > 0) {
+          elevation = `${Math.round(geoData.elevation[0])} m`;
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo obtener la elevación');
+    }
+    
+    const cityInfo = { country, timezone, population, elevation };
+    cityDataCache.set(coordsKey, cityInfo);
+    
+    if (countryEl) countryEl.textContent = country;
+    if (coordsEl) coordsEl.textContent = coords;
+    if (timezoneEl) timezoneEl.textContent = timezone;
+    if (populationEl) populationEl.textContent = population;
+    if (elevationEl) elevationEl.textContent = elevation;
+  }
 }
 
 function animateValue(id, start, end, duration, suffix = '', textSuffix = '') {
@@ -910,6 +1032,8 @@ async function loadWeatherNews(location) {
   }
 }
 
+let currentLocationData = null;
+
 async function loadMap(location) {
   try {
     const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`);
@@ -917,7 +1041,14 @@ async function loadMap(location) {
 
     if (data.success) {
       currentCoords = { lat: data.latitude, lng: data.longitude };
+      currentLocationData = {
+        name: data.location,
+        country: data.country,
+        latitude: data.latitude,
+        longitude: data.longitude
+      };
       updateMap('satellite');
+      updateCityInfo();
     }
   } catch (error) {
     console.error('Error al cargar mapa:', error);
@@ -1672,15 +1803,11 @@ Instrucciones:
 
 async function toggleChatbot() {
   var container = document.getElementById('chatbot-container');
-  var fab = document.getElementById('chatbot-fab-nasa');
+  var fab = document.querySelector('.chat-fab');
   
   if (!container) {
     console.error('Chatbot container not found');
     return;
-  }
-  
-  if (!fab) {
-    console.error('Chatbot FAB not found');
   }
   
   container.classList.toggle('active');
