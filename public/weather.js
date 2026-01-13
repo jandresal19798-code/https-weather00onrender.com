@@ -1653,8 +1653,10 @@ Instrucciones:
 
 async function toggleChatbot() {
   const container = document.getElementById('chatbot-container');
+  if (!container) return;
   const fab = document.getElementById('chatbot-fab-nasa');
-  if (!container || !fab) return;
+  if (!fab) return;
+  
   container.classList.toggle('active');
   fab.style.display = container.classList.contains('active') ? 'none' : 'flex';
   
@@ -1675,7 +1677,10 @@ function handleChatKeyPress(event) {
 
 function sendChatMessage() {
   const input = document.getElementById('chatbot-input-nasa');
-  if (!input) return;
+  if (!input) {
+    console.error('Chat input not found');
+    return;
+  }
   const message = input.value.trim();
   
   if (!message) return;
@@ -1697,6 +1702,8 @@ function sendChatMessage() {
 
 function addChatMessage(role, content) {
   const container = document.getElementById('chatbot-messages');
+  if (!container) return;
+  
   const messageDiv = document.createElement('div');
   messageDiv.className = `chatbot-message ${role}`;
   messageDiv.textContent = content;
@@ -1713,6 +1720,11 @@ function addChatMessage(role, content) {
 
 function addThinkingIndicator() {
   const container = document.getElementById('chatbot-messages');
+  if (!container) return;
+  
+  const existingIndicator = document.getElementById('thinking-indicator');
+  if (existingIndicator) return;
+  
   const indicator = document.createElement('div');
   indicator.className = 'chatbot-message thinking';
   indicator.id = 'thinking-indicator';
@@ -1960,7 +1972,11 @@ function handleSpecialCommands(message) {
 // Modificar sendChatMessage para incluir comandos especiales
 const originalSendChatMessage = sendChatMessage;
 sendChatMessage = function() {
-  const input = document.getElementById('chatbot-input');
+  const input = document.getElementById('chatbot-input-nasa');
+  if (!input) {
+    originalSendChatMessage();
+    return;
+  }
   const message = input.value.trim();
   
   if (!message) return;
