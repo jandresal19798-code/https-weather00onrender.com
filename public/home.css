@@ -1,10 +1,10 @@
-/* ========================
-   HOME PAGE STYLES - Premium Theme
-   ======================== */
+/* ================================
+   ZEUS METEO - HOME PAGE PREMIUM DESIGN
+   Con efectos inspirados en Uiverse.io
+   ================================ */
 
 /* Premium Color Variables */
 :root {
-  /* Light Mode - Premium */
   --primary: #0B3D91;
   --primary-light: #1E5AA8;
   --primary-dark: #062A6E;
@@ -14,49 +14,2398 @@
   --warning: #F59E0B;
   --danger: #EF4444;
   
-  /* Text Colors - Light */
   --text-darkest: #0F172A;
   --text-dark: #1E293B;
   --text-medium: #475569;
   --text-light: #64748B;
   --text-lighter: #94A3B8;
   
-  /* Background Colors - Light */
   --bg-lightest: #F8FAFC;
   --bg-light: #F1F5F9;
   --bg-white: #FFFFFF;
   --bg-card: #FFFFFF;
-  --bg-overlay: rgba(15, 23, 42, 0.5);
   
-  /* Borders - Light */
   --border-light: #E2E8F0;
   --border-medium: #CBD5E1;
   
-  /* Shadows - Light */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
   --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.15);
   
-  /* Gradients */
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--accent-orange) 100%);
   --gradient-hero: linear-gradient(135deg, #0B3D91 0%, #1E5AA8 50%, #3B82F6 100%);
   --gradient-card: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
   
-  /* Transitions */
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.3s ease;
-  --transition-slow: 0.5s ease;
-  
-  /* Border Radius */
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-xl: 32px;
   --radius-full: 9999px;
+  
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-blur: 20px;
 }
+
+/* Dark Mode */
+[data-theme="dark"],
+body.dark-mode {
+  --text-darkest: #F8FAFC;
+  --text-dark: #F1F5F9;
+  --text-medium: #CBD5E1;
+  --text-light: #94A3B8;
+  --text-lighter: #64748B;
+  
+  --bg-lightest: #0F172A;
+  --bg-light: #1E293B;
+  --bg-white: #1E293B;
+  --bg-card: #1E293B;
+  
+  --border-light: #334155;
+  --border-medium: #475569;
+  
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.7);
+  
+  --gradient-hero: linear-gradient(135deg, #0B3D91 0%, #1E3A5F 50%, #0F172A 100%);
+  --gradient-card: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(30, 41, 59, 0.1) 100%);
+  
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Global Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-lightest);
+  color: var(--text-dark);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background var(--transition-slow), color var(--transition-base);
+  overflow-x: hidden;
+}
+
+/* ================================
+   AMBIENT ANIMATED BACKGROUND
+   ================================ */
+.ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.cloud {
+  position: absolute;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, transparent 100%);
+  border-radius: 100px;
+  opacity: 0.4;
+  animation: float-cloud 35s linear infinite;
+  filter: blur(2px);
+}
+
+.cloud-1 {
+  width: 300px;
+  height: 80px;
+  top: 5%;
+  left: -300px;
+  animation-delay: 0s;
+  animation-duration: 35s;
+}
+
+.cloud-2 {
+  width: 400px;
+  height: 100px;
+  top: 20%;
+  left: -400px;
+  animation-delay: 12s;
+  animation-duration: 40s;
+}
+
+.cloud-3 {
+  width: 250px;
+  height: 70px;
+  top: 35%;
+  left: -250px;
+  animation-delay: 24s;
+  animation-duration: 32s;
+}
+
+.cloud-4 {
+  width: 350px;
+  height: 90px;
+  top: 50%;
+  left: -350px;
+  animation-delay: 8s;
+  animation-duration: 38s;
+}
+
+.cloud-5 {
+  width: 280px;
+  height: 75px;
+  top: 65%;
+  left: -280px;
+  animation-delay: 18s;
+  animation-duration: 33s;
+}
+
+@keyframes float-cloud {
+  from {
+    transform: translateX(-400px);
+  }
+  to {
+    transform: translateX(calc(100vw + 400px));
+  }
+}
+
+/* ================================
+   GLASSMORPHISM HEADER
+   ================================ */
+.home-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-light);
+  transition: all var(--transition-base);
+}
+
+[data-theme="dark"] .home-header,
+body.dark-mode .home-header {
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Logo Container */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.zeus-logo {
+  width: 56px;
+  height: 56px;
+  position: relative;
+}
+
+.logo-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 12px rgba(255, 165, 0, 0.4));
+}
+
+.lightning-bolt {
+  animation: lightning-pulse 2s ease-in-out infinite, lightning-glow 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes lightning-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes lightning-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.6)); }
+  50% { filter: drop-shadow(0 0 20px rgba(255, 200, 0, 0.9)); }
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 28px;
+  font-weight: 800;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.brand-tagline {
+  font-size: 13px;
+  color: var(--text-light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Navigation */
+.main-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: var(--gradient-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 15px;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 15px rgba(11, 61, 145, 0.3);
+}
+
+.nav-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(11, 61, 145, 0.4);
+}
+
+.nav-link:active {
+  transform: translateY(-1px);
+}
+
+.nav-icon {
+  font-size: 20px;
+}
+
+/* ================================
+   HERO SECTION - MODERN DESIGN
+   ================================ */
+.hero {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 32px 100px;
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.hero-text {
+  max-width: 600px;
+}
+
+.hero-title {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0 0 28px;
+  letter-spacing: -2px;
+  color: var(--text-darkest);
+}
+
+.hero-title .highlight {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.hero-description {
+  font-size: 20px;
+  color: var(--text-medium);
+  margin: 0 0 36px;
+  line-height: 1.7;
+}
+
+/* Hero Actions */
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 36px;
+  background: var(--gradient-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 17px;
+  transition: all var(--transition-base);
+  box-shadow: 0 6px 25px rgba(11, 61, 145, 0.35);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(11, 61, 145, 0.45);
+}
+
+.btn-icon {
+  font-size: 22px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 18px 36px;
+  background: transparent;
+  color: var(--primary);
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 17px;
+  border: 2px solid var(--primary);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* Hero Stats */
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  padding: 28px 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 42px;
+  font-weight: 800;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* Hero Visual - 3D Weather Card */
+.hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1000px;
+}
+
+.weather-showcase {
+  position: relative;
+  width: 380px;
+  height: 480px;
+}
+
+.weather-card-large {
+  position: relative;
+  background: var(--gradient-card);
+  border-radius: var(--radius-xl);
+  padding: 36px;
+  box-shadow: var(--shadow-xl);
+  z-index: 2;
+  animation: card-float 6s ease-in-out infinite;
+  border: 1px solid var(--border-light);
+}
+
+@keyframes card-float {
+  0%, 100% { transform: translateY(0) rotateX(2deg); }
+  50% { transform: translateY(-15px) rotateX(-2deg); }
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.weather-emoji {
+  font-size: 88px;
+  animation: emoji-bounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.2));
+}
+
+@keyframes emoji-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.weather-temp {
+  font-size: 72px;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.weather-info {
+  margin-bottom: 24px;
+}
+
+.weather-city {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-darkest);
+  margin-bottom: 6px;
+}
+
+.weather-condition {
+  font-size: 20px;
+  color: var(--text-medium);
+}
+
+.weather-details {
+  display: flex;
+  gap: 20px;
+  padding: 24px 0;
+  border-top: 1px solid var(--border-light);
+  font-size: 16px;
+  color: var(--text-light);
+}
+
+/* Floating Elements */
+.floating-elements {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.float-item {
+  position: absolute;
+  font-size: 48px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.cloud-float {
+  top: -20px;
+  right: -30px;
+  animation: float-right 8s ease-in-out infinite;
+}
+
+.sun-float {
+  top: 40px;
+  left: -50px;
+  animation: float-left 6s ease-in-out infinite;
+}
+
+.rain-float {
+  bottom: 20px;
+  right: -20px;
+  animation: float-up 7s ease-in-out infinite;
+}
+
+.thunder-float {
+  top: 100px;
+  right: -60px;
+  animation: float-right 9s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+@keyframes float-right {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(20px) translateY(-15px); }
+}
+
+@keyframes float-left {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-15px) translateY(10px); }
+}
+
+@keyframes float-up {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* ================================
+   SECTIONS
+   ================================ */
+.features,
+.sources {
+  padding: 100px 32px;
+}
+
+.features {
+  background: var(--bg-white);
+}
+
+.sources {
+  background: var(--bg-lightest);
+}
+
+.section-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 56px;
+}
+
+.section-title {
+  font-size: 42px;
+  font-weight: 800;
+  margin: 0 0 16px;
+  color: var(--text-darkest);
+  letter-spacing: -1px;
+}
+
+.section-subtitle {
+  font-size: 20px;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+/* Features Grid */
+.features-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.feature-card {
+  background: var(--bg-lightest);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  transition: all var(--transition-base);
+  border: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transition: transform var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.feature-card:hover::before {
+  transform: scaleX(1);
+}
+
+.feature-icon {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.feature-svg {
+  width: 72px;
+  height: 72px;
+}
+
+.feature-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--text-darkest);
+}
+
+.feature-card p {
+  font-size: 16px;
+  color: var(--text-medium);
+  margin: 0 0 20px;
+  line-height: 1.7;
+}
+
+.feature-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 6px 16px;
+  background: var(--bg-white);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  border: 1px solid var(--border-light);
+}
+
+/* Sources Grid */
+.sources-grid {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.source-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  padding: 32px;
+  text-align: center;
+  transition: all var(--transition-base);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.source-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.source-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: var(--bg-lightest);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border-light);
+}
+
+.source-icon {
+  font-size: 36px;
+}
+
+.source-name {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: var(--text-darkest);
+}
+
+.source-description {
+  font-size: 15px;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+/* ================================
+   QUICK SEARCH SECTION
+   ================================ */
+.quick-search {
+  background: var(--gradient-hero);
+  padding: 100px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-search::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.quick-search-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.quick-search-title {
+  font-size: 42px;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 16px;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+}
+
+.quick-search-description {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 36px;
+}
+
+/* Glass Search Box */
+.search-box {
+  display: flex;
+  gap: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 12px;
+  border-radius: var(--radius-xl);
+  margin-bottom: 28px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.search-box input {
+  flex: 1;
+  padding: 20px 24px;
+  border: none;
+  font-size: 17px;
+  border-radius: var(--radius-lg);
+  outline: none;
+  color: var(--text-dark);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.search-box input::placeholder {
+  color: var(--text-light);
+}
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 32px;
+  background: var(--gradient-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3);
+}
+
+.search-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 30px rgba(255, 107, 0, 0.5);
+}
+
+.quick-cities {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quick-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.quick-cities button {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.quick-cities button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ================================
+   FOOTER
+   ================================ */
+.home-footer {
+  background: var(--bg-white);
+  padding: 48px 32px;
+  border-top: 1px solid var(--border-light);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.zeus-logo-small {
+  width: 40px;
+  height: 40px;
+}
+
+.logo-svg-small {
+  width: 100%;
+  height: 100%;
+}
+
+.footer-brand {
+  font-size: 24px;
+  font-weight: 700;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-text {
+  font-size: 15px;
+  color: var(--text-medium);
+  margin: 0 0 10px;
+}
+
+.footer-copyright {
+  font-size: 14px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* Logo Link */
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.zeus-logo-mini {
+  width: 44px;
+  height: 44px;
+}
+
+.logo-svg-mini {
+  width: 100%;
+  height: 100%;
+}
+
+/* ================================
+   FORECAST PAGE STYLES
+   ================================ */
+
+/* Forecast Header */
+.forecast-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+[data-theme="dark"] .forecast-header,
+body.dark-mode .forecast-header {
+  background: rgba(30, 41, 59, 0.95);
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(11, 61, 145, 0.3);
+}
+
+/* Search Section */
+.search-section {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  padding: 24px;
+}
+
+[data-theme="dark"] .search-section,
+body.dark-mode .search-section {
+  background: linear-gradient(135deg, #0B3D91 0%, #1E3A5F 100%);
+}
+
+.search-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.main-search {
+  margin-bottom: 16px;
+  background: white;
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.search-box-nasa {
+  display: flex;
+  gap: 8px;
+}
+
+.search-box-nasa input {
+  flex: 1;
+  padding: 16px 20px;
+  border: none;
+  font-size: 16px;
+  border-radius: var(--radius-md);
+  outline: none;
+  color: var(--text-dark);
+  background: transparent;
+}
+
+.search-box-nasa input::placeholder {
+  color: var(--text-light);
+}
+
+.search-btn-nasa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-orange) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+}
+
+.search-btn-nasa:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 25px rgba(255, 107, 0, 0.5);
+}
+
+.quick-cities-inline {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quick-cities-inline button {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(10px);
+}
+
+.quick-cities-inline button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* City Banner */
+.city-banner {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent-orange) 100%);
+  padding: 32px;
+  border-radius: var(--radius-xl);
+  color: white;
+  margin: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.city-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.city-banner-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.city-main-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.city-weather-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.city-banner .weather-icon-large {
+  font-size: 80px;
+  animation: emoji-bounce 2s ease-in-out infinite;
+}
+
+.city-banner .temp-display {
+  display: flex;
+  align-items: flex-start;
+}
+
+.city-banner .temp-value {
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.city-banner .temp-unit {
+  font-size: 28px;
+  margin-top: 10px;
+}
+
+.city-details {
+  flex: 1;
+}
+
+.city-name {
+  font-size: 40px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  letter-spacing: -1px;
+}
+
+.city-condition {
+  font-size: 22px;
+  opacity: 0.9;
+  margin: 0 0 4px;
+}
+
+.city-date {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.city-stats-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  min-width: 110px;
+  transition: all var(--transition-base);
+}
+
+.stat-badge:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.stat-badge-icon {
+  font-size: 28px;
+}
+
+.stat-badge-value {
+  font-size: 20px;
+  font-weight: 800;
+  display: block;
+}
+
+.stat-badge-label {
+  font-size: 11px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Forecast Main */
+.forecast-main {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 24px;
+}
+
+.forecast-left,
+.forecast-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* NASA Card Styles */
+.nasa-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-base);
+}
+
+.nasa-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+[data-theme="dark"] .nasa-card,
+body.dark-mode .nasa-card {
+  background: #1E293B;
+  border-color: var(--border-medium);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+  background: linear-gradient(180deg, var(--bg-lightest) 0%, var(--bg-white) 100%);
+}
+
+[data-theme="dark"] .card-header,
+body.dark-mode .card-header {
+  background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+  border-color: var(--border-medium);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-darkest);
+  margin: 0;
+}
+
+[data-theme="dark"] .card-title,
+body.dark-mode .card-title {
+  color: white;
+}
+
+.card-badge {
+  padding: 6px 14px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-badge.info {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.card-badge.social {
+  background: linear-gradient(135deg, #1DA1F2 0%, #0D8BD9 100%);
+}
+
+/* Sun & Moon Cards */
+.sun-moon-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 24px;
+}
+
+.sun-card,
+.moon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: linear-gradient(180deg, var(--bg-lightest) 0%, var(--bg-light) 100%);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .sun-card,
+[data-theme="dark"] .moon-card,
+body.dark-mode .sun-card,
+body.dark-mode .moon-card {
+  background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+  border-color: var(--border-medium);
+}
+
+.sun-visual {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sun-circle {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B00 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 40px rgba(255, 200, 0, 0.6);
+  animation: sun-glow 3s ease-in-out infinite;
+}
+
+@keyframes sun-glow {
+  0%, 100% { box-shadow: 0 0 40px rgba(255, 200, 0, 0.6); }
+  50% { box-shadow: 0 0 60px rgba(255, 200, 0, 0.8); }
+}
+
+.sun-rays {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent 50%, rgba(255, 200, 0, 0.2) 70%, transparent 80%);
+  animation: sun-rays 4s linear infinite;
+}
+
+@keyframes sun-rays {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.time-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.time-item:last-of-type {
+  border-bottom: none;
+}
+
+.time-icon {
+  font-size: 24px;
+}
+
+.time-info {
+  flex: 1;
+}
+
+.time-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+.time-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .time-value,
+body.dark-mode .time-value {
+  color: white;
+}
+
+.day-info {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.moon-visual {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.moon-phase-visual {
+  font-size: 72px;
+  animation: moon-glow 4s ease-in-out infinite;
+}
+
+@keyframes moon-glow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 255, 200, 0.3)); }
+  50% { filter: drop-shadow(0 0 20px rgba(255, 255, 200, 0.6)); }
+}
+
+.moon-info {
+  text-align: center;
+}
+
+.moon-phase {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+[data-theme="dark"] .moon-phase,
+body.dark-mode .moon-phase {
+  color: white;
+}
+
+.moon-illumination {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.moon-details {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 8px;
+}
+
+/* 7 Day Forecast */
+.forecast-7days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.day-card-nasa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: var(--bg-lightest);
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all var(--transition-base);
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.day-card-nasa:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary);
+}
+
+.day-card-nasa.today {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  border: none;
+}
+
+.day-name-nasa {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.day-icon-nasa {
+  font-size: 32px;
+  margin: 6px 0;
+}
+
+.day-temps-nasa {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day-temp-max-nasa {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.day-temp-min-nasa {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.day-card-nasa.today .day-temp-min-nasa {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Hourly Forecast */
+.hourly-forecast-nasa {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hourly-card-nasa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  background: var(--bg-lightest);
+  border-radius: var(--radius-md);
+  min-width: 80px;
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.hourly-card-nasa:hover {
+  transform: translateY(-2px);
+  background: var(--primary);
+  color: white;
+}
+
+.hourly-time-nasa {
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.hourly-card-nasa:hover .hourly-time-nasa {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hourly-icon-nasa {
+  font-size: 32px;
+}
+
+.hourly-temp-nasa {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Filter Buttons */
+.filter-tabs-nasa {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-btn {
+  padding: 8px 20px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.filter-btn:hover {
+  background: var(--bg-light);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(11, 61, 145, 0.3);
+}
+
+/* Chart Container */
+.chart-container-nasa {
+  padding: 20px;
+  min-height: 300px;
+}
+
+/* Activities Grid */
+.activities-grid-nasa {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 20px;
+}
+
+.activity-card-nasa {
+  padding: 20px 16px;
+  background: var(--bg-lightest);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: 2px solid transparent;
+}
+
+.activity-card-nasa:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-4px);
+  border-color: var(--primary);
+}
+
+.activity-icon-nasa {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.activity-name-nasa {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.activity-conf-nasa {
+  font-size: 12px;
+  color: var(--success);
+  padding: 4px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: var(--radius-full);
+  display: inline-block;
+}
+
+.activity-card-nasa:hover .activity-conf-nasa {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Map Card */
+.map-card {
+  margin-bottom: 24px;
+}
+
+.map-controls-nasa {
+  display: flex;
+  gap: 8px;
+}
+
+.map-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--transition-base);
+}
+
+.map-btn:hover {
+  background: var(--bg-light);
+}
+
+.map-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.map-container-nasa {
+  height: 350px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  overflow: hidden;
+}
+
+.map-frame-nasa {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Details Grid */
+.details-grid-nasa {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 20px;
+}
+
+.detail-card-nasa {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-lightest);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.detail-card-nasa:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateX(4px);
+}
+
+.detail-icon-nasa {
+  font-size: 28px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.detail-card-nasa:hover .detail-icon-nasa {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.detail-content-nasa {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.detail-card-nasa:hover .detail-value {
+  color: white;
+}
+
+.detail-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.detail-card-nasa:hover .detail-desc {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Astronomy Grid */
+.astronomy-grid-nasa {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 20px;
+}
+
+.astro-item-nasa {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  background: var(--bg-lightest);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.astro-item-nasa:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.astro-label {
+  font-size: 12px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.astro-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.astro-item-nasa:hover .astro-value {
+  color: white;
+}
+
+/* Calendar */
+.calendar-nasa {
+  padding: 20px;
+}
+
+.calendar-header-nasa {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+#calendar-month-year {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cal-nav {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--transition-base);
+}
+
+.cal-nav:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.calendar-weekdays-nasa {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.calendar-weekdays-nasa span {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-light);
+  padding: 8px 0;
+}
+
+.calendar-days-nasa {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day-nasa {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-weight: 500;
+}
+
+.calendar-day-nasa:hover {
+  background: var(--bg-light);
+  transform: scale(1.1);
+}
+
+.calendar-day-nasa.other-month {
+  color: var(--text-light);
+  opacity: 0.5;
+}
+
+.calendar-day-nasa.today {
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(11, 61, 145, 0.3);
+}
+
+/* Facts List */
+.facts-list {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fact-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-lightest);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.fact-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.fact-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.fact-item p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ================================
+   RESPONSIVE BREAKPOINTS
+   ================================ */
+
+/* Large Desktop */
+@media (max-width: 1400px) {
+  .forecast-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-nasa {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* Desktop */
+@media (max-width: 1200px) {
+  .hero-content {
+    gap: 60px;
+  }
+  
+  .hero-title {
+    font-size: 52px;
+  }
+  
+  .weather-showcase {
+    width: 340px;
+    height: 430px;
+  }
+}
+
+/* Tablet Landscape */
+@media (max-width: 1024px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .hero-text {
+    max-width: 100%;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .hero-stats {
+    justify-content: center;
+  }
+  
+  .hero-visual {
+    order: -1;
+  }
+  
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .forecast-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .forecast-right {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .sun-moon-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 900px) {
+  .hero {
+    padding: 60px 24px 80px;
+  }
+  
+  .hero-title {
+    font-size: 42px;
+  }
+  
+  .hero-description {
+    font-size: 18px;
+  }
+  
+  .weather-showcase {
+    width: 320px;
+    height: 400px;
+  }
+  
+  .weather-card-large {
+    padding: 28px;
+  }
+  
+  .weather-emoji {
+    font-size: 72px;
+  }
+  
+  .weather-temp {
+    font-size: 56px;
+  }
+  
+  .weather-city {
+    font-size: 26px;
+  }
+  
+  .features-grid,
+  .sources-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .city-main-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .city-weather-main {
+    justify-content: center;
+  }
+  
+  .city-stats-row {
+    justify-content: center;
+  }
+  
+  .weather-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px 16px;
+  }
+  
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .nav-link {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+  
+  .hero {
+    padding: 40px 20px 60px;
+  }
+  
+  .hero-title {
+    font-size: 36px;
+  }
+  
+  .hero-description {
+    font-size: 16px;
+  }
+  
+  .hero-stats {
+    gap: 24px;
+  }
+  
+  .stat-value {
+    font-size: 32px;
+  }
+  
+  .features-grid,
+  .sources-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-title {
+    font-size: 32px;
+  }
+  
+  .quick-search {
+    padding: 60px 20px;
+  }
+  
+  .quick-search-title {
+    font-size: 32px;
+  }
+  
+  .search-box {
+    flex-direction: column;
+  }
+  
+  .search-box input {
+    text-align: center;
+  }
+  
+  .search-btn {
+    justify-content: center;
+  }
+  
+  .forecast-right {
+    grid-template-columns: 1fr;
+  }
+  
+  .forecast-7days {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  
+  .day-card-nasa {
+    padding: 12px 8px;
+    min-width: 60px;
+  }
+  
+  .day-name-nasa {
+    font-size: 10px;
+  }
+  
+  .day-icon-nasa {
+    font-size: 24px;
+  }
+  
+  .day-temp-max-nasa {
+    font-size: 14px;
+  }
+  
+  .details-grid-nasa,
+  .astronomy-grid-nasa {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 28px;
+  }
+  
+  .temp-value {
+    font-size: 48px;
+  }
+  
+  .weather-icon-large {
+    font-size: 64px;
+  }
+  
+  .city-name {
+    font-size: 28px;
+  }
+  
+  .stat-badge {
+    padding: 12px 20px;
+    min-width: 80px;
+  }
+  
+  .quick-cities button {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+  
+  .day-card-nasa {
+    min-width: 55px;
+    padding: 10px 6px;
+  }
+  
+  .hourly-card-nasa {
+    min-width: 70px;
+  }
+  
+  .calendar-day-nasa {
+    font-size: 12px;
+  }
+  
+  .nasa-card {
+    border-radius: var(--radius-md);
+  }
+  
+  .card-header {
+    padding: 12px 16px;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 16px 28px;
+    font-size: 15px;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: 24px;
+  }
+  
+  .brand-name {
+    font-size: 24px;
+  }
+  
+  .weather-temp {
+    font-size: 48px;
+  }
+  
+  .weather-emoji {
+    font-size: 64px;
+  }
+  
+  .stat-badge {
+    padding: 10px 16px;
+    min-width: 70px;
+  }
+  
+  .action-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  
+  .nav-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .home-header,
+  .hero-visual,
+  .quick-search,
+  .home-footer {
+    display: none;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .hero {
+    padding: 20px;
+  }
+  
+  .hero-title {
+    color: black;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000;
+    --text-secondary: #333;
+  }
+  
+  .nasa-card,
+  .feature-card,
+  .source-card {
+    border: 2px solid #000;
+  }
+}
+
+/* Dark Mode Specific Overrides */
+[data-theme="dark"] body.dark-mode,
+body.dark-mode {
+  background: var(--bg-lightest);
+}
+
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .source-card,
+[data-theme="dark"] .nasa-card,
+body.dark-mode .feature-card,
+body.dark-mode .source-card,
+body.dark-mode .nasa-card {
+  background: #1E1E1E;
+}
+
+[data-theme="dark"] .feature-card:hover,
+body.dark-mode .feature-card:hover {
+  background: #252525;
+}
+
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .feature-title,
+[data-theme="dark"] .weather-city,
+[data-theme="dark"] .source-name,
+body.dark-mode .card-title,
+body.dark-mode .feature-title,
+body.dark-mode .weather-city,
+body.dark-mode .source-name {
+  color: white;
+}
+
+[data-theme="dark"] .time-value,
+[data-theme="dark"] .astro-value,
+[data-theme="dark"] .detail-value,
+body.dark-mode .time-value,
+body.dark-mode .astro-value,
+body.dark-mode .detail-value {
+  color: white;
+}
+
+[data-theme="dark"] .sun-card,
+[data-theme="dark"] .moon-card,
+[data-theme="dark"] .day-card-nasa,
+[data-theme="dark"] .hourly-card-nasa,
+[data-theme="dark"] .detail-card-nasa,
+[data-theme="dark"] .activity-card,
+[data-theme="dark"] .astro-item-nasa,
+body.dark-mode .sun-card,
+body.dark-mode .moon-card,
+body.dark-mode .day-card-nasa,
+body.dark-mode .hourly-card-nasa,
+body.dark-mode .detail-card-nasa,
+body.dark-mode .activity-card,
+body.dark-mode .astro-item-nasa {
+  background: #2A2A2A;
+}
+
+[data-theme="dark"] .weather-card-main,
+body.dark-mode .weather-card-main {
+  background: linear-gradient(135deg, #1E3A5F 0%, #0B3D91 100%);
+}
+
+[data-theme="dark"] .search-box input,
+body.dark-mode .search-box input {
+  background: #2A2A2A;
+  color: white;
+}
+
+/* ================================
+   MOON PHASE ANIMATIONS
+   ================================ */
+.moon-phase {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.moon-illumination {
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.day-info {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 8px;
+}
+
+/* ================================
+   END OF HOME.CSS
+   ================================ */
 
 /* Dark Mode - Premium */
 [data-theme="dark"],
