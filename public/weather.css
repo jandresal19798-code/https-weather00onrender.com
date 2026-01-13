@@ -1022,35 +1022,6 @@ a:hover {
   color: white;
 }
 
-/* Astronomy Grid */
-.astronomy-grid-nasa {
-  padding: 16px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.astro-item-nasa {
-  padding: 12px;
-  background: var(--bg-light);
-  border-radius: var(--radius-md);
-  text-align: center;
-}
-
-.astro-item-nasa .astro-label {
-  display: block;
-  font-size: 11px;
-  color: var(--text-light);
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.astro-item-nasa .astro-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 /* Facts List */
 .facts-list {
   padding: 16px;

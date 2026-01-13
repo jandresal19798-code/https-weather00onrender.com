@@ -326,7 +326,7 @@ async function loadDailyForecast(location, retryCount = 0) {
       generateActivities(data.forecast);
       updateSolarInfo(new Date());
       updateMoonInfo(new Date());
-      updateCityInfo();
+      updateAstronomy();
     } else {
       console.warn('Pronóstico diario no disponible');
       const mockData = getMockForecast();
@@ -334,7 +334,9 @@ async function loadDailyForecast(location, retryCount = 0) {
       updateWeatherDetails(mockData);
       renderTempChart(mockData);
       generateActivities(mockData);
-      updateCityInfo();
+      updateSolarInfo(new Date());
+      updateMoonInfo(new Date());
+      updateAstronomy();
     }
   } catch (error) {
     console.warn('Error pronóstico diario, usando datos demo:', error.message);
@@ -343,7 +345,9 @@ async function loadDailyForecast(location, retryCount = 0) {
     updateWeatherDetails(mockData);
     renderTempChart(mockData);
     generateActivities(mockData);
-    updateCityInfo();
+    updateSolarInfo(new Date());
+    updateMoonInfo(new Date());
+    updateAstronomy();
   }
 }
 
