@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#0B3D91">
+  <meta name="description" content="Zeus Meteo - Pronóstico meteorológico detallado">
+  <title>Zeus Meteo - Pronóstico</title>
+  <link rel="stylesheet" href="weather.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay-top" id="loading">
+    <div class="loading-content-top">
+      <div class="nasa-loader">
+        <div class="nasa-spinner">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#0B3D91" stroke-width="2"/>
+            <path d="M50 5 A45 45 0 0 1 95 50" fill="none" stroke="#0B3D91" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="loading-earth">
+          <div class="earth-globe">
+            <div class="earth-continents"></div>
+          </div>
+        </div>
+      </div>
+      <h2 class="loading-title-top">ZEUS METEO</h2>
+      <p class="loading-subtitle-top">Obteniendo datos satelitales...</p>
+      <div class="loading-sources">
+        <span>● Open-Meteo</span>
+        <span>● US-NWS</span>
+        <span>● MetNorway</span>
+      </div>
+      <div class="loading-progress">
+        <div class="loading-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="nasa-header">
+    <div class="header-container">
+      <div class="logo-section">
+        <a href="index.html" class="logo-link">
+          <div class="zeus-logo-mini">
+            <svg viewBox="0 0 40 40" class="logo-svg-mini">
+              <defs>
+                <linearGradient id="logoGradientMini" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#FFD700"/>
+                  <stop offset="100%" style="stop-color:#FF6B00"/>
+                </linearGradient>
+              </defs>
+              <path d="M22 4 L14 18 L20 18 L16 36 L28 20 L22 20 Z" fill="url(#logoGradientMini)"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-title">ZEUS METEO</span>
+            <span class="logo-subtitle">Pronóstico</span>
+          </div>
+        </a>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="action-btn" title="Volver al inicio">🏠</a>
+        <button class="action-btn" onclick="downloadPDF()" title="Descargar PDF">📄</button>
+        <button class="action-btn" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Bar -->
+  <section class="search-section">
+    <div class="search-container">
+      <div class="search-box-nasa main-search">
+        <input type="text" id="location-input" placeholder="Ingresa el nombre de una ciudad..." onkeypress="if(event.key==='Enter')searchWeather()"/>
+        <button class="search-btn-nasa" onclick="searchWeather()">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M16 16 L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="quick-cities-inline">
+        <button onclick="quickSearch('Montevideo')">Montevideo</button>
+        <button onclick="quickSearch('Buenos Aires')">Buenos Aires</button>
+        <button onclick="quickSearch('Madrid')">Madrid</button>
+        <button onclick="quickSearch('Ciudad de México')">CDMX</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="forecast-main">
+    <!-- Current Weather Card -->
+    <section class="current-weather-section">
+      <div class="weather-card-main" id="current-weather" style="display: none;">
+        <div class="weather-main-header">
+          <div class="location-info">
+            <span class="location-icon">📍</span>
+            <span class="location-name" id="city-name">Ciudad</span>
+          </div>
+          <div class="update-time" id="current-date">Hoy</div>
+        </div>
+        
+        <div class="weather-main-display">
+          <div class="weather-main-left">
+            <span class="weather-icon-large" id="weather-icon">☀️</span>
+            <div class="temp-display">
+              <span class="temp-value" id="current-temp">--</span>
+              <span class="temp-unit">°C</span>
+            </div>
+            <span class="condition-text" id="weather-description">--</span>
+          </div>
+          
+          <div class="weather-main-stats">
+            <div class="stat-item">
+              <span class="stat-icon">💧</span>
+              <div class="stat-info">
+                <span class="stat-label">Humedad</span>
+                <span class="stat-value" id="humidity">--%</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-icon">💨</span>
+              <div class="stat-info">
+                <span class="stat-label">Viento</span>
+                <span class="stat-value" id="wind">-- km/h</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-icon">🌡️</span>
+              <div class="stat-info">
+                <span class="stat-label">Sensación</span>
+                <span class="stat-value" id="feels-like">--°</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-icon">📊</span>
+              <div class="stat-info">
+                <span class="stat-label">Presión</span>
+                <span class="stat-value" id="pressure">-- hPa</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="forecast-grid">
+      <!-- Left Column -->
+      <div class="forecast-left">
+        <!-- Sun & Moon -->
+        <section class="nasa-card">
+          <div class="card-header">
+            <h2 class="card-title">☀️ Sol y Luna</h2>
+          </div>
+          <div class="sun-moon-cards">
+            <div class="sun-card">
+              <div class="sun-visual">
+                <div class="sun-circle"></div>
+              </div>
+              <div class="sun-times">
+                <div class="time-item">
+                  <span class="time-icon">🌅</span>
+                  <span class="time-label">Amanecer</span>
+                  <span class="time-value" id="sunrise">--:--</span>
+                </div>
+                <div class="time-item">
+                  <span class="time-icon">🌇</span>
+                  <span class="time-label">Atardecer</span>
+                  <span class="time-value" id="sunset">--:--</span>
+                </div>
+                <div class="day-info">Duración del día: <span id="day-length">--</span></div>
+              </div>
+            </div>
+            <div class="moon-card">
+              <div class="moon-visual">
+                <span class="moon-icon" id="moon-icon">🌙</span>
+              </div>
+              <div class="moon-info">
+                <span class="moon-phase" id="moon-phase-name">Fase Lunar</span>
+                <span class="moon-illumination" id="moon-illumination">0% iluminada</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7 Day Forecast -->
+        <section class="nasa-card">
+          <div class="card-header">
+            <h2 class="card-title">📅 Pronóstico 7 Días</h2>
+          </div>
+          <div class="forecast-7days" id="daily-forecast"></div>
+        </section>
+
+        <!-- Hourly Forecast -->
+        <section class="nasa-card">
+          <div class="card-header">
+            <h2 class="card-title">⏰ Pronóstico por Horas</h2>
+            <div class="filter-tabs-nasa">
+              <button class="filter-btn active" onclick="filterHours(12, this)">12 Horas</button>
+              <button class="filter-btn" onclick="filterHours(24, this)">24 Horas</button>
+            </div>
+          </div>
+          <div class="hourly-forecast-nasa" id="hourly-forecast"></div>
+        </section>
+
+        <!-- Temperature Chart -->
+        <section class="nasa-card">
+          <div class="card-header">
+            <h2 class="card-title">📈 Tendencia de Temperatura</h2>
+          </div>
+          <div class="chart-container-nasa" id="temp-chart-container" style="display: none;">
+            <div id="tempChart"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column -->
+      <div class="forecast-right">
+        <!-- Additional Details -->
+        <section class="nasa-card">
+          <div class="card-header">
+            <h2 class="card-title">💡 Detalles Adicionales</h2>
+          </div>
+          <div class="details-grid-nasa">
+            <div class="detail-card-nasa">
+              <span class="detail-icon-nasa">☀️</span>
+              <div class="detail-content-nasa">
+                <span class="detail-label">Índice UV</span>
+                <span class="detail-value" id="uv-value">--</span>
+              </div>
+            </div>
+            <div class="detail-card-nasa">
+              <span class="detail-icon-nasa">💧</span>
+              <div class="detail-content-nasa">
+                <span class="detail-label">Precipitación</span>
+                <span class="detail-value" id="rain-value">-- mm</span>
+              </div>
+            </div>
+            <div class="detail-card-nasa">
+              <span class="detail-icon-nasa">⛈️</span>
+              <div class="detail-content-nasa">
+                <span class="detail-label">Riesgo Tormenta</span>
+                <span class="detail-value" id="storm-value">--%</span>
+              </div>
+            </div>
+            <div class="detail-card-nasa">
+              <span class="detail-icon-nasa">💨</span>
+              <div class="detail-content-nasa">
+                <span class="detail-label">Ráfagas</span>
+                <span class="detail-value" id="gusts-value">-- km/h</span>
+              </div>
+            </div>
+            <div class="detail-card-nasa">
+              <span class="detail-icon-nasa">👁️</span>
+              <div class="detail-content-nasa">
+                <span class="detail-label">Visibilidad</span>
+                <span class="detail-value" id="visibility-value">-- km</span>
+              </div>
+            </div>
+            <div class="detail-card-nasa">
+              <span class="detail-icon-nasa">☁️</span>
+              <div class="detail-content-nasa">
+                <span class="detail-label">Nubosidad</span>
+                <span class="detail-value" id="clouds-value">--%</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Activities -->
+        <section class="nasa-card">
+          <div class="card-header">
+            <h2 class="card-title">🎯 Actividades</h2>
+          </div>
+          <div class="activities-grid-nasa" id="activities-grid"></div>
+        </section>
+
+        <!-- Astronomy Data -->
+        <section class="nasa-card">
+          <div class="card-header">
+            <h3 class="card-title">🌍 Astronomía</h3>
+          </div>
+          <div class="astronomy-grid-nasa">
+            <div class="astro-item-nasa">
+              <span class="astro-label">Distancia Sol</span>
+              <span class="astro-value" id="sun-distance">-- M km</span>
+            </div>
+            <div class="astro-item-nasa">
+              <span class="astro-label">Distancia Luna</span>
+              <span class="astro-value" id="moon-distance">-- km</span>
+            </div>
+            <div class="astro-item-nasa">
+              <span class="astro-label">Mediodía Solar</span>
+              <span class="astro-value" id="solar-noon">--:--</span>
+            </div>
+            <div class="astro-item-nasa">
+              <span class="astro-label">Declinación</span>
+              <span class="astro-value" id="solar-declination">--°</span>
+            </div>
+            <div class="astro-item-nasa">
+              <span class="astro-label">Tendencia</span>
+              <span class="astro-value" id="temp-trend">--</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Weather Map -->
+        <section class="nasa-card map-card">
+          <div class="card-header">
+            <h2 class="card-title">🗺️ Mapa del Clima</h2>
+            <div class="map-controls-nasa">
+              <button class="map-btn active" onclick="changeMapType('satellite')">🛰️</button>
+              <button class="map-btn" onclick="changeMapType('weather')">☀️</button>
+              <button class="map-btn" onclick="changeMapType('precipitation')">🌧️</button>
+              <button class="map-btn" onclick="changeMapType('wind')">💨</button>
+            </div>
+          </div>
+          <div class="map-container-nasa">
+            <iframe id="map-frame" class="map-frame-nasa"></iframe>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="nasa-footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <span class="nasa-logo-small">⚡</span>
+        <span>ZEUS METEO</span>
+      </div>
+      <p class="footer-text">Sistema de Inteligencia Meteorológica • Powered by Open-Meteo, US-NWS, MetNorway</p>
+      <p class="footer-copyright">© 2026 Zeus Meteo. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Chatbot -->
+  <div class="chatbot-fab-nasa" onclick="toggleChatbot()">💬</div>
+  <div class="chatbot-status-indicator" id="chatbot-status-text">IA Gratuita</div>
+  <div class="chatbot-container-nasa" id="chatbot-container">
+    <div class="chatbot-header-nasa">
+      <span>🤖 Zeus IA</span>
+      <button class="chatbot-close-nasa" onclick="toggleChatbot()">✕</button>
+    </div>
+    <div class="chatbot-messages-nasa" id="chatbot-messages">
+      <div class="chatbot-welcome-nasa">
+        <p>¡Hola! Soy Zeus AI, tu asistente meteorológico.</p>
+        <p>Pregúntame sobre el clima, pronósticos o clima.</p>
+      </div>
+    </div>
+    <div class="chatbot-input-nasa">
+      <input type="text" id="chatbot-input-nasa" placeholder="Haz una pregunta..." onkeypress="handleChatKeyPress(event)"/>
+      <button onclick="sendChatMessage()">➤</button>
+    </div>
+  </div>
+
+  <script src="weather.js?v=20&ts=20260112"></script>
+  <script>
+    // Check for city parameter on load
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const city = urlParams.get('city');
+      if (city) {
+        document.getElementById('location-input').value = city;
+        searchWeather();
+      }
+    });
+  </script>
+</body>
+</html>
