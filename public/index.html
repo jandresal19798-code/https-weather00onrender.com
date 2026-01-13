@@ -446,8 +446,18 @@
     </div>
   </footer>
 
-  <!-- Chatbot -->
-  <div class="chatbot-fab-nasa" onclick="toggleChatbot()">💬</div>
+    <!-- Animación del clima -->
+    <div class="weather-visual-container" id="weather-visual-container" style="display: none;">
+      <div class="weather-visual" id="weather-visual"></div>
+      <div class="weather-conditions" id="weather-visual-label">Clima</div>
+      <div id="rain-container"></div>
+      <div id="snow-container"></div>
+      <div id="lightning-container"></div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-fab-nasa" onclick="toggleChatbot()">💬</div>
+    <div class="chatbot-status-indicator" id="chatbot-status-text">IA Gratuita</div>
   <div class="chatbot-container-nasa" id="chatbot-container">
     <div class="chatbot-header-nasa">
       <span>🤖 Zeus IA</span>

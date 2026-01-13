@@ -109,6 +109,7 @@ function showError(message, suggestion = '') {
 
 function updateCurrentWeather(report) {
   const container = document.getElementById('current-weather');
+  if (!container) return;
   container.style.display = 'block';
   
   const lines = report.split('\n');
@@ -123,13 +124,29 @@ function updateCurrentWeather(report) {
   
   document.getElementById('city-name').textContent = city;
   
-  const tempMatch = report.match(/Promedio:\s*([\d.]+)/);
-  if (tempMatch) {
-    document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
+  const tempPatterns = [
+    /Promedio:\s*([\d.]+)/,
+    /(\d+(?:\.\d+)?)\s*°C/i,
+    /temperatura.*?(\d+(?:\.\d+)?)/i,
+    /([\d.]+)\s*°\s*C/i
+  ];
+  
+  let tempFound = false;
+  for (const pattern of tempPatterns) {
+    const tempMatch = report.match(pattern);
+    if (tempMatch) {
+      document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
+      tempFound = true;
+      break;
+    }
+  }
+  
+  if (!tempFound) {
+    document.getElementById('current-temp').textContent = '--';
   }
   
   const descMatch = report.match(/Estado predominante:\s*(.+)/i);
-  const description = descMatch ? descMatch[1].trim() : 'Clear sky';
+  const description = descMatch ? descMatch[1].trim() : 'Despejado';
   document.getElementById('weather-description').textContent = description;
   document.getElementById('weather-icon').textContent = getWeatherIcon(description);
   
@@ -151,6 +168,34 @@ function updateCurrentWeather(report) {
   
   updateMoonInfo(now);
   updateAstronomy();
+  
+  const visualContainer = document.getElementById('weather-visual');
+  const visualLabel = document.getElementById('weather-visual-label');
+  const visualContainerMain = document.getElementById('weather-visual-container');
+  
+  if (visualContainer && visualLabel && visualContainerMain) {
+    visualContainerMain.style.display = 'block';
+    visualContainer.className = 'weather-visual';
+    visualLabel.textContent = description;
+    
+    const descLower = description.toLowerCase();
+    
+    if (descLower.includes('lluvia') || descLower.includes('rain') || descLower.includes('shower')) {
+      visualContainer.classList.add('rainy');
+      generateRain();
+    } else if (descLower.includes('tormenta') || descLower.includes('thunder') || descLower.includes('storm')) {
+      visualContainer.classList.add('stormy');
+      generateRain();
+      generateLightning();
+    } else if (descLower.includes('nieve') || descLower.includes('snow')) {
+      visualContainer.classList.add('snowy');
+      generateSnow();
+    } else if (descLower.includes('nublado') || descLower.includes('cloudy') || descLower.includes('overcast')) {
+      visualContainer.classList.add('cloudy');
+    } else if (descLower.includes('despejado') || descLower.includes('soleado') || descLower.includes('clear') || descLower.includes('sunny')) {
+      visualContainer.classList.add('sunny');
+    }
+  }
 }
 
 
@@ -1716,40 +1761,6 @@ function updateChatbotStatus() {
 document.addEventListener('DOMContentLoaded', updateChatbotStatus);
 
 async function getAIResponse(userMessage) {
-  const systemMessage = WEATHER_CONTEXT;
-  
-  const messages = [
-    { role: 'system', content: systemMessage },
-    ...chatHistory.slice(-10),
-    { role: 'user', content: userMessage }
-  ];
-  
-  if (API_CONFIG.groq.apiKey) {
-    try {
-      const response = await fetch(API_CONFIG.groq.endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_CONFIG.groq.apiKey}`
-        },
-        body: JSON.stringify({
-          model: API_CONFIG.groq.model,
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 300,
-          stream: false
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return data.choices[0].message.content.trim();
-      }
-    } catch (error) {
-      console.error('Groq error:', error);
-    }
-  }
-  
   return getSmartResponse(userMessage);
 }
 

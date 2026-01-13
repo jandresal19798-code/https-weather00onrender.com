@@ -1532,3 +1532,164 @@ body.dark-mode .fact-source {
     grid-template-columns: 1fr;
   }
 }
+
+/* Weather Animation */
+.weather-visual-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.weather-visual {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.03;
+  transition: all 1s ease;
+}
+
+.weather-visual.sunny {
+  background: radial-gradient(circle, #FFE066 0%, #FFF9E6 50%, transparent 70%);
+  opacity: 0.15;
+}
+
+.weather-visual.cloudy {
+  background: linear-gradient(180deg, #B8C6DB 0%, #F5F7FA 100%);
+  opacity: 0.2;
+}
+
+.weather-visual.rainy {
+  background: linear-gradient(180deg, #4A6A8A 0%, #6B8BA4 50%, #8AA4B8 100%);
+  opacity: 0.15;
+}
+
+.weather-visual.stormy {
+  background: linear-gradient(180deg, #2C3E50 0%, #34495E 50%, #4A5A6A 100%);
+  opacity: 0.2;
+}
+
+.weather-visual.snowy {
+  background: linear-gradient(180deg, #E8F4F8 0%, #F0F8FF 50%, #FFFFFF 100%);
+  opacity: 0.2;
+}
+
+.weather-conditions {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Rain drops */
+.rain-drop {
+  position: absolute;
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(transparent, rgba(100, 149, 237, 0.6));
+  animation: rain-fall 0.8s linear infinite;
+}
+
+@keyframes rain-fall {
+  from { transform: translateY(-20px); opacity: 1; }
+  to { transform: translateY(100vh); opacity: 0; }
+}
+
+/* Snowflakes */
+.snowflake {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: snow-fall 5s linear infinite;
+}
+
+@keyframes snow-fall {
+  from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  to { transform: translateY(100vh) rotate(360deg); opacity: 0.3; }
+}
+
+/* Lightning */
+.lightning {
+  position: absolute;
+  width: 4px;
+  height: 100px;
+  background: linear-gradient(transparent, #FFF9C4, transparent);
+  animation: flash 0.3s ease-in-out infinite;
+  opacity: 0;
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Chatbot Status Indicator */
+.chatbot-status-indicator {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: var(--bg-white);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-md);
+  z-index: 999;
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .chatbot-status-indicator {
+  background: var(--bg-gray);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+/* Weather card animation */
+.stat-card.main-stat {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading animation enhanced */
+.nasa-loader {
+  position: relative;
+}
+
+.nasa-spinner svg {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.earth-globe {
+  animation: rotate-earth 20s linear infinite;
+}
+
+@keyframes rotate-earth {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
