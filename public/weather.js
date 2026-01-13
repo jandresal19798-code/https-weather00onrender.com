@@ -878,6 +878,11 @@ async function downloadPDF() {
     return;
   }
   
+  if (!window.jspdf) {
+    alert('La librería de PDF está cargando. Intenta de nuevo en unos segundos.');
+    return;
+  }
+  
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   
@@ -1588,13 +1593,15 @@ Instrucciones:
 
 async function toggleChatbot() {
   const container = document.getElementById('chatbot-container');
-  const fab = document.getElementById('chatbot-fab');
+  const fab = document.getElementById('chatbot-fab-nasa');
+  if (!container || !fab) return;
   container.classList.toggle('active');
   fab.style.display = container.classList.contains('active') ? 'none' : 'flex';
   
   if (container.classList.contains('active')) {
     setTimeout(() => {
-      document.getElementById('chatbot-input').focus();
+      const input = document.getElementById('chatbot-input-nasa');
+      if (input) input.focus();
     }, 300);
   }
 }
@@ -1607,7 +1614,8 @@ function handleChatKeyPress(event) {
 }
 
 function sendChatMessage() {
-  const input = document.getElementById('chatbot-input');
+  const input = document.getElementById('chatbot-input-nasa');
+  if (!input) return;
   const message = input.value.trim();
   
   if (!message) return;
