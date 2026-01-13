@@ -417,6 +417,7 @@ function changeMonth(delta) {
 
 function renderLunarCalendar() {
   const container = document.getElementById('lunar-calendar');
+  if (!container) return;
   const year = currentCalendarDate.getFullYear();
   const month = currentCalendarDate.getMonth();
   
@@ -1840,6 +1841,7 @@ function showApiKeyConfig() {
 
 function saveApiKey() {
   const input = document.getElementById('groq-api-key');
+  if (!input) return;
   const apiKey = input.value.trim();
   
   if (apiKey.length < 10) {
@@ -1864,6 +1866,7 @@ function saveApiKey() {
 
 function testApiKey() {
   const input = document.getElementById('groq-api-key');
+  if (!input) return;
   const apiKey = input.value.trim();
   
   if (!apiKey) {
