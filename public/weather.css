@@ -785,14 +785,6 @@ a:hover {
   min-height: 300px;
 }
 
-/* Details Grid */
-.details-grid-nasa {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  padding: 20px;
-}
-
 /* Activities Grid */
 .activities-grid-nasa {
   display: grid;
