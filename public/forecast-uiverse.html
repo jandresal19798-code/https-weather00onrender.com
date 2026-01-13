@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#667eea">
+  <meta name="description" content="Zeus Meteo - Pronóstico meteorológico detallado con diseño neumorphism">
+  <title>Zeus Meteo - Pronóstico Detallado</title>
+  <link rel="stylesheet" href="uiverse.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="animated-bg">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Analizando datos meteorológicos...</div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <h1>ZEUS METEO</h1>
+        <p style="font-size: 12px; opacity: 0.8; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Pronóstico Detallado</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index-uiverse.html" class="nav-link">
+        <i class="fas fa-home"></i> Inicio
+      </a>
+      <button class="btn-glass" onclick="downloadPDF()">
+        <i class="fas fa-file-pdf"></i> PDF
+      </button>
+      <button class="btn-glass" onclick="toggleTheme()">
+        <i class="fas fa-adjust"></i>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Search Section -->
+    <section style="margin-bottom: 40px;">
+      <div class="search-container">
+        <div class="search-box">
+          <input type="text" class="input-neu" id="location-input" placeholder="🔍 Buscar ciudad..." onkeypress="if(event.key==='Enter')searchWeather()"/>
+          <button class="btn-3d" onclick="searchWeather()">
+            <i class="fas fa-search"></i> Buscar
+          </button>
+        </div>
+      </div>
+      
+      <div class="quick-cities">
+        <button class="city-btn" onclick="quickSearch('Buenos Aires')">🇦🇷 Buenos Aires</button>
+        <button class="city-btn" onclick="quickSearch('Madrid')">🇪🇸 Madrid</button>
+        <button class="city-btn" onclick="quickSearch('Nueva York')">🇺🇸 Nueva York</button>
+        <button class="city-btn" onclick="quickSearch('Londres')">🇬🇧 Londres</button>
+        <button class="city-btn" onclick="quickSearch('Tokio')">🇯🇵 Tokio</button>
+        <button class="city-btn" onclick="quickSearch('Sydney')">🇦🇺 Sydney</button>
+      </div>
+    </section>
+
+    <!-- City Banner -->
+    <div class="neu-card" id="city-banner" style="padding: 30px; margin-bottom: 30px; display: none;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+        <div style="display: flex; align-items: center; gap: 30px; flex: 1;">
+          <div style="font-size: 80px; animation: pulse 2s ease-in-out infinite;" id="weather-icon">☀️</div>
+          <div>
+            <h1 style="font-size: 48px; font-weight: 800; color: var(--text-primary);" id="city-name">Ciudad</h1>
+            <p style="font-size: 24px; color: var(--text-secondary);" id="weather-description">--</p>
+            <p style="font-size: 14px; color: var(--text-light); margin-top: 5px;" id="current-date">Hoy</p>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <div class="stat-item" style="background: var(--gradient-neu);">
+            <div class="stat-icon">💧</div>
+            <div>
+              <div class="stat-value" id="humidity">--%</div>
+              <div class="stat-label">Humedad</div>
+            </div>
+          </div>
+          <div class="stat-item" style="background: var(--gradient-neu);">
+            <div class="stat-icon">💨</div>
+            <div>
+              <div class="stat-value" id="wind">-- km/h</div>
+              <div class="stat-label">Viento</div>
+            </div>
+          </div>
+          <div class="stat-item" style="background: var(--gradient-neu);">
+            <div class="stat-icon">🌡️</div>
+            <div>
+              <div class="stat-value" id="feels-like">--°</div>
+              <div class="stat-label">Sensación</div>
+            </div>
+          </div>
+          <div class="stat-item" style="background: var(--gradient-neu);">
+            <div class="stat-icon">📊</div>
+            <div>
+              <div class="stat-value" id="pressure">-- hPa</div>
+              <div class="stat-label">Presión</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="grid" style="grid-template-columns: 2fr 1fr;">
+      <!-- Left Column -->
+      <div style="display: flex; flex-direction: column; gap: 30px;">
+        <!-- Main Weather Card -->
+        <div class="neu-card" style="padding: 40px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div>
+              <h2 style="font-size: 28px; font-weight: 800; color: var(--text-primary);">☀️ Clima Actual</h2>
+              <p style="color: var(--text-secondary);">Datos en tiempo real</p>
+            </div>
+            <button class="btn-glass" onclick="refreshWeather()">
+              <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+          </div>
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div style="font-size: 100px;" id="main-weather-icon">☀️</div>
+              <div>
+                <div style="font-size: 80px; font-weight: 800; color: var(--text-primary);" id="main-temp">--°</div>
+                <div style="font-size: 20px; color: var(--text-secondary);" id="main-condition">--</div>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+              <div class="stat-item" style="background: var(--gradient-neu);">
+                <div class="stat-icon">☀️</div>
+                <div>
+                  <div class="stat-value" id="uv-value">--</div>
+                  <div class="stat-label">UV</div>
+                </div>
+              </div>
+              <div class="stat-item" style="background: var(--gradient-neu);">
+                <div class="stat-icon">💧</div>
+                <div>
+                  <div class="stat-value" id="rain-value">-- mm</div>
+                  <div class="stat-label">Lluvia</div>
+                </div>
+              </div>
+              <div class="stat-item" style="background: var(--gradient-neu);">
+                <div class="stat-icon">⛈️</div>
+                <div>
+                  <div class="stat-value" id="storm-value">--%</div>
+                  <div class="stat-label">Tormenta</div>
+                </div>
+              </div>
+              <div class="stat-item" style="background: var(--gradient-neu);">
+                <div class="stat-icon">👁️</div>
+                <div>
+                  <div class="stat-value" id="visibility-value">-- km</div>
+                  <div class="stat-label">Visibilidad</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7 Day Forecast -->
+        <div class="glass-card" style="padding: 40px;">
+          <div style="margin-bottom: 30px;">
+            <h2 style="font-size: 28px; font-weight: 800; color: white;">📅 Pronóstico 7 Días</h2>
+            <p style="color: rgba(255,255,255,0.7);">Previsión extendida</p>
+          </div>
+          
+          <div class="forecast-grid" id="daily-forecast" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+            <!-- Forecast items will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- Hourly Forecast -->
+        <div class="neu-card" style="padding: 40px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div>
+              <h2 style="font-size: 28px; font-weight: 800; color: var(--text-primary);">⏰ Pronóstico Horario</h2>
+              <p style="color: var(--text-secondary);">Las próximas 24 horas</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn-glass" onclick="filterHours(12)">12h</button>
+              <button class="btn-glass" onclick="filterHours(24)">24h</button>
+            </div>
+          </div>
+          
+          <div class="forecast-grid" id="hourly-forecast" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+            <!-- Hourly items will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- Temperature Chart -->
+        <div class="glass-card" style="padding: 40px;">
+          <div style="margin-bottom: 30px;">
+            <h2 style="font-size: 28px; font-weight: 800; color: white;">📈 Tendencia de Temperatura</h2>
+            <p style="color: rgba(255,255,255,0.7);">Análisis de temperatura</p>
+          </div>
+          
+          <div id="tempChart" style="height: 400px;"></div>
+        </div>
+
+        <!-- Weather Map -->
+        <div class="neu-card" style="padding: 40px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div>
+              <h2 style="font-size: 28px; font-weight: 800; color: var(--text-primary);">🗺️ Mapa del Clima</h2>
+              <p style="color: var(--text-secondary);">Visualización en tiempo real</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn-glass" onclick="changeMapType('satellite')">🛰️ Satélite</button>
+              <button class="btn-glass" onclick="changeMapType('weather')">☀️ Clima</button>
+              <button class="btn-glass" onclick="changeMapType('precipitation')">🌧️ Lluvia</button>
+              <button class="btn-glass" onclick="changeMapType('wind')">💨 Viento</button>
+            </div>
+          </div>
+          
+          <div style="width: 100%; height: 500px; border-radius: 20px; overflow: hidden; box-shadow: inset 6px 6px 10px var(--neu-shadow-dark), inset -6px -6px 10px var(--neu-shadow-light);">
+            <iframe id="map-frame" style="width: 100%; height: 100%; border: none;" src=""></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div style="display: flex; flex-direction: column; gap: 30px;">
+        <!-- Sun & Moon -->
+        <div class="glass-card" style="padding: 30px;">
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 20px; font-weight: 700; color: white;">☀️ Sol y Luna</h3>
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Datos astronómicos</p>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <div style="font-size: 28px;">🌅</div>
+              <div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Amanecer</div>
+                <div style="font-size: 18px; font-weight: 700; color: white;" id="sunrise">--:--</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <div style="font-size: 28px;">🌇</div>
+              <div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Atardecer</div>
+                <div style="font-size: 18px; font-weight: 700; color: white;" id="sunset">--:--</div>
+              </div>
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; text-align: center;">
+              <div style="font-size: 60px; margin-bottom: 10px;" id="moon-phase-visual">🌑</div>
+              <div style="font-size: 16px; font-weight: 600; color: white;" id="moon-phase-name">Fase Lunar</div>
+              <div style="font-size: 14px; opacity: 0.7; color: rgba(255,255,255,0.7);" id="moon-illumination">0% iluminada</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activities -->
+        <div class="neu-card" style="padding: 30px;">
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 20px; font-weight: 700; color: var(--text-primary);">🎯 Actividades</h3>
+            <p style="color: var(--text-secondary); font-size: 14px;">Recomendaciones</p>
+          </div>
+          
+          <div id="activities-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <!-- Activities will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- City Info -->
+        <div class="glass-card" style="padding: 30px;">
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 20px; font-weight: 700; color: white;">🏙️ Información</h3>
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Datos de la ciudad</p>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="font-size: 20px;">📍</div>
+              <div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7);">País</div>
+                <div style="font-size: 16px; font-weight: 600; color: white;" id="city-country">--</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="font-size: 20px;">🌍</div>
+              <div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Coordenadas</div>
+                <div style="font-size: 16px; font-weight: 600; color: white;" id="city-coords">--</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="font-size: 20px;">🏔️</div>
+              <div>
+                <div style="font-size: 12px; color: rgba(255,255,255,0.7);">Elevación</div>
+                <div style="font-size: 16px; font-weight: 600; color: white;" id="city-elevation">-- m</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meteorology Facts -->
+        <div class="neu-card" style="padding: 30px;">
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 20px; font-weight: 700; color: var(--text-primary);">🔬 Datos</h3>
+            <p style="color: var(--text-secondary); font-size: 14px;">Meteorología</p>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; gap: 10px; align-items: start;">
+              <div style="font-size: 20px;">🌡️</div>
+              <div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">Récord de calor</div>
+                <div style="font-size: 13px; color: var(--text-secondary);">56.7°C en Furnace Creek, EE.UU. (1913)</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: start;">
+              <div style="font-size: 20px;">❄️</div>
+              <div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">Récord de frío</div>
+                <div style="font-size: 13px; color: var(--text-secondary);">-89.2°C en Vostok, Antártida (1983)</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: start;">
+              <div style="font-size: 20px;">⚡</div>
+              <div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">Más rayos</div>
+                <div style="font-size: 13px; color: var(--text-secondary);">Lago Maracaibo, Venezuela - 250/min</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-logo">⚡ ZEUS METEO</div>
+    <p class="footer-text">Sistema de Inteligencia Meteorológica • Powered by Open-Meteo, Weather.gov, MetNorway</p>
+    <p class="footer-text">Diseño Neumorphism inspirado en Uiverse.io</p>
+    <p class="footer-copyright">© 2026 Zeus Meteo. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Chatbot FAB -->
+  <button class="btn-glass" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 1000;" onclick="toggleChatbot()">
+    💬
+  </button>
+
+  <!-- Chatbot Container -->
+  <div class="glass-card" id="chatbot-container" style="position: fixed; bottom: 100px; right: 30px; width: 350px; max-width: calc(100vw - 60px); display: none; z-index: 1000; padding: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h4 style="color: white; font-size: 18px; font-weight: 700;">🤖 Zeus IA</h4>
+      <button class="btn-glass" style="padding: 5px 10px; font-size: 14px;" onclick="toggleChatbot()">✕</button>
+    </div>
+    
+    <div id="chatbot-messages" style="height: 250px; overflow-y: auto; margin-bottom: 15px;">
+      <div style="background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; margin-bottom: 10px;">
+        <p style="color: white; font-size: 14px; margin: 0;">¡Hola! Soy Zeus AI, tu asistente meteorológico. Pregúntame sobre el clima, pronósticos o datos científicos.</p>
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="chatbot-input" class="input-neu" style="flex: 1; padding: 10px 15px;" placeholder="Escribe tu pregunta..." onkeypress="handleChatKeyPress(event)"/>
+      <button class="btn-3d" style="padding: 10px 15px;" onclick="sendChatMessage()">➤</button>
+    </div>
+  </div>
+
+  <script src="weather-uiverse.js"></script>
+</body>
+</html>

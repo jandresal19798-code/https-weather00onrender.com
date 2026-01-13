@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#667eea">
+  <meta name="description" content="Zeus Meteo - Pronóstico meteorológico con diseño moderno">
+  <title>Zeus Meteo - Tu Asistente del Clima</title>
+  <link rel="stylesheet" href="uiverse.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="animated-bg">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <h1>ZEUS METEO</h1>
+        <p style="font-size: 12px; opacity: 0.8; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Inteligencia Meteorológica</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="forecast.html" class="nav-link">
+        <i class="fas fa-cloud-sun"></i> Pronóstico
+      </a>
+      <a href="forecast.html" class="nav-link">
+        <i class="fas fa-chart-line"></i> Estadísticas
+      </a>
+      <button class="btn-glass" onclick="toggleTheme()">
+        <i class="fas fa-adjust"></i>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1 class="hero-title">Tu Asistente Meteorológico Inteligente</h1>
+      <p class="hero-subtitle">
+        Obtén pronósticos precisos del clima con datos en tiempo real de las mejores fuentes meteorológicas del mundo.
+        Diseño moderno con efectos de glassmorphism y neumorphism.
+      </p>
+      
+      <!-- Search -->
+      <div class="search-container">
+        <div class="search-box">
+          <input type="text" class="input-neu" id="location-input" placeholder="🔍 Buscar ciudad..." onkeypress="if(event.key==='Enter')quickSearch()"/>
+          <button class="btn-3d" onclick="quickSearch()">
+            <i class="fas fa-search"></i> Buscar
+          </button>
+        </div>
+      </div>
+      
+      <!-- Quick Cities -->
+      <div class="quick-cities">
+        <button class="city-btn" onclick="quickSearchCity('Buenos Aires')">🇦🇷 Buenos Aires</button>
+        <button class="city-btn" onclick="quickSearchCity('Madrid')">🇪🇸 Madrid</button>
+        <button class="city-btn" onclick="quickSearchCity('Nueva York')">🇺🇸 Nueva York</button>
+        <button class="city-btn" onclick="quickSearchCity('Londres')">🇬🇧 Londres</button>
+        <button class="city-btn" onclick="quickSearchCity('Tokio')">🇯🇵 Tokio</button>
+        <button class="city-btn" onclick="quickSearchCity('Sydney')">🇦🇺 Sydney</button>
+      </div>
+    </section>
+
+    <!-- Weather Cards Grid -->
+    <div class="grid">
+      <!-- Main Weather Card -->
+      <div class="glass-card weather-card">
+        <div class="weather-main">
+          <div>
+            <div class="weather-icon">☀️</div>
+            <div class="temperature">24°C</div>
+          </div>
+          <div class="weather-info">
+            <h3>Buenos Aires</h3>
+            <p>Parcialmente nublado</p>
+            <p style="margin-top: 5px; font-size: 13px; opacity: 0.7;">
+              <i class="fas fa-clock"></i> Actualizado hace 5 min
+            </p>
+          </div>
+        </div>
+        
+        <div class="weather-stats">
+          <div class="stat-item">
+            <div class="stat-icon">💧</div>
+            <div>
+              <div class="stat-value">45%</div>
+              <div class="stat-label">Humedad</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">💨</div>
+            <div>
+              <div class="stat-value">12 km/h</div>
+              <div class="stat-label">Viento</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">🌡️</div>
+            <div>
+              <div class="stat-value">26°</div>
+              <div class="stat-label">Sensación</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">📊</div>
+            <div>
+              <div class="stat-value">1015</div>
+              <div class="stat-label">hPa</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7 Day Forecast Card -->
+      <div class="glass-card weather-card">
+        <div class="weather-info">
+          <h3>📅 Pronóstico 7 Días</h3>
+          <p>Previsión para la semana</p>
+        </div>
+        
+        <div class="forecast-grid">
+          <div class="forecast-item">
+            <div class="forecast-day">Hoy</div>
+            <div class="forecast-icon">☀️</div>
+            <div class="forecast-temp">24°<span>/18°</span></div>
+          </div>
+          <div class="forecast-item">
+            <div class="forecast-day">Lun</div>
+            <div class="forecast-icon">🌤️</div>
+            <div class="forecast-temp">22°<span>/17°</span></div>
+          </div>
+          <div class="forecast-item">
+            <div class="forecast-day">Mar</div>
+            <div class="forecast-icon">⛅</div>
+            <div class="forecast-temp">20°<span>/16°</span></div>
+          </div>
+          <div class="forecast-item">
+            <div class="forecast-day">Mié</div>
+            <div class="forecast-icon">🌧️</div>
+            <div class="forecast-temp">18°<span>/15°</span></div>
+          </div>
+          <div class="forecast-item">
+            <div class="forecast-day">Jue</div>
+            <div class="forecast-icon">☀️</div>
+            <div class="forecast-temp">23°<span>/17°</span></div>
+          </div>
+          <div class="forecast-item">
+            <div class="forecast-day">Vie</div>
+            <div class="forecast-icon">☀️</div>
+            <div class="forecast-temp">25°<span>/19°</span></div>
+          </div>
+          <div class="forecast-item">
+            <div class="forecast-day">Sáb</div>
+            <div class="forecast-icon">🌤️</div>
+            <div class="forecast-temp">24°<span>/18°</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sun & Moon Card -->
+      <div class="neu-card weather-card" style="padding: 25px;">
+        <div class="weather-info" style="margin-bottom: 20px;">
+          <h3 style="color: var(--text-primary);">☀️ Sol y Luna</h3>
+          <p style="color: var(--text-secondary);">Datos astronómicos</p>
+        </div>
+        
+        <div style="display: flex; gap: 20px;">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+              <span style="font-size: 20px;">🌅</span>
+              <div>
+                <div style="font-size: 12px; color: var(--text-secondary);">Amanecer</div>
+                <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">06:32</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 20px;">🌇</span>
+              <div>
+                <div style="font-size: 12px; color: var(--text-secondary);">Atardecer</div>
+                <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">19:45</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="flex: 1; text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🌕</div>
+            <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">Luna Llena</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">98% iluminada</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Air Quality Card -->
+      <div class="glass-card weather-card">
+        <div class="weather-info">
+          <h3>🌬️ Calidad del Aire</h3>
+          <p>Índice de calidad actual</p>
+        </div>
+        
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 64px; font-weight: 800; color: #10b981; margin-bottom: 10px;">42</div>
+          <div style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 10px;">Bueno</div>
+          <div style="font-size: 14px; opacity: 0.8; color: rgba(255,255,255,0.7);">
+            La calidad del aire es satisfactoria. No hay riesgo.
+          </div>
+        </div>
+        
+        <div class="weather-stats">
+          <div class="stat-item">
+            <div class="stat-icon">🌫️</div>
+            <div>
+              <div class="stat-value">12 µg</div>
+              <div class="stat-label">PM2.5</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">🏭</div>
+            <div>
+              <div class="stat-value">28 µg</div>
+              <div class="stat-label">PM10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="feature-card glass-card">
+        <div class="feature-icon floating">
+          <i class="fas fa-clock"></i>
+        </div>
+        <h3>Actualización en Tiempo Real</h3>
+        <p>Datos meteorológicos actualizados cada hora desde múltiples fuentes confiables como Open-Meteo, MetNorway y Weather.gov.</p>
+      </div>
+      
+      <div class="feature-card glass-card">
+        <div class="feature-icon floating" style="animation-delay: 0.5s;">
+          <i class="fas fa-globe-americas"></i>
+        </div>
+        <h3>Cobertura Global</h3>
+        <p>Accede a información del clima de cualquier ciudad del mundo con más de 7 días de pronóstico extendido.</p>
+      </div>
+      
+      <div class="feature-card glass-card">
+        <div class="feature-icon floating" style="animation-delay: 1s;">
+          <i class="fas fa-chart-area"></i>
+        </div>
+        <h3>Gráficos Interactivos</h3>
+        <p>Visualiza tendencias de temperatura, precipitación y viento con gráficos dinámicos y fáciles de entender.</p>
+      </div>
+      
+      <div class="feature-card glass-card">
+        <div class="feature-icon floating" style="animation-delay: 1.5s;">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h3>Asistente IA</h3>
+        <p>Pregúntale a Zeus AI sobre el clima, pronósticos o curiosidades meteorológicas de forma natural.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-logo">⚡ ZEUS METEO</div>
+    <p class="footer-text">Sistema de Inteligencia Meteorológica • Powered by Open-Meteo, Weather.gov, MetNorway</p>
+    <p class="footer-text">Diseño inspirado en Uiverse.io con Glassmorphism y Neumorphism</p>
+    <p class="footer-copyright">© 2026 Zeus Meteo. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Analizando datos meteorológicos...</div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    function quickSearch() {
+      const location = document.getElementById('location-input').value.trim();
+      if (location) {
+        window.location.href = 'forecast.html?city=' + encodeURIComponent(location);
+      }
+    }
+
+    function quickSearchCity(city) {
+      window.location.href = 'forecast.html?city=' + encodeURIComponent(city);
+    }
+
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    });
+  </script>
+</body>
+</html>

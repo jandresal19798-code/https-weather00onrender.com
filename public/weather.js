@@ -3,6 +3,7 @@ let currentCoords = null;
 let currentReport = null;
 let hourlyForecastData = [];
 let filterHoursValue = 12;
+let searchController = null;
 
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');
@@ -79,11 +80,15 @@ async function searchWeather() {
   showLoading();
   
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    if (searchController) {
+      searchController.abort();
+    }
+    searchController = new AbortController();
+    
+    const timeout = setTimeout(() => searchController.abort(), 30000);
     
     const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
-      signal: controller.signal
+      signal: searchController.signal
     });
     
     clearTimeout(timeout);
@@ -97,21 +102,23 @@ async function searchWeather() {
     if (data.success) {
       updateCurrentWeather(data.report);
       currentReport = data.report;
+      await loadMap(location);
       await Promise.all([
         loadHourlyForecast(location),
-        loadDailyForecast(location),
-        loadMap(location)
+        loadDailyForecast(location)
       ]);
     } else {
       console.error(data.error);
     }
   } catch (error) {
-    console.error('Error:', error);
     if (error.name === 'AbortError') {
-      console.log('Request timed out');
+      console.log('Request cancelled');
+    } else {
+      console.error('Error:', error);
     }
   } finally {
     hideLoading();
+    searchController = null;
   }
 }
 
@@ -1086,9 +1093,12 @@ async function loadMap(location) {
       };
       updateMap('satellite');
       updateCityInfo();
+      updateAstronomy();
     }
   } catch (error) {
     console.error('Error al cargar mapa:', error);
+    updateCityInfo();
+    updateAstronomy();
   }
 }
 
