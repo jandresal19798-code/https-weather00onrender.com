@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB } from './weatherSources.js';
+import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB, INUMET } from './weatherSources.js';
 import { ReportGenerator } from './reportGenerator.js';
 
 dotenv.config();
@@ -13,6 +13,7 @@ class WeatherAgent {
   }
 
   initializeSources() {
+    this.sources.push(new INUMET());
     this.sources.push(new OpenMeteo());
     this.sources.push(new SevenTimer());
     this.sources.push(new TomorrowIO());
@@ -153,6 +154,7 @@ class WeatherAgent {
 
   getSourceWeight(source) {
     const weights = {
+      'INUMET': 1.3,
       'USNWS': 1.2,
       'Tomorrow.io': 1.15,
       '7Timer': 1.1,

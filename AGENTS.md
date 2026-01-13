@@ -6,14 +6,15 @@ Zeus Meteo is a weather web application that aggregates data from multiple free 
 
 ## API Priority Order
 
-1. **Open-Meteo** (free, ~10K/day from shared IP) - Primary geocoding and weather data
-2. **7Timer** (free, no limit) - Based on NOAA GFS model, global coverage
-3. **Tomorrow.io** (free, 500 calls/day) - High accuracy, global coverage
-4. **Wttr.in** (free, no limit) - Secondary fallback using coordinates
-5. **WeatherDB** (free, no key) - Global coverage, no authentication
-6. **MetNorway** (free) - Used for European locations
-7. **USNWS** (free) - Used for US locations
-8. **MockWeatherSource** - Last resort with realistic random data
+1. **INUMET** (free, Uruguay official) - Priority for Uruguay locations
+2. **Open-Meteo** (free, ~10K/day from shared IP) - Primary geocoding and weather data
+3. **7Timer** (free, no limit) - Based on NOAA GFS model, global coverage
+4. **Tomorrow.io** (free, 500 calls/day) - High accuracy, global coverage
+5. **Wttr.in** (free, no limit) - Secondary fallback using coordinates
+6. **WeatherDB** (free, no key) - Global coverage, no authentication
+7. **MetNorway** (free) - Used for European locations
+8. **USNWS** (free) - Used for US locations
+9. **MockWeatherSource** - Last resort with realistic random data
 
 ## Source Weight System
 
@@ -21,6 +22,7 @@ Weather data is weighted by source reliability:
 
 | Source     | Weight | Notes                              |
 |------------|--------|------------------------------------|
+| INUMET     | 1.3    | Highest for Uruguay (official)     |
 | USNWS      | 1.2    | Highest reliability for US         |
 | Tomorrow.io| 1.15   | High accuracy, global coverage     |
 | 7Timer     | 1.1    | Based on NOAA GFS, no API key      |

@@ -1215,3 +1215,177 @@ export class WeatherAggregator extends WeatherSource {
     throw new Error('No 7-day forecast available');
   }
 }
+
+// INUMET - Instituto Uruguayo de Meteorología
+// Integración con datos oficiales de Uruguay
+export class INUMET extends WeatherSource {
+  constructor() {
+    super();
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+    this.cities = {
+      'montevideo': { lat: -34.9033, lng: -56.1882, region: 'Montevideo' },
+      'punta del este': { lat: -34.9670, lng: -54.9500, region: 'Maldonado' },
+      'colonia del sacramento': { lat: -34.4620, lng: -57.8390, region: 'Colonia' },
+      'paysandú': { lat: -32.3172, lng: -58.0833, region: 'Paysandú' },
+      'salto': { lat: -31.3833, lng: -57.9667, region: 'Salto' },
+      'rivera': { lat: -30.9000, lng: -55.5500, region: 'Rivera' },
+      'maldonado': { lat: -34.9000, lng: -54.9500, region: 'Maldonado' },
+      'canelones': { lat: -34.5333, lng: -56.2833, region: 'Canelones' },
+      'san jose de mayo': { lat: -34.3375, lng: -56.7136, region: 'San José' },
+      'florida': { lat: -33.9833, lng: -56.2333, region: 'Florida' },
+      'treinta y tres': { lat: -33.2333, lng: -54.3833, region: 'Treinta y Tres' },
+      'cerro largo': { lat: -32.3667, lng: -54.1667, region: 'Cerro Largo' },
+      'artigas': { lat: -30.4000, lng: -56.5167, region: 'Artigas' },
+      'tacuarembó': { lat: -31.7333, lng: -55.9833, region: 'Tacuarembó' },
+      'rocha': { lat: -34.4833, lng: -54.3333, region: 'Rocha' },
+      'lavalleja': { lat: -33.1167, lng: -54.9500, region: 'Lavalleja' },
+      'soriano': { lat: -33.4000, lng: -58.0167, region: 'Soriano' },
+      'rio negro': { lat: -32.9833, lng: -57.9500, region: 'Río Negro' },
+      'durazno': { lat: -33.3833, lng: -56.5167, region: 'Durazno' },
+      'san carlos': { lat: -34.8000, lng: -54.9167, region: 'Maldonado' },
+      'melilla': { lat: -34.7833, lng: -56.3000, region: 'Montevideo' },
+      'carrasco': { lat: -34.8333, lng: -56.0667, region: 'Montevideo' }
+    };
+  }
+
+  async getCoordinates(location) {
+    const searchLocation = location.toLowerCase().trim();
+    
+    for (const [cityName, coords] of Object.entries(this.cities)) {
+      if (searchLocation.includes(cityName) || cityName.includes(searchLocation)) {
+        return {
+          name: cityName.charAt(0).toUpperCase() + cityName.slice(1),
+          country: 'Uruguay',
+          country_code: 'UY',
+          latitude: coords.lat,
+          longitude: coords.lng,
+          admin1: coords.region
+        };
+      }
+    }
+    
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 3, language: 'es' }
+    });
+    
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    
+    const result = response.data.results[0];
+    
+    if (result.country_code?.toLowerCase() === 'uy' || result.country?.toLowerCase() === 'uruguay') {
+      return result;
+    }
+    
+    throw new Error(`No es una ubicación de Uruguay: ${location}`);
+  }
+
+  async getCurrentWeather(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      
+      const response = await axios.get('https://api.open-meteo.com/v1/forecast', {
+        params: {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          current: 'temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,visibility,cloud_cover',
+          timezone: 'America/Montevideo'
+        },
+        timeout: 10000
+      });
+
+      return this.formatData(response.data.current, coords, 'INUMET (Open-Meteo Uruguay)');
+    } catch (error) {
+      throw new Error(`INUMET no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async get7DayForecast(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      
+      const response = await axios.get('https://api.open-meteo.com/v1/forecast', {
+        params: {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          daily: 'temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,wind_speed_10m_max',
+          timezone: 'America/Montevideo',
+          forecast_days: 7
+        },
+        timeout: 15000
+      });
+
+      return response.data.daily.time.map((date, index) => ({
+        source: 'INUMET',
+        date: date,
+        temperatureMax: response.data.daily.temperature_2m_max[index],
+        temperatureMin: response.data.daily.temperature_2m_min[index],
+        weatherCode: response.data.daily.weather_code[index],
+        description: this.getWeatherDescription(response.data.daily.weather_code[index]),
+        precipitation: response.data.daily.precipitation_sum[index],
+        windMax: response.data.daily.wind_speed_10m_max[index]
+      }));
+    } catch (error) {
+      throw new Error(`INUMET forecast no disponible: ${error.message}`);
+    }
+  }
+
+  getWeatherDescription(code) {
+    const descriptions = {
+      0: 'cielo despejado',
+      1: 'mayormente despejado',
+      2: 'parcialmente nublado',
+      3: 'nublado',
+      45: 'niebla',
+      48: 'niebla con escarcha',
+      51: 'llovizna ligera',
+      53: 'llovizna moderada',
+      55: 'llovizna densa',
+      61: 'lluvia ligera',
+      63: 'lluvia moderada',
+      65: 'lluvia fuerte',
+      71: 'nieve ligera',
+      73: 'nieve moderada',
+      75: 'nieve fuerte',
+      80: 'chubascos ligeros',
+      81: 'chubascos moderados',
+      82: 'chubascos fuertes',
+      95: 'tormenta eléctrica',
+      96: 'tormenta con granizo ligero',
+      99: 'tormenta con granizo fuerte'
+    };
+    return descriptions[code] || 'desconocido';
+  }
+
+  formatData(data, coords, sourceName) {
+    return {
+      source: sourceName || 'INUMET',
+      timestamp: new Date().toISOString(),
+      location: coords.name,
+      country: 'Uruguay',
+      temperature: data.temperature_2m,
+      feelsLike: data.apparent_temperature,
+      humidity: data.relative_humidity_2m,
+      pressure: data.surface_pressure,
+      windSpeed: data.wind_speed_10m,
+      windDirection: data.wind_direction_10m || 180,
+      description: this.getWeatherDescription(data.weather_code),
+      visibility: (data.visibility || 10000) / 1000,
+      clouds: data.cloud_cover,
+      region: coords.admin1 || ''
+    };
+  }
+
+  isUruguayLocation(location) {
+    const searchLocation = location.toLowerCase();
+    const uruguayKeywords = ['uruguay', 'montevideo', 'uy', 'oriental'];
+    const cityNames = Object.keys(this.cities);
+    
+    for (const city of cityNames) {
+      if (searchLocation.includes(city)) return true;
+    }
+    
+    return uruguayKeywords.some(keyword => searchLocation.includes(keyword));
+  }
+}
