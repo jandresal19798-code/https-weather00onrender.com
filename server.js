@@ -217,17 +217,44 @@ app.get('/api/coordinates', async (req, res) => {
     const openMeteo = new OpenMeteo();
     
     let coords = null;
-    const variations = [
-      location,
-      location.replace(/^[a-z]{2}\s+/i, ''),
-      location.replace(/,\s*[a-z]{2}$/i, ''),
-      location.replace(/\s+[a-z]{2}$/i, '')
+    const variations = [];
+    
+    const commonCountries = [
+      'argentina', 'uruguay', 'chile', 'brasil', 'paraguay', 'bolivia', 'peru', 'ecuador', 
+      'colombia', 'venezuela', 'mexico', 'españa', 'portugal', 'francia', 'italia', 'alemania',
+      'estados unidos', 'usa', 'united states', 'canada', 'reino unido', 'uk', 'japon', 'china',
+      'argentina', 'uruguay', 'chile', 'brasil', 'paraguay', 'bolivia', 'peru', 'ecuador', 
+      'colombia', 'venezuela', 'mexico', 'spain', 'portugal', 'france', 'italy', 'germany',
+      'argentina', 'uruguay', 'chile', 'brazil', 'paraguay', 'bolivia', 'peru', 'ecuador',
+      'colombia', 'venezuela', 'mexico', 'spain', 'portugal', 'france', 'italy', 'germany',
+      'argentinian', 'uruguayan', 'chilean', 'brazilian', 'paraguayan', 'peruvian', 'ecuadorian',
+      'colombian', 'venezuelan', 'mexican', 'spanish', 'portuguese', 'french', 'italian', 'german'
     ];
     
+    variations.push(location);
+    
+    if (location.includes(',')) {
+      const parts = location.split(',').map(p => p.trim());
+      if (parts.length >= 2) {
+        variations.push(parts[0]);
+        variations.push(`${parts[0]}, ${parts[1].toLowerCase()}`);
+        variations.push(`${parts[0]}, ${parts[1].toUpperCase()}`);
+      }
+    } else {
+      for (const country of commonCountries) {
+        variations.push(`${location}, ${country}`);
+        variations.push(`${location} ${country}`);
+      }
+    }
+    
+    const triedLocations = new Set();
     for (const loc of variations) {
+      if (triedLocations.has(loc.toLowerCase())) continue;
+      triedLocations.add(loc.toLowerCase());
+      
       try {
         coords = await openMeteo.getCoordinates(loc);
-        if (coords) break;
+        if (coords && coords.country) break;
       } catch (e) {
         continue;
       }
@@ -241,6 +268,7 @@ app.get('/api/coordinates', async (req, res) => {
       success: true, 
       location: coords.name,
       country: coords.country,
+      countryCode: coords.country_code?.toUpperCase() || '',
       latitude: coords.latitude,
       longitude: coords.longitude
     };
@@ -250,6 +278,55 @@ app.get('/api/coordinates', async (req, res) => {
   } catch (error) {
     console.error('Error al obtener coordenadas:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/search', async (req, res) => {
+  try {
+    const query = req.query.q;
+    
+    if (!query || query.length < 2) {
+      return res.json([]);
+    }
+
+    const cacheKey = getCacheKey('/api/search', { query });
+    const cached = getCached(cacheKey);
+    
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const axios = (await import('axios')).default;
+    const response = await axios.get('https://geocoding-api.open-meteo.com/v1/search', {
+      params: {
+        name: query,
+        count: 10,
+        language: 'es',
+        format: 'json'
+      },
+      timeout: 5000
+    });
+
+    if (!response.data.results) {
+      return res.json([]);
+    }
+
+    const suggestions = response.data.results.map(r => ({
+      name: r.name,
+      country: r.country || '',
+      countryCode: r.country_code?.toUpperCase() || '',
+      state: r.admin1 || '',
+      latitude: r.latitude,
+      longitude: r.longitude,
+      display: `${r.name}${r.country ? ', ' + r.country : ''}${r.admin1 ? ' (' + r.admin1 + ')' : ''}`
+    }));
+
+    setCached(cacheKey, suggestions, 60000);
+    
+    res.json(suggestions);
+  } catch (error) {
+    console.error('Error en búsqueda:', error);
+    res.json([]);
   }
 });
 

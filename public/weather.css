@@ -1042,6 +1042,71 @@ a:hover {
 }
 
 /* ================================
+   SEARCH SUGGESTIONS
+   ================================ */
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.search-suggestions.active {
+  display: block;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: var(--nasa-blue);
+  color: white;
+}
+
+.suggestion-icon {
+  font-size: 18px;
+}
+
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.suggestion-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.suggestion-country {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.suggestion-flag {
+  font-size: 18px;
+}
+
+/* ================================
    CALENDAR
    ================================ */
 .calendar-nasa {

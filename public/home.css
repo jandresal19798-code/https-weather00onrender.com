@@ -724,6 +724,69 @@ body.dark-mode .home-header {
   box-shadow: 0 6px 25px rgba(255, 107, 0, 0.5);
 }
 
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 500px;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-suggestions.active {
+  display: block;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: var(--bg-light);
+}
+
+.suggestion-icon {
+  font-size: 20px;
+}
+
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.suggestion-name {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.suggestion-country {
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.suggestion-flag {
+  font-size: 16px;
+}
+
 .quick-cities {
   display: flex;
   justify-content: center;
