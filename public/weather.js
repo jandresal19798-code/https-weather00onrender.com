@@ -34,17 +34,29 @@ function hideLoading() {
 }
 
 function showHome() {
-  document.getElementById('home-page').classList.add('active');
-  document.getElementById('forecasts-page').classList.remove('active');
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector('.nav-btn:first-child').classList.add('active');
+  var homePage = document.getElementById('home-page');
+  var forecastsPage = document.getElementById('forecasts-page');
+  var navBtns = document.querySelectorAll('.nav-btn');
+  
+  if (homePage) homePage.classList.add('active');
+  if (forecastsPage) forecastsPage.classList.remove('active');
+  if (navBtns.length > 0) {
+    navBtns.forEach(function(btn) { btn.classList.remove('active'); });
+    navBtns[0].classList.add('active');
+  }
 }
 
 function showForecasts() {
-  document.getElementById('home-page').classList.remove('active');
-  document.getElementById('forecasts-page').classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
+  var homePage = document.getElementById('home-page');
+  var forecastsPage = document.getElementById('forecasts-page');
+  var navBtns = document.querySelectorAll('.nav-btn');
+  
+  if (homePage) homePage.classList.remove('active');
+  if (forecastsPage) forecastsPage.classList.add('active');
+  if (navBtns.length > 0) {
+    navBtns.forEach(function(btn) { btn.classList.remove('active'); });
+    if (navBtns[1]) navBtns[1].classList.add('active');
+  }
 }
 
 function quickSearch(city) {
@@ -420,6 +432,8 @@ function updateMoonInfo(date) {
   const moonPhaseNameEl = document.getElementById('moon-phase-name');
   const moonIlluminationEl = document.getElementById('moon-illumination');
   
+  if (!moonIconEl || !moonPhaseNameEl || !moonIlluminationEl) return;
+  
   const moon = calculateMoonPhase(date);
   
   moonIconEl.textContent = moon.icon;
@@ -430,19 +444,23 @@ function updateMoonInfo(date) {
 let currentCalendarDate = new Date();
 
 function initCalendar() {
+  var container = document.getElementById('calendar-days');
+  if (!container) return; // No calendar on this page
   renderCalendar(currentCalendarDate);
   updateAstronomy();
 }
 
 function renderCalendar(date) {
-  const container = document.getElementById('calendar-days');
-  const monthYearEl = document.getElementById('calendar-month-year');
+  var container = document.getElementById('calendar-days');
+  var monthYearEl = document.getElementById('calendar-month-year');
+  
+  if (!container || !monthYearEl) return;
   
   const year = date.getFullYear();
   const month = date.getMonth();
   
   const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  monthYearEl.textContent = `${months[month]} ${year}`;
+  monthYearEl.textContent = months[month] + ' ' + year;
   
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -470,8 +488,9 @@ function renderCalendar(date) {
 
 function changeMonth(delta) {
   currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+  var container = document.getElementById('calendar-days');
+  if (!container) return;
   renderCalendar(currentCalendarDate);
-  renderLunarCalendar();
 }
 
 function renderLunarCalendar() {
