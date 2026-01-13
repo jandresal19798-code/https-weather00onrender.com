@@ -1681,6 +1681,7 @@ const API_CONFIG = {
 
 function updateChatbotStatus() {
   const statusEl = document.getElementById('chatbot-status-text');
+  if (!statusEl) return;
   if (API_CONFIG.groq.apiKey) {
     statusEl.textContent = 'Groq IA';
     statusEl.style.color = '#00c853';
