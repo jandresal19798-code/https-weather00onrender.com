@@ -793,45 +793,6 @@ a:hover {
   padding: 20px;
 }
 
-.detail-card-nasa {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: var(--bg-light);
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-}
-
-.detail-card-nasa:hover {
-  background: var(--nasa-blue);
-  color: white;
-}
-
-.detail-icon-nasa {
-  font-size: 28px;
-}
-
-.detail-content-nasa {
-  display: flex;
-  flex-direction: column;
-}
-
-.detail-content-nasa .detail-label {
-  font-size: 12px;
-  color: var(--text-light);
-  text-transform: uppercase;
-}
-
-.detail-content-nasa .detail-value {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.detail-card-nasa:hover .detail-label {
-  color: rgba(255, 255, 255, 0.7);
-}
-
 /* Activities Grid */
 .activities-grid-nasa {
   display: grid;
