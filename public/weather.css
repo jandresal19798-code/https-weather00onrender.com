@@ -1247,3 +1247,88 @@ a:hover {
     font-size: 13px;
   }
 }
+
+/* Dark Mode */
+body.dark-mode {
+  --nasa-blue: #1E5AA8;
+  --nasa-blue-light: #2E6FB8;
+  --nasa-blue-dark: #0B3D91;
+  --space-black: #0C0C0C;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --text-light: #888888;
+  --bg-white: #1A1A1A;
+  --bg-light: #121212;
+  --bg-gray: #2A2A2A;
+  --border-color: #3A3A3A;
+  --success: #0B9444;
+  --warning: #F5A623;
+  --danger: #FF4444;
+}
+
+body.dark-mode {
+  background: var(--bg-light);
+  color: var(--text-primary);
+}
+
+body.dark-mode .nasa-header {
+  background: linear-gradient(135deg, var(--nasa-blue-dark) 0%, var(--nasa-blue) 100%);
+}
+
+body.dark-mode .nasa-card {
+  background: var(--bg-white);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .day-card-nasa,
+body.dark-mode .hourly-card-nasa,
+body.dark-mode .detail-card-nasa,
+body.dark-mode .activity-card {
+  background: var(--bg-gray);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .calendar-day.today {
+  background: var(--nasa-blue);
+  color: white;
+}
+
+body.dark-mode .loading-overlay-top {
+  background: var(--space-black);
+}
+
+body.dark-mode .chatbot-container-nasa {
+  background: var(--bg-white);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .chatbot-message.assistant {
+  background: var(--bg-gray);
+  color: var(--text-primary);
+}
+
+body.dark-mode input,
+body.dark-mode textarea {
+  background: var(--bg-gray);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .action-btn {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+body.dark-mode .action-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+body.dark-mode .nav-btn {
+  color: rgba(255,255,255,0.7);
+}
+
+body.dark-mode .nav-btn.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
