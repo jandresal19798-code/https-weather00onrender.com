@@ -120,7 +120,7 @@ function showError(message, suggestion = '') {
 }
 
 function updateCurrentWeather(report) {
-  const banner = document.getElementById('weather-banner');
+  const banner = document.getElementById('city-banner');
   if (!banner) return;
   
   banner.style.display = 'block';
@@ -436,14 +436,16 @@ function updateMoonInfo(date) {
   const moonIconEl = document.getElementById('moon-icon');
   const moonPhaseNameEl = document.getElementById('moon-phase-name');
   const moonIlluminationEl = document.getElementById('moon-illumination');
+  const moonPhaseVisualEl = document.getElementById('moon-phase-visual');
   
-  if (!moonIconEl || !moonPhaseNameEl || !moonIlluminationEl) return;
+  if (!moonIconEl || !moonPhaseNameEl) return;
   
   const moon = calculateMoonPhase(date);
   
   moonIconEl.textContent = moon.icon;
   moonPhaseNameEl.textContent = moon.name;
-  moonIlluminationEl.textContent = moon.illumination + '%';
+  if (moonIlluminationEl) moonIlluminationEl.textContent = moon.illumination + '%';
+  if (moonPhaseVisualEl) moonPhaseVisualEl.textContent = moon.icon;
 }
 
 let currentCalendarDate = new Date();
@@ -809,6 +811,18 @@ function updateWeatherDetails(forecast) {
   const clouds = description.includes('nublado') ? 70 + Math.floor(Math.random() * 30) : (description.includes('parcial') ? 40 : 20);
   
   animateValue('uv-value', 0, uvIndex, 800, '', uvLevel);
+  
+  const uvDescEl = document.getElementById('uv-desc');
+  if (uvDescEl) {
+    const uvDescriptions = {
+      'Bajo': 'Puedes estar al sol',
+      'Moderado': 'Protector solar moderado',
+      'Alto': 'Usa protector FPS 30+',
+      'Extremo': 'Evita el sol directo'
+    };
+    uvDescEl.textContent = uvDescriptions[uvLevel] || '--';
+  }
+  
   animateValue('rain-value', 0, rainfall, 800, ' mm');
   animateValue('storm-value', 0, stormProbability, 800, '%');
   animateValue('gusts-value', 0, gusts, 800, ' km/h');
@@ -824,8 +838,17 @@ async function updateCityInfo() {
   const timezoneEl = document.getElementById('city-timezone');
   const populationEl = document.getElementById('city-population');
   const elevationEl = document.getElementById('city-elevation');
+  const avgTempEl = document.getElementById('city-avg-temp');
   
   if (!countryEl) return;
+  
+  const country = currentLocationData?.country || '--';
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '--';
+  const coords = currentCoords ? `${currentCoords.lat.toFixed(2)}°, ${currentCoords.lng.toFixed(2)}°` : '--';
+  
+  let population = '--';
+  let elevation = '--';
+  let avgTemp = '--°C';
   
   if (currentCoords?.lat && currentCoords?.lng) {
     const coordsKey = `${currentCoords.lat.toFixed(2)},${currentCoords.lng.toFixed(2)}`;
@@ -833,19 +856,13 @@ async function updateCityInfo() {
     if (cityDataCache.has(coordsKey)) {
       const cached = cityDataCache.get(coordsKey);
       if (countryEl) countryEl.textContent = cached.country || '--';
-      if (coordsEl) coordsEl.textContent = `${currentCoords.lat.toFixed(2)}°, ${currentCoords.lng.toFixed(2)}°`;
+      if (coordsEl) coordsEl.textContent = coords;
       if (timezoneEl) timezoneEl.textContent = cached.timezone || '--';
       if (populationEl) populationEl.textContent = cached.population || '--';
       if (elevationEl) elevationEl.textContent = cached.elevation ? `${cached.elevation} m` : '--';
+      if (avgTempEl) avgTempEl.textContent = cached.avgTemp || '--°C';
       return;
     }
-    
-    const country = currentLocationData?.country || '--';
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '--';
-    const coords = `${currentCoords.lat.toFixed(2)}°, ${currentCoords.lng.toFixed(2)}°`;
-    
-    let population = '--';
-    let elevation = '--';
     
     try {
       const geoResponse = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${currentCoords.lat}&longitude=${currentCoords.lng}`);
@@ -859,15 +876,31 @@ async function updateCityInfo() {
       console.warn('No se pudo obtener la elevación');
     }
     
-    const cityInfo = { country, timezone, population, elevation };
-    cityDataCache.set(coordsKey, cityInfo);
+    try {
+      const weatherResponse = await fetch(`/api/weather?location=${encodeURIComponent(currentLocation || '')}`);
+      if (weatherResponse.ok) {
+        const weatherData = await weatherResponse.json();
+        if (weatherData.report) {
+          const tempMatch = weatherData.report.match(/Promedio:\s*([\d.]+)/);
+          if (tempMatch) {
+            avgTemp = `${Math.round(parseFloat(tempMatch[1]))}°C`;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo obtener el clima promedio');
+    }
     
-    if (countryEl) countryEl.textContent = country;
-    if (coordsEl) coordsEl.textContent = coords;
-    if (timezoneEl) timezoneEl.textContent = timezone;
-    if (populationEl) populationEl.textContent = population;
-    if (elevationEl) elevationEl.textContent = elevation;
+    const cityInfo = { country, timezone, population, elevation, avgTemp };
+    cityDataCache.set(coordsKey, cityInfo);
   }
+  
+  if (countryEl) countryEl.textContent = country;
+  if (coordsEl) coordsEl.textContent = coords;
+  if (timezoneEl) timezoneEl.textContent = timezone;
+  if (populationEl) populationEl.textContent = population;
+  if (elevationEl) elevationEl.textContent = elevation;
+  if (avgTempEl) avgTempEl.textContent = avgTemp;
 }
 
 function animateValue(id, start, end, duration, suffix = '', textSuffix = '') {
