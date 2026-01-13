@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource } from './weatherSources.js';
+import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB } from './weatherSources.js';
 import { ReportGenerator } from './reportGenerator.js';
 
 dotenv.config();
@@ -14,9 +14,12 @@ class WeatherAgent {
 
   initializeSources() {
     this.sources.push(new OpenMeteo());
+    this.sources.push(new SevenTimer());
+    this.sources.push(new TomorrowIO());
     this.sources.push(new WttrIn());
-    this.sources.push(new USNWS());
+    this.sources.push(new WeatherDB());
     this.sources.push(new MetNorway());
+    this.sources.push(new USNWS());
 
     if (process.env.OPENWEATHER_API_KEY && process.env.OPENWEATHER_API_KEY !== 'tu_api_key_aqui') {
       this.sources.push(new OpenWeatherMap(process.env.OPENWEATHER_API_KEY));
@@ -151,9 +154,12 @@ class WeatherAgent {
   getSourceWeight(source) {
     const weights = {
       'USNWS': 1.2,
+      'Tomorrow.io': 1.15,
+      '7Timer': 1.1,
+      'WttrIn': 1.1,
       'OpenMeteo': 1.0,
       'MetNorway': 1.0,
-      'WttrIn': 1.1,
+      'WeatherDB': 0.95,
       'OpenWeatherMap': 0.9,
       'WeatherAPI': 0.85
     };
