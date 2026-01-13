@@ -569,38 +569,6 @@ a:hover {
 }
 
 /* ================================
-   NASA CARD STYLE - MODERN
-   ================================ */
-.nasa-card {
-  background: var(--bg-white);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: all var(--transition-base);
-}
-
-.nasa-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-light);
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-/* ================================
    MAIN WEATHER DISPLAY
    ================================ */
 .main-stat {
@@ -878,65 +846,6 @@ a:hover {
   border-radius: 3px;
 }
 
-.day-card-nasa {
-  flex: 0 0 auto;
-  width: 110px;
-  padding: 20px 16px;
-  background: var(--bg-light);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  scroll-snap-align: start;
-  border: 2px solid transparent;
-}
-
-.day-card-nasa:hover {
-  transform: translateY(-4px) scale(1.02);
-  border-color: var(--nasa-blue);
-  box-shadow: var(--shadow-lg);
-}
-
-.day-card-nasa.today {
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-}
-
-.day-name-nasa {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  letter-spacing: 0.5px;
-}
-
-.day-icon-nasa {
-  font-size: 36px;
-  margin-bottom: 12px;
-  display: block;
-}
-
-.day-temps-nasa {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-.day-temp-max-nasa {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.day-temp-min-nasa {
-  font-size: 14px;
-  color: var(--text-light);
-}
-
-.day-card-nasa.today .day-temp-min-nasa {
-  color: rgba(255, 255, 255, 0.8);
-}
-
 /* ================================
    HOURLY FORECAST
    ================================ */
@@ -961,46 +870,6 @@ a:hover {
 .hourly-forecast-nasa::-webkit-scrollbar-thumb {
   background: var(--nasa-blue);
   border-radius: 3px;
-}
-
-.hourly-card-nasa {
-  flex: 0 0 auto;
-  width: 90px;
-  padding: 16px 12px;
-  background: var(--bg-light);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  scroll-snap-align: start;
-}
-
-.hourly-card-nasa:hover {
-  transform: translateY(-4px);
-  background: var(--nasa-blue);
-  color: white;
-}
-
-.hourly-time-nasa {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.hourly-card-nasa:hover .hourly-time-nasa {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.hourly-icon-nasa {
-  font-size: 32px;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.hourly-temp-nasa {
-  font-size: 20px;
-  font-weight: 700;
 }
 
 /* ================================
@@ -1647,124 +1516,6 @@ a:hover {
 }
 
 /* ================================
-   DETAILS GRID
-   ================================ */
-.details-grid-nasa {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 20px;
-}
-
-.detail-card-nasa {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: var(--bg-light);
-  border-radius: var(--radius-lg);
-  transition: all var(--transition-base);
-  cursor: pointer;
-}
-
-.detail-card-nasa:hover {
-  background: var(--nasa-blue);
-  color: white;
-  transform: translateX(4px);
-}
-
-.detail-icon-nasa {
-  font-size: 28px;
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-white);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-base);
-}
-
-.detail-card-nasa:hover .detail-icon-nasa {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.detail-content-nasa {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: var(--text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-
-.detail-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.detail-card-nasa:hover .detail-value {
-  color: white;
-}
-
-.detail-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.detail-card-nasa:hover .detail-desc {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* ================================
-   ASTRONOMY GRID
-   ================================ */
-.astronomy-grid-nasa {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 20px;
-}
-
-.astro-item-nasa {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 16px;
-  background: var(--bg-light);
-  border-radius: var(--radius-lg);
-  transition: all var(--transition-base);
-}
-
-.astro-item-nasa:hover {
-  background: var(--nasa-blue);
-  color: white;
-}
-
-.astro-label {
-  font-size: 12px;
-  color: var(--text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.astro-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.astro-item-nasa:hover .astro-value {
-  color: white;
-}
-
-/* ================================
    CITY INFO
    ================================ */
 .city-info-content {
@@ -2379,35 +2130,21 @@ a:hover {
   .search-box-nasa input {
     text-align: center;
   }
-  
-  .day-card-nasa {
-    width: 90px;
-    padding: 16px 12px;
-  }
-  
-  .hourly-card-nasa {
-    width: 80px;
-  }
-  
-  .details-grid-nasa,
-  .astronomy-grid-nasa {
-    grid-template-columns: 1fr;
-  }
-  
-  .sun-moon-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .chatbot-container-nasa {
-    width: calc(100vw - 32px);
-    right: 16px;
-    bottom: 90px;
-  }
-  
-  .chatbot-status-indicator {
-    display: none;
-  }
-}
+   
+   .sun-moon-cards {
+     grid-template-columns: 1fr;
+   }
+   
+   .chatbot-container-nasa {
+     width: calc(100vw - 32px);
+     right: 16px;
+     bottom: 90px;
+   }
+   
+   .chatbot-status-indicator {
+     display: none;
+   }
+ }
 
 /* Mobile Small */
 @media (max-width: 480px) {
@@ -2439,32 +2176,24 @@ a:hover {
   .quick-cities {
     gap: 8px;
   }
-  
-  .quick-cities button {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-  
-  .day-card-nasa {
-    width: 80px;
-  }
-  
-  .hourly-card-nasa {
-    width: 70px;
-  }
-  
-  .calendar-day-nasa {
-    font-size: 12px;
-  }
-  
-  .nasa-card {
-    border-radius: var(--radius-lg);
-  }
-  
-  .card-header {
-    padding: 12px 16px;
-  }
-}
+   
+   .quick-cities button {
+     padding: 8px 16px;
+     font-size: 13px;
+   }
+   
+   .calendar-day-nasa {
+     font-size: 12px;
+   }
+   
+   .nasa-card {
+     border-radius: var(--radius-lg);
+   }
+   
+   .card-header {
+     padding: 12px 16px;
+   }
+ }
 
 /* Extra Small Mobile */
 @media (max-width: 360px) {
@@ -2739,34 +2468,6 @@ body.dark-mode .nav-btn.active {
   letter-spacing: 0.5px;
 }
 
-/* Forecast Grid Layout */
-.forecast-grid {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.forecast-left,
-.forecast-right {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.forecast-left {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.forecast-right {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
 /* Search Section */
 .search-section {
   background: var(--bg-white);
@@ -2816,46 +2517,6 @@ body.dark-mode .nav-btn.active {
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
-}
-
-/* Responsive Updates */
-@media (max-width: 1024px) {
-  .forecast-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .sidebar-nasa {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .sun-moon-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .details-grid-nasa {
-    grid-template-columns: 1fr;
-  }
-  
-  .astronomy-grid-nasa {
-    grid-template-columns: 1fr;
-  }
-  
-  .city-main-info {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .city-stats-row {
-    justify-content: center;
-  }
-  
-  .stat-badge {
-    min-width: 80px;
-    padding: 12px 16px;
-  }
 }
 
 /* Weather Animation */
