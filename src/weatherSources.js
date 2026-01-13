@@ -893,16 +893,292 @@ export class WeatherGov extends WeatherSource {
   }
 }
 
+// 7Timer API - Free, no API key, based on NOAA GFS
+export class SevenTimer extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'http://www.7timer.info/bin/api.pl';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 3, language: 'es' }
+    });
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(this.baseUrl, {
+        params: {
+          lon: coords.longitude,
+          lat: coords.latitude,
+          product: 'civillight',
+          output: 'json'
+        },
+        timeout: 10000
+      });
+
+      if (!response.data || !response.data.dataseries || response.data.dataseries.length === 0) {
+        throw new Error('Invalid 7Timer response');
+      }
+
+      return this.formatData(response.data.dataseries[0], coords.name);
+    } catch (error) {
+      throw new Error(`7Timer no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async get7DayForecast(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(this.baseUrl, {
+        params: {
+          lon: coords.longitude,
+          lat: coords.latitude,
+          product: 'civillight',
+          output: 'json'
+        },
+        timeout: 15000
+      });
+
+      if (!response.data || !response.data.dataseries) {
+        throw new Error('Invalid 7Timer forecast response');
+      }
+
+      return response.data.dataseries.slice(0, 7).map((day, index) => ({
+        source: '7Timer',
+        date: this.getDateFromInitPlus(index),
+        temperatureMax: day.temp2m?.max || 20,
+        temperatureMin: day.temp2m?.min || 10,
+        weatherCode: this.getWeatherCode(day.weather),
+        description: this.getWeatherDescription(day.weather),
+        precipitation: this.getPrecipitation(day.prec),
+        windMax: this.getWindSpeed(day.wind10m?.max || 0)
+      }));
+    } catch (error) {
+      throw new Error(`7Timer forecast no disponible: ${error.message}`);
+    }
+  }
+
+  getDateFromInitPlus(days) {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split('T')[0];
+  }
+
+  getWeatherCode(weather) {
+    if (!weather) return 0;
+    const w = weather.toLowerCase();
+    if (w.includes('thunder') || w.includes('ts')) return 95;
+    if (w.includes('rain') || w.includes('shower')) return 61;
+    if (w.includes('snow')) return 71;
+    if (w.includes('cloudy') && !w.includes('part')) return 3;
+    if (w.includes('part')) return 2;
+    if (w.includes('clear') || w.includes('sunny')) return 0;
+    return 0;
+  }
+
+  getWeatherDescription(weather) {
+    if (!weather) return 'desconocido';
+    const w = weather.toLowerCase();
+    if (w.includes('thunder')) return 'tormenta eléctrica';
+    if (w.includes('rain') && w.includes('showers')) return 'chubascos';
+    if (w.includes('rain')) return 'lluvia';
+    if (w.includes('snow') && w.includes('showers')) return 'chubascos de nieve';
+    if (w.includes('snow')) return 'nieve';
+    if (w.includes('cloudy') && !w.includes('part')) return 'nublado';
+    if (w.includes('part')) return 'parcialmente nublado';
+    if (w.includes('clear') || w.includes('sunny')) return 'cielo despejado';
+    if (w.includes('humid') || w.includes('fog')) return 'niebla';
+    return weather;
+  }
+
+  getPrecipitation(prec) {
+    if (!prec) return 0;
+    if (prec >= 7) return 10;
+    if (prec >= 4) return 5;
+    if (prec >= 1) return 2;
+    return 0;
+  }
+
+  getWindSpeed(windLevel) {
+    const speeds = [0.3, 3.4, 8.0, 10.8, 17.2, 24.5, 32.6];
+    return windLevel < speeds.length ? speeds[windLevel - 1] || 5 : 5;
+  }
+
+  formatData(data, location) {
+    return {
+      source: '7Timer',
+      timestamp: new Date().toISOString(),
+      location: location,
+      temperature: data.temp2m?.max || 20,
+      feelsLike: data.temp2m?.max || 20,
+      humidity: data.rh2m ? parseInt(data.rh2m) : 50,
+      pressure: 1013,
+      windSpeed: data.wind10m?.max || 5,
+      windDirection: 180,
+      description: this.getWeatherDescription(data.weather),
+      visibility: 10,
+      clouds: this.getClouds(data.weather)
+    };
+  }
+
+  getClouds(weather) {
+    if (!weather) return 50;
+    const w = weather.toLowerCase();
+    if (w.includes('clear')) return 10;
+    if (w.includes('part')) return 40;
+    if (w.includes('cloudy') || w.includes('humid')) return 80;
+    return 50;
+  }
+}
+
+// Tomorrow.io API - Free tier available (500 calls/day)
+export class TomorrowIO extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.tomorrow.io/v4';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 3, language: 'es' }
+    });
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/weather/realtime`, {
+        params: {
+          location: `${coords.latitude},${coords.longitude}`
+        },
+        timeout: 10000
+      });
+
+      return this.formatData(response.data.data, coords.name);
+    } catch (error) {
+      throw new Error(`Tomorrow.io no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async get7DayForecast(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/weather/forecast`, {
+        params: {
+          location: `${coords.latitude},${coords.longitude}`,
+          timesteps: '1d',
+          units: 'metric'
+        },
+        timeout: 15000
+      });
+
+      if (!response.data.data || !response.data.data.timelines) {
+        throw new Error('Invalid Tomorrow.io response');
+      }
+
+      const daily = response.data.data.timelines.daily || [];
+      return daily.slice(0, 7).map(day => ({
+        source: 'Tomorrow.io',
+        date: day.time.split('T')[0],
+        temperatureMax: day.values?.temperatureMax || day.values?.temperatureApparentMax || 20,
+        temperatureMin: day.values?.temperatureMin || day.values?.temperatureApparentMin || 10,
+        weatherCode: this.getWeatherCode(day.values?.weatherCode),
+        description: this.getWeatherDescription(day.values?.weatherCode),
+        precipitation: day.values?.precipitationProbabilityMax || 0,
+        windMax: day.values?.windSpeedMax || 5
+      }));
+    } catch (error) {
+      throw new Error(`Tomorrow.io forecast no disponible: ${error.message}`);
+    }
+  }
+
+  getWeatherCode(code) {
+    if (!code) return 0;
+    const codes = {
+      0: 0, 1: 0, 2: 2, 3: 3,
+      10: 51, 11: 95, 12: 61, 13: 71, 14: 71, 15: 95,
+      16: 61, 17: 61, 18: 61, 19: 95,
+      20: 45, 21: 45, 22: 45, 23: 45,
+      30: 80, 31: 80, 32: 80,
+      40: 80, 41: 80, 42: 80
+    };
+    return codes[code] || 0;
+  }
+
+  getWeatherDescription(code) {
+    const descriptions = {
+      0: 'cielo despejado',
+      1: 'mayormente despejado',
+      2: 'parcialmente nublado',
+      3: 'nublado',
+      10: 'llovizna',
+      11: 'tormenta eléctrica',
+      12: 'lluvia',
+      13: 'nieve',
+      14: 'aguanieve',
+      15: 'granizo',
+      16: 'lluvia y nieve',
+      17: 'lluvia helada',
+      18: 'aguanieve',
+      19: 'tormenta eléctrica',
+      20: 'niebla',
+      21: 'neblina',
+      22: 'bruma',
+      23: ' humo',
+      30: 'lluvia ligera',
+      31: 'lluvia moderada',
+      32: 'lluvia fuerte',
+      40: 'lluvia ligera',
+      41: 'lluvia moderada',
+      42: 'lluvia fuerte'
+    };
+    return descriptions[code] || 'desconocido';
+  }
+
+  formatData(data, location) {
+    const values = data.values || {};
+    return {
+      source: 'Tomorrow.io',
+      timestamp: data.time || new Date().toISOString(),
+      location: location,
+      temperature: values.temperature || values.temperatureApparent || 20,
+      feelsLike: values.temperatureApparent || values.temperature || 20,
+      humidity: values.humidity || 50,
+      pressure: values.pressureSurfaceLevel || 1013,
+      windSpeed: values.windSpeed || 0,
+      windDirection: values.windDirection || 0,
+      description: this.getWeatherDescription(values.weatherCode),
+      visibility: values.visibility || 10,
+      clouds: values.cloudCover || 0
+    };
+  }
+}
+
 // Combined weather aggregator
 export class WeatherAggregator extends WeatherSource {
   constructor() {
     super();
     this.sources = [
       new OpenMeteo(),
+      new SevenTimer(),
       new WttrIn(),
       new WeatherDB(),
       new MetNorway(),
-      new USNWS()
+      new USNWS(),
+      new TomorrowIO()
     ];
   }
 
