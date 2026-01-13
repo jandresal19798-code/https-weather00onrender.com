@@ -626,3 +626,316 @@ export class WttrIn extends WeatherSource {
     };
   }
 }
+
+// WeatherDB API - Free, no API key required
+export class WeatherDB extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://weatherdbi.herokuapp.com/data';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.baseUrl}/search?keyword=${encodeURIComponent(location)}`);
+    if (!response.data.data || response.data.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return {
+      latitude: response.data.data[0].lat,
+      longitude: response.data.data[0].lon,
+      name: response.data.data[0].name
+    };
+  }
+
+  async getCurrentWeather(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/weather/${coords.latitude},${coords.longitude}`);
+      return this.formatData(response.data.current, coords.name);
+    } catch (error) {
+      throw new Error(`WeatherDB no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async get7DayForecast(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/weather/${coords.latitude},${coords.longitude}`);
+      
+      if (!response.data.data || !response.data.data.forecast) {
+        throw new Error('Invalid WeatherDB response');
+      }
+      
+      return response.data.data.forecast.slice(0, 7).map(day => ({
+        source: 'WeatherDB',
+        date: day.date,
+        temperatureMax: parseFloat(day.max_temp),
+        temperatureMin: parseFloat(day.min_temp),
+        weatherCode: this.getWeatherCode(day.condition),
+        description: day.condition.text,
+        precipitation: 0,
+        windMax: 0
+      }));
+    } catch (error) {
+      throw new Error(`WeatherDB forecast no disponible: ${error.message}`);
+    }
+  }
+
+  getWeatherCode(condition) {
+    if (!condition) return 0;
+    const text = condition.text?.toLowerCase() || '';
+    if (text.includes('thunder') || text.includes('storm')) return 95;
+    if (text.includes('rain') || text.includes('shower')) return 61;
+    if (text.includes('snow')) return 71;
+    if (text.includes('cloudy')) return 3;
+    if (text.includes('partly') || text.includes('mostly')) return 2;
+    if (text.includes('sunny') || text.includes('clear')) return 0;
+    return 0;
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'WeatherDB',
+      timestamp: new Date().toISOString(),
+      location: location,
+      temperature: parseFloat(data.temp.c) || parseFloat(data.temp?.value || 0),
+      feelsLike: parseFloat(data.temp.c) || parseFloat(data.temp?.value || 0),
+      humidity: parseInt(data.humidity) || 0,
+      pressure: parseInt(data.pressure) || 0,
+      windSpeed: parseFloat(data.wind.speed) || 0,
+      windDirection: 0,
+      description: data.condition?.text?.toLowerCase() || 'desconocido',
+      visibility: 10,
+      clouds: parseInt(data.cloud) || 0
+    };
+  }
+}
+
+// Meteostat API - Historical and current weather
+export class Meteostat extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.meteostat.net/v2';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 3, language: 'es' }
+    });
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/stations/nearby`, {
+        params: { lat: coords.latitude, lon: coords.longitude, radius: 50000 },
+        headers: { 'x-api-key': process.env.METEOSTAT_KEY || '' }
+      });
+      
+      if (!response.data.data || response.data.data.length === 0) {
+        throw new Error('No weather stations nearby');
+      }
+      
+      const station = response.data.data[0];
+      return this.formatData(station, coords.name);
+    } catch (error) {
+      throw new Error(`Meteostat no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'Meteostat',
+      timestamp: data.time ? new Date(data.time).toISOString() : new Date().toISOString(),
+      location: location,
+      temperature: data.temperature,
+      feelsLike: data.celsius?.feels_like || data.temperature,
+      humidity: data.humidity,
+      pressure: data.pressure,
+      windSpeed: data.wind_speed || 0,
+      windDirection: data.wind_direction || 0,
+      description: 'actual',
+      visibility: data.visibility || 10,
+      clouds: data.cloud_cover || 0
+    };
+  }
+}
+
+// WeatherAPI from weather.gov (US National Weather Service)
+export class WeatherGov extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.weather.gov';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 3, language: 'es' }
+    });
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const pointsResponse = await axios.get(`${this.baseUrl}/points/${coords.latitude},${coords.longitude}`);
+      
+      const forecastUrl = pointsResponse.data.properties.forecast;
+      const forecastResponse = await axios.get(forecastUrl);
+      
+      const currentPeriod = forecastResponse.data.properties.periods[0];
+      
+      return this.formatData(currentPeriod, coords.name);
+    } catch (error) {
+      throw new Error(`Weather.gov no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async get7DayForecast(location) {
+    try {
+      const coords = await this.getCoordinates(location);
+      const pointsResponse = await axios.get(`${this.baseUrl}/points/${coords.latitude},${coords.longitude}`);
+      
+      const forecastUrl = pointsResponse.data.properties.forecast;
+      const forecastResponse = await axios.get(forecastUrl);
+      
+      const periods = forecastResponse.data.properties.periods;
+      const dailyData = new Map();
+      
+      periods.forEach(period => {
+        const date = period.startTime.split('T')[0];
+        const temp = period.temperature;
+        const description = period.shortForecast.toLowerCase();
+        
+        if (!dailyData.has(date)) {
+          dailyData.set(date, { temps: [], descriptions: [] });
+        }
+        
+        const day = dailyData.get(date);
+        day.temps.push(temp);
+        day.descriptions.push(description);
+      });
+      
+      return Array.from(dailyData.entries()).slice(0, 7).map(([date, data]) => ({
+        source: 'Weather.gov',
+        date: date,
+        temperatureMax: Math.max(...data.temps),
+        temperatureMin: Math.min(...data.temps),
+        weatherCode: this.getWeatherCode(data.descriptions),
+        description: this.getDescription(data.descriptions),
+        precipitation: this.getPrecipitation(data.descriptions),
+        windMax: this.getWind(data.descriptions)
+      }));
+    } catch (error) {
+      throw new Error(`Weather.gov forecast no disponible: ${error.message}`);
+    }
+  }
+
+  getWeatherCode(descriptions) {
+    const desc = descriptions.join(' ').toLowerCase();
+    if (desc.includes('thunder') || desc.includes('storm')) return 95;
+    if (desc.includes('rain') || desc.includes('showers')) return 61;
+    if (desc.includes('snow') || desc.includes('flurries')) return 71;
+    if (desc.includes('cloudy')) return 3;
+    if (desc.includes('partly') || desc.includes('mostly')) return 2;
+    return 0;
+  }
+
+  getDescription(descriptions) {
+    const desc = descriptions.join(' ').toLowerCase();
+    if (desc.includes('thunder')) return 'tormenta eléctrica';
+    if (desc.includes('rain') && desc.includes('showers')) return 'lluvia';
+    if (desc.includes('rain')) return 'lluvia';
+    if (desc.includes('snow')) return 'nieve';
+    if (desc.includes('cloudy') && !desc.includes('partly')) return 'nublado';
+    if (desc.includes('partly') || desc.includes('mostly')) return 'parcialmente nublado';
+    if (desc.includes('sunny') || desc.includes('clear')) return 'cielo despejado';
+    return descriptions[0] || 'desconocido';
+  }
+
+  getPrecipitation(descriptions) {
+    const desc = descriptions.join(' ').toLowerCase();
+    if (desc.includes('heavy')) return 10;
+    if (desc.includes('rain') || desc.includes('showers')) return 5;
+    if (desc.includes('snow')) return 3;
+    return 0;
+  }
+
+  getWind(descriptions) {
+    const desc = descriptions.join(' ').toLowerCase();
+    if (desc.includes('breezy') || desc.includes('windy')) return 8;
+    return 3;
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'Weather.gov',
+      timestamp: data.startTime || new Date().toISOString(),
+      location: location,
+      temperature: data.temperature,
+      feelsLike: data.temperature,
+      humidity: null,
+      pressure: null,
+      windSpeed: null,
+      windDirection: null,
+      description: data.shortForecast || 'desconocido',
+      visibility: null,
+      clouds: null
+    };
+  }
+}
+
+// Combined weather aggregator
+export class WeatherAggregator extends WeatherSource {
+  constructor() {
+    super();
+    this.sources = [
+      new OpenMeteo(),
+      new WttrIn(),
+      new WeatherDB(),
+      new MetNorway(),
+      new USNWS()
+    ];
+  }
+
+  async getCurrentWeather(location) {
+    const errors = [];
+    
+    for (const source of this.sources) {
+      try {
+        const weather = await source.getCurrentWeather(location);
+        console.log(`✅ Weather from ${weather.source}`);
+        return weather;
+      } catch (error) {
+        errors.push(`${source.constructor.name}: ${error.message}`);
+        console.log(`⚠️ ${source.constructor.name} failed: ${error.message}`);
+      }
+    }
+    
+    throw new Error('All weather sources failed');
+  }
+
+  async get7DayForecast(location) {
+    for (const source of this.sources) {
+      try {
+        if (typeof source.get7DayForecast === 'function') {
+          const forecast = await source.get7DayForecast(location);
+          console.log(`✅ 7-day forecast from ${source.constructor.name}`);
+          return forecast;
+        }
+      } catch (error) {
+        console.log(`⚠️ ${source.constructor.name} 7-day forecast failed: ${error.message}`);
+      }
+    }
+    
+    throw new Error('No 7-day forecast available');
+  }
+}
