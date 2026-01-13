@@ -1332,3 +1332,203 @@ body.dark-mode .nav-btn.active {
   background: rgba(255,255,255,0.15);
   color: white;
 }
+
+/* Loading Animation Progress */
+.loading-progress {
+  width: 200px;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.loading-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #0B3D91, #1E5AA8, #0B3D91);
+  background-size: 200% 100%;
+  animation: loading-progress 1.5s ease-in-out infinite;
+  width: 60%;
+}
+
+@keyframes loading-progress {
+  0% { background-position: 200% 0; width: 30%; }
+  50% { width: 60%; }
+  100% { background-position: -200% 0; width: 30%; }
+}
+
+/* News Section */
+.news-section {
+  padding: 40px 20px;
+  background: var(--bg-white);
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.news-card-nasa {
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.news-card-nasa:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.news-image-nasa {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  background: linear-gradient(135deg, var(--nasa-blue) 0%, var(--nasa-blue-light) 100%);
+}
+
+.news-content-nasa {
+  padding: 16px;
+}
+
+.news-category {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--nasa-blue);
+  background: rgba(11, 61, 145, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.news-content-nasa h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.news-content-nasa p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.news-date {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+/* Facts Section */
+.facts-section {
+  padding: 40px 20px;
+  background: var(--bg-light);
+}
+
+.facts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.fact-card-nasa {
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  transition: transform 0.3s ease;
+}
+
+.fact-card-nasa:hover {
+  transform: translateY(-2px);
+}
+
+.fact-icon-nasa {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.fact-card-nasa h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.fact-card-nasa p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.fact-source {
+  font-size: 10px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Dark mode for news and facts */
+body.dark-mode .news-section,
+body.dark-mode .facts-section {
+  background: var(--bg-gray);
+}
+
+body.dark-mode .news-card-nasa,
+body.dark-mode .fact-card-nasa {
+  background: var(--bg-white);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .news-content-nasa h3,
+body.dark-mode .fact-card-nasa h3 {
+  color: var(--text-primary);
+}
+
+body.dark-mode .news-content-nasa p,
+body.dark-mode .fact-card-nasa p {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .fact-source {
+  color: var(--text-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .facts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .facts-grid {
+    grid-template-columns: 1fr;
+  }
+}

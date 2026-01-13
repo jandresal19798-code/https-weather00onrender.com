@@ -17,6 +17,22 @@ function toggleTheme() {
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
 
+function showLoading() {
+  const loading = document.getElementById('loading');
+  if (loading) {
+    loading.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function hideLoading() {
+  const loading = document.getElementById('loading');
+  if (loading) {
+    loading.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
 function showHome() {
   document.getElementById('home-page').classList.add('active');
   document.getElementById('forecasts-page').classList.remove('active');
@@ -41,16 +57,14 @@ async function searchWeather() {
   const location = document.getElementById('location-input').value.trim();
   
   if (!location) {
-    alert('Please enter a city name');
+    alert('Por favor, ingresa el nombre de una ciudad');
     return;
   }
 
   currentLocation = location;
   saveRecentSearch(location);
   showForecasts();
-  
-  const loading = document.getElementById('loading');
-  loading.classList.add('active');
+  showLoading();
   
   try {
     const controller = new AbortController();
@@ -85,7 +99,7 @@ async function searchWeather() {
       console.log('Request timed out');
     }
   } finally {
-    loading.classList.remove('active');
+    hideLoading();
   }
 }
 
@@ -133,7 +147,7 @@ function updateCurrentWeather(report) {
   
   const now = new Date();
   const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-  document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+  document.getElementById('current-date').textContent = now.toLocaleDateString('es-ES', options);
   
   updateMoonInfo(now);
   updateAstronomy();
