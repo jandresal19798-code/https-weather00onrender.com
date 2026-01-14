@@ -147,38 +147,44 @@ function updateCurrentWeather(report) {
   
   document.getElementById('city-name').textContent = city;
   
-  // Buscar EXACTAMENTE la línea "• Promedio: XX.X°C" 
-  const promedioLine = lines.find(line => line.trim().startsWith('• Promedio:'));
-  
-  if (promedioLine) {
-    const tempMatch = promedioLine.match(/Promedio:\s*([\d.]+)/);
-    if (tempMatch) {
-      document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
-      return;
-    }
-  }
-  
-  // Fallback: Buscar en líneas que contengan TEMPERATURA
-  for (const line of lines) {
-    if (line.includes('TEMPERATURA') && line.includes('Promedio:')) {
-      const tempMatch = line.match(/Promedio:\s*([\d.]+)/);
-      if (tempMatch) {
-        document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
+  // PRIORIDAD 1: Usar currentDailyForecast si está disponible (más confiable)
+  if (currentDailyForecast.length > 0) {
+    const today = currentDailyForecast[0];
+    if (today) {
+      // Usar la temperatura del primer forecast disponible
+      if (today.temperatureMax !== undefined && today.temperatureMin !== undefined) {
+        const avgTemp = (today.temperatureMax + today.temperatureMin) / 2;
+        document.getElementById('current-temp').textContent = Math.round(avgTemp);
+        return;
+      }
+      if (today.temperatureMax !== undefined) {
+        document.getElementById('current-temp').textContent = Math.round(today.temperatureMax);
         return;
       }
     }
   }
   
-  // Último fallback: Usar forecast si está disponible
-  if (currentDailyForecast.length > 0) {
-    const today = currentDailyForecast[0];
-    if (today && today.temperatureMax && today.temperatureMin) {
-      const avgTemp = (today.temperatureMax + today.temperatureMin) / 2;
-      document.getElementById('current-temp').textContent = Math.round(avgTemp);
-      return;
+  // PRIORIDAD 2: Parsear el reporte buscando "Promedio: XX.X°C"
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Buscar línea que contenga solo "• Promedio: XX.X°C"
+    if (trimmed.startsWith('•') && trimmed.includes('Promedio:')) {
+      const match = trimmed.match(/Promedio:\s*([\d.]+)/);
+      if (match) {
+        document.getElementById('current-temp').textContent = Math.round(parseFloat(match[1]));
+        return;
+      }
     }
   }
   
+  // PRIORIDAD 3: Buscar cualquier línea con Promedio
+  const promedioMatch = report.match(/Promedio:\s*([\d.]+)/);
+  if (promedioMatch) {
+    document.getElementById('current-temp').textContent = Math.round(parseFloat(promedioMatch[1]));
+    return;
+  }
+  
+  // Fallback final
   document.getElementById('current-temp').textContent = '--';
   
   const descMatch = report.match(/Estado predominante:\s*(.+)/i);
@@ -209,27 +215,21 @@ function updateCurrentWeather(report) {
   const visualLabel = document.getElementById('weather-visual-label');
   const visualContainerMain = document.getElementById('weather-visual-container');
   
-  if (visualContainer && visualLabel && visualContainerMain) {
-    visualContainerMain.style.display = 'block';
+  if (visualContainer && visualContainerMain && visualLabel) {
+    const descLower = description.toLowerCase();
     visualContainer.className = 'weather-visual';
     visualLabel.textContent = description;
+    visualContainerMain.className = 'weather-visual-container';
     
-    const descLower = description.toLowerCase();
-    
-    if (descLower.includes('lluvia') || descLower.includes('rain') || descLower.includes('shower')) {
+    if (descLower.includes('lluv') || descLower.includes('rain') || descLower.includes('storm')) {
       visualContainer.classList.add('rainy');
-      generateRain();
-    } else if (descLower.includes('tormenta') || descLower.includes('thunder') || descLower.includes('storm')) {
-      visualContainer.classList.add('stormy');
-      generateRain();
-      generateLightning();
-    } else if (descLower.includes('nieve') || descLower.includes('snow')) {
-      visualContainer.classList.add('snowy');
-      generateSnow();
+      visualContainerMain.classList.add('rainy');
     } else if (descLower.includes('nublado') || descLower.includes('cloudy') || descLower.includes('overcast')) {
       visualContainer.classList.add('cloudy');
+      visualContainerMain.classList.add('cloudy');
     } else if (descLower.includes('despejado') || descLower.includes('soleado') || descLower.includes('clear') || descLower.includes('sunny')) {
       visualContainer.classList.add('sunny');
+      visualContainerMain.classList.add('sunny');
     }
   }
 }
