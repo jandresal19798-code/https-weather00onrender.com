@@ -4,6 +4,8 @@ let currentReport = null;
 let hourlyForecastData = [];
 let filterHoursValue = 12;
 let searchController = null;
+let currentDailyForecast = [];
+let currentLocationName = '';
 
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');
@@ -327,6 +329,8 @@ async function loadDailyForecast(location, retryCount = 0) {
     const data = await response.json();
 
     if (data.success) {
+      currentDailyForecast = data.forecast || [];
+      currentLocationName = location;
       displayDailyForecast(data.forecast);
       updateWeatherDetails(data.forecast);
       renderTempChart(data.forecast);
@@ -1981,7 +1985,16 @@ async function getAIResponse(userMessage) {
 }
 
 function getSmartResponse(message) {
-  const lowerMessage = message.toLowerCase();
+  const lowerMessage = message.toLowerCase().trim();
+  
+  if (currentDailyForecast.length > 0) {
+    const forecastResponse = analyzeForecast(lowerMessage);
+    if (forecastResponse) return forecastResponse;
+  }
+  
+  if (lowerMessage.startsWith('/')) {
+    return handleCommands(lowerMessage);
+  }
   
   const smartResponses = {
     greeting: ['Hola 👋 ¿En qué puedo ayudarte con el clima?', '¡Hey! 🌤️ ¿Buscas información meteorológica?', '¡Buenas! ☀️ ¿Qué quieres saber del clima?'],
@@ -1994,11 +2007,11 @@ function getSmartResponse(message) {
     cold: ['❄️ Hace frío, ¿verdad? La sensación térmica puede ser diferente a la temperatura real 🧥'],
     hot: ['🔥 Hace calor hoy. No olvides hidratarte y usar protector solar 🧴'],
     humidity: ['💧 La humedad alta hace que la sensación térmica sea más extrema. ¿En qué ciudad consultas?'],
-    forecast: ['📊 Los pronósticos están disponibles para 7 días. Busca una ciudad para verlos 🌤️'],
+    forecast: ['📊 Los pronósticos están disponibles para 7 días. Ya tengo los datos de ' + currentLocationName + ' 🌤️'],
     curiosity: ['💡 Dato curioso: Los rayos pueden alcanzar temperaturas de 30,000°C ⚡', '¿Sabías que la presión atmosférica puede predecir cambios de clima? 📊', '🌍 La temperatura más alta registrada fue 56.7°C en California'],
     thanks: ['¡De nada! 😊 ¿Hay algo más en lo que pueda ayudarte?', '¡Con gusto! 🌤️ ¿Necesitas algo más?'],
     goodbye: ['¡Adiós! 👋 ¡Que tengas un excelente día!', '¡Chao! 🌙 ¡Vuelve cuando quieras!', '¡Hasta luego! ☀️ ¡Cuídate!'],
-    help: ['🤖 Puedo responder preguntas sobre:\n• El clima actual\n• Pronósticos\n• Curiosidades meteorológicas\n• Consejos según el clima\n\nSolo busca una ciudad o pregúntame algo 😊'],
+    help: ['🤖 Puedo responder preguntas sobre:\n• El clima actual\n• Pronósticos\n• Curiosidades meteorológicas\n• Consejos según el clima\n\nYa tengo datos de ' + currentLocationName + '. ¡Pregúntame sobre el clima! 😊'],
     how_are_you: ['¡Muy bien! 🌞 Estoy listo para ayudarte con el clima. ¿Qué quieres saber?', '¡Excelente! ☀️ ¿En qué puedo asistirte hoy?'],
     what_is: ['💡 Pregunta interesante. Los fenómenos meteorológicos son fascinantes. ¿Hay algo específico que quieras saber?'],
     why: ['🤔 Buena pregunta. El clima depende de muchos factores: temperatura, humedad, presión, viento...'],
@@ -2012,14 +2025,14 @@ function getSmartResponse(message) {
     { keys: ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'hey', 'qué tal', 'que tal'], type: 'greeting' },
     { keys: ['clima', 'tiempo', 'pronóstico', 'pronostico', 'como está', 'como esta'], type: 'weather_search' },
     { keys: ['temperatura', 'cuántos grados', 'cuantos grados', 'calor', 'frío', 'frio'], type: 'temperature' },
-    { keys: ['llover', 'lluvia', 'lloverá', 'llovera', 'llovizna', 'aguanieve'], type: 'rain' },
-    { keys: ['sol', 'soleado', 'despejado', 'claro'], type: 'sun' },
-    { keys: ['viento', 'viento', 'ráfagas', 'rafagas'], type: 'wind' },
-    { keys: ['tormenta', 'rayo', 'trueno', 'relámpago', 'rayos'], type: 'storm' },
-    { keys: ['frío', 'frio', 'helado', 'congelado'], type: 'cold' },
-    { keys: ['calor', 'caluroso', 'caliente'], type: 'hot' },
-    { keys: ['humedad', 'húmedo', 'humedo'], type: 'humidity' },
-    { keys: ['pronóstico', 'pronostico', '7 días', '7 dias', 'semana'], type: 'forecast' },
+    { keys: ['llover', 'lluvia', 'lloverá', 'llovera', 'llovizna', 'aguanieve', 'llueve'], type: 'rain' },
+    { keys: ['sol', 'soleado', 'despejado', 'claro', 'soleado'], type: 'sun' },
+    { keys: ['viento', 'viento', 'ráfagas', 'rafagas', 'ventoso'], type: 'wind' },
+    { keys: ['tormenta', 'rayo', 'trueno', 'relámpago', 'rayos', 'tormentas'], type: 'storm' },
+    { keys: ['frío', 'frio', 'helado', 'congelado', 'fría'], type: 'cold' },
+    { keys: ['calor', 'caluroso', 'caliente', 'calurosa'], type: 'hot' },
+    { keys: ['humedad', 'húmedo', 'humedo', 'húmeda'], type: 'humidity' },
+    { keys: ['pronóstico', 'pronostico', '7 días', '7 dias', 'semana', 'pronósticos'], type: 'forecast' },
     { keys: ['sabías', 'sabias', 'curiosidad', 'dato', 'interesante'], type: 'curiosity' },
     { keys: ['gracias', 'thank', 'te agradezco'], type: 'thanks' },
     { keys: ['adiós', 'adios', 'chao', 'bye', 'nos vemos', 'hasta luego'], type: 'goodbye' },
@@ -2041,13 +2054,279 @@ function getSmartResponse(message) {
   }
   
   const defaultResponses = [
-    'Interesante pregunta 🤔 Para darte información precisa, busca una ciudad específica arriba 🔍',
+    'Interesante pregunta 🤔 Tengo los datos de ' + currentLocationName + '. ¿Quieres que te hable del clima ahí?',
     '¡Hmm! Pregunta interesante 💭 ¿Te ayudo a buscar el clima de alguna ciudad?',
     '😊 No estoy seguro de entender. ¿Buscas el pronóstico de alguna ciudad?',
     '¡Vale! 🌤️ ¿En qué ciudad te gustaría consultar el clima?'
   ];
   
   return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+}
+
+function analyzeForecast(message) {
+  const lower = message.toLowerCase();
+  const forecast = currentDailyForecast;
+  
+  if (!forecast || forecast.length === 0) return null;
+  
+  const today = forecast[0] || {};
+  const temps = forecast.map(d => d.temperatureMax || 0);
+  const maxTemp = Math.max(...temps);
+  const minTemp = Math.min(...temps);
+  const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
+  
+  const descriptions = forecast.map(d => (d.description || '').toLowerCase());
+  const hasRain = descriptions.some(d => d.includes('lluv') || d.includes('storm') || d.includes('chubasc'));
+  const hasSun = descriptions.some(d => d.includes('despejado') || d.includes('claro') || d.includes('sunny'));
+  const hasCloud = descriptions.some(d => d.includes('nublado') || d.includes('cloud'));
+  
+  const maxPrecip = Math.max(...forecast.map(d => d.precipitation || 0));
+  const maxWind = Math.max(...forecast.map(d => d.windMax || 0));
+  
+  if (lower.includes('qué tiempo hace') || lower.includes('como esta el tiempo') || lower.includes('cómo está el tiempo')) {
+    return `En ${currentLocationName} hoy hace ${Math.round(today.temperatureMax || avgTemp)}°C con ${today.description || 'condiciones variables'}. ` +
+           `Máxima de ${Math.round(maxTemp)}°C y mínima de ${Math.round(minTemp)}°C esta semana. ` +
+           (hasRain ? '🌧️ Hay probabilidad de lluvia.' : '☀️ Mayormente seco.');
+  }
+  
+  if (lower.includes('lloverá') || lower.includes('llover') || lower.includes('lluvia') || lower.includes('llueve')) {
+    if (hasRain) {
+      const rainyDays = forecast.filter(d => (d.description || '').toLowerCase().includes('lluv') || (d.description || '').toLowerCase().includes('storm'));
+      const maxRainDay = forecast.find(d => (d.precipitation || 0) === maxPrecip);
+      return `Sí, hay probabilidad de lluvia en ${currentLocationName}. ` +
+             `El día con más precipitación sería ${maxRainDay?.date || 'próximamente'} con ${maxPrecip.toFixed(1)}mm. ` +
+             `${rainyDays.length} de los próximos 7 días tienen probabilidad de lluvia. 🌧️`;
+    }
+    return `En ${currentLocationName} no se esperan lluvias significativas esta semana. ☀️ ` +
+           `El clima estará mayormente seco con temperaturas entre ${Math.round(minTemp)}°C y ${Math.round(maxTemp)}°C.`;
+  }
+  
+  if (lower.includes('calor') || lower.includes('caluroso') || lower.includes('caliente') || lower.includes('qué temperatura')) {
+    return `En ${currentLocationName} las temperaturas esta semana van desde ${Math.round(minTemp)}°C hasta ${Math.round(maxTemp)}°C. ` +
+           `El día más caluroso será con ${Math.round(maxTemp)}°C. ` +
+           (maxTemp > 30 ? '🔥 Hace calor, recuerda hidratarte y usar protector solar.' : '🌡️ Temperaturas agradables.');
+  }
+  
+  if (lower.includes('frío') || lower.includes('frio') || lower.includes('fría') || lower.includes('helado')) {
+    return `En ${currentLocationName} las temperaturas mínimas rondarán los ${Math.round(minTemp)}°C. ` +
+           (minTemp < 10 ? '❄️ Hace fresco, lleva abrigo.' : '🌡️ Temperaturas suaves.');
+  }
+  
+  if (lower.includes('viento') || lower.includes('ventoso') || lower.includes('ráfaga')) {
+    return `El viento máximo esperado en ${currentLocationName} es de ${maxWind.toFixed(1)} km/h. ` +
+           (maxWind > 30 ? '💨 Hay viento fuerte, ten cuidado con objetos ligeros.' : '🌬️ Viento moderado.');
+  }
+  
+  if (lower.includes('sol') || lower.includes('soleado') || lower.includes('despejado')) {
+    if (hasSun) {
+      const sunnyDays = forecast.filter(d => (d.description || '').toLowerCase().includes('despejado') || (d.description || '').toLowerCase().includes('claro'));
+      return `¡Sí! Habrá sol en ${currentLocationName}. ` +
+             `${sunnyDays.length} días con cielo despejado esta semana. ☀️ ` +
+             'Ideal para actividades al aire libre.';
+    }
+    return `En ${currentLocationName} el cielo estará parcialmente nublado esta semana. ` +
+           '虽 Habrá momentos de sol entre nubes. ⛅';
+  }
+  
+  if (lower.includes('mejor día') || lower.includes('mejor dia') || lower.includes('día ideal')) {
+    const bestDay = forecast.find(d => 
+      !(d.description || '').toLowerCase().includes('lluv') && 
+      !(d.description || '').toLowerCase().includes('storm') &&
+      (d.temperatureMax || 0) >= avgTemp
+    ) || forecast[0];
+    return `El mejor día en ${currentLocationName} sería ${bestDay?.date || 'hoy'} ` +
+           `con ${Math.round(bestDay?.temperatureMax || avgTemp)}°C y ${bestDay?.description || 'buen tiempo'}. 🌟`;
+  }
+  
+  if (lower.includes('qué día') || lower.includes('que dia') || lower.includes('pronóstico para') || lower.includes('pronostico para')) {
+    const dayMatch = lower.match(/(lunes|martes|miércoles|martes|jueves|viernes|sábado|sabado|domingo|hoy|mañana|pasado)/i);
+    if (dayMatch) {
+      const dayName = dayMatch[1].toLowerCase();
+      const todayDate = new Date().getDay();
+      const dayMap = {domingo: 0, lunes: 1, martes: 2, miércoles: 3, jueves: 4, viernes: 5, sábado: 6, sabado: 6};
+      let targetIndex = -1;
+      
+      if (dayName === 'hoy') targetIndex = 0;
+      else if (dayName === 'mañana' || dayName === 'manana') targetIndex = 1;
+      else if (dayName === 'pasado') targetIndex = 2;
+      else {
+        const dayNum = dayMap[dayName] !== undefined ? dayMap[dayName] : todayDate;
+        targetIndex = (dayNum - todayDate + 7) % 7;
+      }
+      
+      if (targetIndex < forecast.length) {
+        const dayForecast = forecast[targetIndex];
+        return `El ${dayName} en ${currentLocationName}: ` +
+               `Máxima ${Math.round(dayForecast?.temperatureMax || avgTemp)}°C, ` +
+               `mínima ${Math.round(dayForecast?.temperatureMin || avgTemp - 5)}°C, ` +
+               `${dayForecast?.description || 'condiciones variables'}. 📅`;
+      }
+    }
+  }
+  
+  if (lower.includes('semana') || lower.includes('próximos días') || lower.includes('proximos dias')) {
+    return `Pronóstico para la semana en ${currentLocationName}:\n\n` +
+           `• Temperaturas: ${Math.round(minTemp)}°C a ${Math.round(maxTemp)}°C\n` +
+           `• ${hasRain ? '🌧️ Hay días con lluvia' : '☀️ Mayormente seco'}\n` +
+           `• Viento máximo: ${maxWind.toFixed(1)} km/h\n` +
+           `• ${hasSun ? '☀️ Días soleados' : '⛅ Mezcla de nubes y sol'}`;
+  }
+  
+  if (lower.includes('recomendación') || lower.includes('recomiendas') || lower.includes('aconsejas') || lower.includes('debo llevar')) {
+    const recommendations = [];
+    if (hasRain) recommendations.push('🌂 Lleva paraguas o impermeable');
+    if (maxTemp > 28) recommendations.push('🧴 Protector solar');
+    if (minTemp < 15) recommendations.push('🧥 Ropa de abrigo para las mañanas');
+    if (maxWind > 25) recommendations.push('💨 Cuidado con el viento');
+    if (hasSun) recommendations.push('🕶️ Gafas de sol');
+    
+    return `Para ${currentLocationName} te recomiendo:\n${recommendations.join('\n')}` +
+           `\n\n💡 Verifica el pronóstico diariamente para mayor precisión.`;
+  }
+  
+  if (lower.includes('temperatura máxima') || lower.includes('temp máxima') || lower.includes('máxima')) {
+    return `La temperatura máxima en ${currentLocationName} esta semana es de ${Math.round(maxTemp)}°C. 🔥`;
+  }
+  
+  if (lower.includes('temperatura mínima') || lower.includes('temp mínima') || lower.includes('mínima')) {
+    return `La temperatura mínima en ${currentLocationName} esta semana es de ${Math.round(minTemp)}°C. ❄️`;
+  }
+  
+  return null;
+}
+
+function handleCommands(command) {
+  const cmd = command.toLowerCase();
+  
+  if (cmd === '/help' || cmd === '/ayuda') {
+    return `🤖 Comandos disponibles:\n\n` +
+           `• /forecast - Ver resumen del pronóstico\n` +
+           `• /week - Pronóstico de 7 días\n` +
+           `• /rain - Info sobre lluvia\n` +
+           `• /temp - Información de temperatura\n` +
+           `• /wind - Información del viento\n` +
+           `• /best - Mejor día de la semana\n` +
+           `• /clear - Borrar chat\n` +
+           `• /config - Configurar Groq API\n\n` +
+           `También puedes preguntarme sobre el clima de ${currentLocationName || 'tu ciudad'} 😊`;
+  }
+  
+  if (cmd === '/forecast' || cmd === '/clima') {
+    if (currentDailyForecast.length === 0) {
+      return '🔍 Primero busca una ciudad para ver su pronóstico.';
+    }
+    const today = currentDailyForecast[0] || {};
+    return `📊 Resumen para ${currentLocationName}:\n\n` +
+           `• Hoy: ${Math.round(today.temperatureMax || 0)}°C / ${Math.round(today.temperatureMin || 0)}°C\n` +
+           `• Condición: ${today.description || 'N/A'}\n` +
+           `• Precipitación: ${(today.precipitation || 0).toFixed(1)}mm\n` +
+           `• Viento: ${(today.windMax || 0).toFixed(1)} km/h\n\n` +
+           `Usa /week para ver los 7 días completos.`;
+  }
+  
+  if (cmd === '/week' || cmd === '/semana') {
+    if (currentDailyForecast.length === 0) {
+      return '🔍 Primero busca una ciudad para ver su pronóstico.';
+    }
+    let response = `📅 Pronóstico de 7 días para ${currentLocationName}:\n\n`;
+    currentDailyForecast.forEach((day, i) => {
+      const date = new Date(day.date);
+      const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' });
+      response += `${dayName}: ${Math.round(day.temperatureMax)}°/${Math.round(day.temperatureMin)}° ${getWeatherEmoji(day.description)} ${day.description}\n`;
+    });
+    return response;
+  }
+  
+  if (cmd === '/rain' || cmd === '/lluvia') {
+    if (currentDailyForecast.length === 0) {
+      return '🔍 Primero busca una ciudad.';
+    }
+    const rainyDays = currentDailyForecast.filter(d => 
+      (d.description || '').toLowerCase().includes('lluv') || 
+      (d.description || '').toLowerCase().includes('storm') ||
+      (d.description || '').toLowerCase().includes('chubasc')
+    );
+    if (rainyDays.length > 0) {
+      return `🌧️ Días con probabilidad de lluvia en ${currentLocationName}:\n\n` +
+             rainyDays.map(d => `${d.date}: ${d.description} (${(d.precipitation || 0).toFixed(1)}mm)`).join('\n');
+    }
+    return `☀️ No se esperan lluvias significativas en ${currentLocationName} esta semana.`;
+  }
+  
+  if (cmd === '/temp' || cmd === '/temperatura') {
+    if (currentDailyForecast.length === 0) {
+      return '🔍 Primero busca una ciudad.';
+    }
+    const temps = currentDailyForecast.map(d => d.temperatureMax);
+    const max = Math.max(...temps);
+    const min = Math.min(...temps);
+    const avg = temps.reduce((a, b) => a + b, 0) / temps.length;
+    return `🌡️ Información de temperatura para ${currentLocationName}:\n\n` +
+           `• Máxima: ${Math.round(max)}°C\n` +
+           `• Mínima: ${Math.round(min)}°C\n` +
+           `• Promedio: ${Math.round(avg)}°C\n\n` +
+           `Rango térmico: ${Math.round(min)}°C - ${Math.round(max)}°C`;
+  }
+  
+  if (cmd === '/wind' || cmd === '/viento') {
+    if (currentDailyForecast.length === 0) {
+      return '🔍 Primero busca una ciudad.';
+    }
+    const maxWind = Math.max(...currentDailyForecast.map(d => d.windMax || 0));
+    const avgWind = currentDailyForecast.reduce((a, b) => a + (b.windMax || 0), 0) / currentDailyForecast.length;
+    return `💨 Información del viento para ${currentLocationName}:\n\n` +
+           `• Viento máximo: ${maxWind.toFixed(1)} km/h\n` +
+           `• Viento promedio: ${avgWind.toFixed(1)} km/h\n\n` +
+           (maxWind > 30 ? '⚠️ Viento fuerte, ten cuidado.' : '🌬️ Viento moderado.');
+  }
+  
+  if (cmd === '/best') {
+    if (currentDailyForecast.length === 0) {
+      return '🔍 Primero busca una ciudad.';
+    }
+    const bestDay = currentDailyForecast.find(d => 
+      !(d.description || '').toLowerCase().includes('lluv') && 
+      !(d.description || '').toLowerCase().includes('storm')
+    ) || currentDailyForecast[0];
+    return `🌟 Mejor día en ${currentLocationName}: ${bestDay?.date}\n\n` +
+           `• Temperatura: ${Math.round(bestDay?.temperatureMax || 0)}°C\n` +
+           `• Condición: ${bestDay?.description}\n` +
+           `• Ideal para actividades al aire libre. ☀️`;
+  }
+  
+  if (cmd === '/clear' || cmd === '/borrar') {
+    chatHistory = [];
+    const container = document.getElementById('chatbot-messages');
+    if (container) {
+      container.innerHTML = `
+        <div class="chatbot-welcome-nasa">
+          <div class="chatbot-avatar">🤖</div>
+          <p>¡Hola! Soy el asistente de Zeus Meteo 🌤️</p>
+          <p style="font-size: 13px; opacity: 0.7;">Pregúntame sobre el clima o usa /help para ver comandos.</p>
+        </div>
+      `;
+    }
+    return 'Chat borrado. ¿En qué puedo ayudarte? 🧹';
+  }
+  
+  if (cmd === '/config' || cmd === '/api') {
+    showApiKeyConfig();
+    return null;
+  }
+  
+  return `Comando no reconocido: ${command}\nUsa /help para ver los comandos disponibles.`;
+}
+
+function getWeatherEmoji(description) {
+  const desc = (description || '').toLowerCase();
+  if (desc.includes('lluv') || desc.includes('storm')) return '🌧️';
+  if (desc.includes('nieve') || desc.includes('snow')) return '❄️';
+  if (desc.includes('nublado') || desc.includes('cloud')) return '☁️';
+  if (desc.includes('despejado') || desc.includes('claro') || desc.includes('sunny')) return '☀️';
+  if (desc.includes('tormenta') || desc.includes('thunder')) return '⛈️';
+  if (desc.includes('niebla') || desc.includes('fog')) return '🌫️';
+  if (desc.includes('chubasc')) return '🌦️';
+  return '🌤️';
 }
 
 // ==================== GROQ API CONFIG ====================
@@ -2148,22 +2427,12 @@ function handleSpecialCommands(message) {
     return true;
   }
   
-  if (lower === '/clear' || lower === '/borrar') {
-    chatHistory = [];
-    const container = document.getElementById('chatbot-messages');
-    container.innerHTML = `
-      <div class="chatbot-welcome">
-        <div class="chatbot-avatar">🤖</div>
-        <p>¡Historial borrado! 💬 ¿En qué puedo ayudarte?</p>
-      </div>
-    `;
-    return true;
-  }
-  
   if (lower === '/status' || lower === '/estado') {
     let status = '📊 Estado del Chatbot:\n\n';
     status += API_CONFIG.groq.apiKey ? '✅ Groq API: Configurada\n' : '⚪ Groq API: No configurada\n';
-    status += '✅ Respuestas inteligentes: Activas\n';
+    status += '✅ Análisis de pronóstico: Activo\n';
+    status += currentLocationName ? `📍 Ciudad cargada: ${currentLocationName}\n` : '';
+    status += currentDailyForecast.length > 0 ? `📊 Datos del pronóstico: ${currentDailyForecast.length} días\n` : '';
     status += localStorage.getItem('zeus_groq_api_key') ? '✅ API Key: Guardada' : '⚪ API Key: No guardada';
     
     alert(status);
@@ -2185,7 +2454,20 @@ sendChatMessage = function() {
   
   if (!message) return;
   
-  if (message.startsWith('/') || message.toLowerCase().includes('/api') || message.toLowerCase().includes('configurar')) {
+  if (message.startsWith('/')) {
+    const response = handleCommands(message.toLowerCase());
+    if (response === null) {
+      input.value = '';
+      return;
+    }
+    if (response) {
+      addChatMessage('assistant', response);
+      input.value = '';
+      return;
+    }
+  }
+  
+  if (message.toLowerCase().includes('/api') || message.toLowerCase().includes('configurar')) {
     if (handleSpecialCommands(message)) {
       input.value = '';
       return;
