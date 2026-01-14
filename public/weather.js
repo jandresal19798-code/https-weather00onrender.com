@@ -1989,7 +1989,102 @@ function updateChatbotStatus() {
 document.addEventListener('DOMContentLoaded', updateChatbotStatus);
 
 async function getAIResponse(userMessage) {
+  const groqApiKey = API_CONFIG.groq.apiKey;
+  const deepseekApiKey = API_CONFIG.deepseek.apiKey;
+  
+  if (deepseekApiKey) {
+    try {
+      return await callDeepSeekAPI(userMessage);
+    } catch (error) {
+      console.error('DeepSeek error:', error);
+    }
+  }
+  
+  if (groqApiKey) {
+    try {
+      return await callGroqAPI(userMessage);
+    } catch (error) {
+      console.error('Groq error:', error);
+    }
+  }
+  
   return getSmartResponse(userMessage);
+}
+
+async function callDeepSeekAPI(message) {
+  const response = await fetch(API_CONFIG.deepseek.endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_CONFIG.deepseek.apiKey}`
+    },
+    body: JSON.stringify({
+      model: API_CONFIG.deepseek.model,
+      messages: [
+        {
+          role: 'system',
+          content: `Eres Zeus, un asistente meteorológico inteligente. Tu trabajo es responder preguntas sobre el clima, pronósticos y datos meteorológicos de forma clara y amigable. 
+
+Current location: ${currentLocationName || 'No cargada'}
+Forecast data: ${currentDailyForecast.length > 0 ? `${currentDailyForecast.length} días disponibles` : 'No disponible'}
+
+Responde siempre en español, de manera helpful y friendly. Usa emojis cuando sea apropiado. Mantén las respuestas concisas pero informativas.`
+        },
+        ...chatHistory.slice(-10).map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        })),
+        { role: 'user', content: message }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`DeepSeek API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+async function callGroqAPI(message) {
+  const response = await fetch(API_CONFIG.groq.endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_CONFIG.groq.apiKey}`
+    },
+    body: JSON.stringify({
+      model: API_CONFIG.groq.model,
+      messages: [
+        {
+          role: 'system',
+          content: `Eres Zeus, un asistente meteorológico inteligente. Tu trabajo es responder preguntas sobre el clima, pronósticos y datos meteorológicos de forma clara y amigable. 
+
+Current location: ${currentLocationName || 'No cargada'}
+Forecast data: ${currentDailyForecast.length > 0 ? `${currentDailyForecast.length} días disponibles` : 'No disponible'}
+
+Responde siempre en español, de manera helpful y friendly. Usa emojis cuando sea apropiado. Mantén las respuestas concisas pero informativas.`
+        },
+        ...chatHistory.slice(-10).map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        })),
+        { role: 'user', content: message }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Groq API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
 }
 
 function getSmartResponse(message) {
