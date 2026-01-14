@@ -147,22 +147,27 @@ function updateCurrentWeather(report) {
   
   document.getElementById('city-name').textContent = city;
   
-  // PATRÓN CORRECTO: Buscar "Promedio: XX.X°C" exactamente
-  const tempMatch = report.match(/Promedio:\s*([\d.]+)/);
+  // Buscar "Promedio: XX.X°C" en una línea específica
+  let tempFound = false;
+  for (const line of lines) {
+    if (line.includes('Promedio:') && line.includes('°C')) {
+      const tempMatch = line.match(/Promedio:\s*([\d.]+)/);
+      if (tempMatch) {
+        document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
+        tempFound = true;
+        break;
+      }
+    }
+  }
   
-  if (tempMatch) {
-    document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
-  } else if (currentDailyForecast.length > 0) {
-    // FALLBACK: Usar temperatura del forecast (promedio de max y min del día)
-    const today = currentDailyForecast[0];
-    if (today && today.temperatureMax && today.temperatureMin) {
-      const avgTemp = (today.temperatureMax + today.temperatureMin) / 2;
-      document.getElementById('current-temp').textContent = Math.round(avgTemp);
+  // Fallback: Buscar cualquier temperatura en formato XX.X°C o XX°C
+  if (!tempFound) {
+    const tempMatch = report.match(/(\d+(?:\.\d+)?)\s*°C/);
+    if (tempMatch) {
+      document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
     } else {
       document.getElementById('current-temp').textContent = '--';
     }
-  } else {
-    document.getElementById('current-temp').textContent = '--';
   }
   
   const descMatch = report.match(/Estado predominante:\s*(.+)/i);
