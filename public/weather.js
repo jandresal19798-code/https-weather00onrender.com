@@ -829,6 +829,87 @@ function displayDailyForecast(forecast) {
   }).join('');
 }
 
+let currentForecastDays = 7;
+let forecast15Data = [];
+
+async function switchForecastDays(days, btn) {
+  currentForecastDays = days;
+  
+  // Update button states
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  if (days === 7) {
+    document.getElementById('forecast-15days-card').style.display = 'none';
+    document.getElementById('daily-forecast').style.display = 'grid';
+    if (currentDailyForecast.length > 0) {
+      displayDailyForecast(currentDailyForecast);
+    }
+  } else {
+    document.getElementById('daily-forecast').style.display = 'none';
+    document.getElementById('forecast-15days-card').style.display = 'block';
+    
+    if (forecast15Data.length > 0) {
+      display15DayForecast(forecast15Data);
+    } else {
+      await load15DayForecast();
+    }
+  }
+}
+
+async function load15DayForecast() {
+  const location = document.getElementById('location-input').value.trim();
+  if (!location) return;
+  
+  try {
+    const response = await fetch(`/api/forecast-15days?location=${encodeURIComponent(location)}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      forecast15Data = data.forecast || [];
+      display15DayForecast(forecast15Data);
+    }
+  } catch (error) {
+    console.error('Error loading 15-day forecast:', error);
+  }
+}
+
+function display15DayForecast(forecast) {
+  const container = document.getElementById('forecast-15days');
+  
+  if (!forecast || forecast.length === 0) {
+    container.innerHTML = '<p style="padding: 20px; color: #888;">Pronóstico de 15 días no disponible</p>';
+    return;
+  }
+  
+  const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  
+  container.innerHTML = forecast.map((day, index) => {
+    const date = new Date(day.date + 'T00:00:00');
+    const dayName = index < 7 ? days[date.getDay()] : days[index % 7];
+    const monthName = months[date.getMonth()];
+    const dayNum = date.getDate();
+    const icon = getWeatherIcon(day.description);
+    const tempMax = Math.round(day.temperatureMax);
+    const tempMin = Math.round(day.temperatureMin);
+    const precip = day.precipitation || 0;
+    
+    return `
+      <div class="day-card-nasa">
+        <div class="day-name-nasa">${dayName}</div>
+        <div style="font-size: 11px; color: var(--text-light); margin-bottom: 4px;">${monthName} ${dayNum}</div>
+        <span class="day-icon-nasa">${icon}</span>
+        <div class="day-temps-nasa">
+          <span class="day-temp-max-nasa">${tempMax}°</span>
+          <span class="day-temp-min-nasa">${tempMin}°</span>
+        </div>
+        ${precip > 0 ? `<div style="font-size: 10px; color: var(--text-light); margin-top: 4px;">💧 ${precip.toFixed(1)}mm</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
 function updateWeatherDetails(forecast) {
   const today = forecast[0];
   if (!today) return;

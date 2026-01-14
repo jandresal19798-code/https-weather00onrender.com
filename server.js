@@ -175,11 +175,11 @@ app.get('/api/forecast-7days', async (req, res) => {
   }
 });
 
-function generateMockForecast(location) {
+function generateMockForecast(location, days = 7) {
   const today = new Date();
   const conditions = ['soleado', 'parcialmente nublado', 'nublado', 'lluvia ligera'];
   
-  return Array.from({ length: 7 }, (_, i) => {
+  return Array.from({ length: days }, (_, i) => {
     const date = new Date(today);
     date.setDate(date.getDate() + i);
     const condition = conditions[Math.floor(Math.random() * conditions.length)];
@@ -197,6 +197,44 @@ function generateMockForecast(location) {
     };
   });
 }
+
+app.get('/api/forecast-15days', async (req, res) => {
+  try {
+    const { location } = req.query;
+    
+    if (!location) {
+      return res.status(400).json({ error: 'Ubicación requerida' });
+    }
+
+    const cacheKey = getCacheKey('/api/forecast-15days', { location });
+    const cached = getCached(cacheKey);
+    
+    if (cached) {
+      return res.json(cached);
+    }
+
+    let forecast = null;
+
+    try {
+      const { OpenMeteo } = await import('./src/weatherSources.js');
+      const openMeteo = new OpenMeteo();
+      forecast = await openMeteo.get15DayForecast(location);
+      console.log('✅ 15-day Forecast desde OpenMeteo');
+    } catch (error) {
+      console.log('⚠️ OpenMeteo 15-day falló:', error.message);
+      forecast = generateMockForecast(location, 15);
+      console.log('⚠️ Usando datos estimados para 15 días');
+    }
+
+    const response = { success: true, forecast, source: 'live' };
+    setCached(cacheKey, response, 300000);
+    
+    res.json(response);
+  } catch (error) {
+    console.error('Error en 15-day forecast:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.get('/api/coordinates', async (req, res) => {
   try {

@@ -1432,6 +1432,35 @@ body.dark-mode .moon-phase {
   border-radius: 3px;
 }
 
+.forecast-15days {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.forecast-15days::-webkit-scrollbar {
+  height: 6px;
+}
+
+.forecast-15days::-webkit-scrollbar-track {
+  background: var(--bg-light);
+}
+
+.forecast-15days::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.forecast-15days .day-card-nasa {
+  flex: 0 0 auto;
+  width: 70px;
+  padding: 12px 8px;
+}
+
 .day-card-nasa {
   flex: 0 0 auto;
   width: 85px;

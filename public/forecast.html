@@ -197,10 +197,22 @@
         <!-- 7 Day Forecast -->
         <section class="nasa-card">
           <div class="card-header">
-            <h2 class="card-title">📅 Pronóstico 7 Días</h2>
-            <span class="card-badge">Previsión</span>
+            <h2 class="card-title">📅 Pronóstico Extendido</h2>
+            <div class="filter-tabs-nasa">
+              <button class="filter-btn active" onclick="switchForecastDays(7, this)">7 Días</button>
+              <button class="filter-btn" onclick="switchForecastDays(15, this)">15 Días</button>
+            </div>
           </div>
           <div class="forecast-7days" id="daily-forecast"></div>
+        </section>
+
+        <!-- 15 Day Forecast (Hidden by default) -->
+        <section class="nasa-card" id="forecast-15days-card" style="display: none;">
+          <div class="card-header">
+            <h2 class="card-title">📊 Pronóstico 15 Días</h2>
+            <span class="card-badge">Previsión Extendida</span>
+          </div>
+          <div class="forecast-15days" id="forecast-15days"></div>
         </section>
 
         <!-- Hourly Forecast -->
@@ -538,7 +550,7 @@
     </div>
   </div>
 
-  <script src="weather.js?v=34&ts=20260114"></script>
+  <script src="weather.js?v=35&ts=20260114"></script>
   <script>
     let searchTimeout = null;
     let currentSuggestions = [];

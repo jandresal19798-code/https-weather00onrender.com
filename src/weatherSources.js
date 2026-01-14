@@ -192,6 +192,33 @@ export class OpenMeteo extends WeatherSource {
     }));
   }
 
+  async get15DayForecast(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        daily: 'temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,wind_speed_10m_max',
+        timezone: 'auto',
+        forecast_days: 16
+      }
+    });
+    
+    // Limit to 15 days
+    const days = response.data.daily.time.slice(0, 15);
+    
+    return days.map((date, index) => ({
+      source: 'OpenMeteo',
+      date: date,
+      temperatureMax: response.data.daily.temperature_2m_max[index],
+      temperatureMin: response.data.daily.temperature_2m_min[index],
+      weatherCode: response.data.daily.weather_code[index],
+      description: this.getWeatherDescription(response.data.daily.weather_code[index]),
+      precipitation: response.data.daily.precipitation_sum[index],
+      windMax: response.data.daily.wind_speed_10m_max[index]
+    }));
+  }
+
   formatData(data, location) {
     return {
       source: 'OpenMeteo',
