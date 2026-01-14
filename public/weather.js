@@ -147,28 +147,39 @@ function updateCurrentWeather(report) {
   
   document.getElementById('city-name').textContent = city;
   
-  // Buscar "Promedio: XX.X°C" en una línea específica
-  let tempFound = false;
+  // Buscar EXACTAMENTE la línea "• Promedio: XX.X°C" 
+  const promedioLine = lines.find(line => line.trim().startsWith('• Promedio:'));
+  
+  if (promedioLine) {
+    const tempMatch = promedioLine.match(/Promedio:\s*([\d.]+)/);
+    if (tempMatch) {
+      document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
+      return;
+    }
+  }
+  
+  // Fallback: Buscar en líneas que contengan TEMPERATURA
   for (const line of lines) {
-    if (line.includes('Promedio:') && line.includes('°C')) {
+    if (line.includes('TEMPERATURA') && line.includes('Promedio:')) {
       const tempMatch = line.match(/Promedio:\s*([\d.]+)/);
       if (tempMatch) {
         document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
-        tempFound = true;
-        break;
+        return;
       }
     }
   }
   
-  // Fallback: Buscar cualquier temperatura en formato XX.X°C o XX°C
-  if (!tempFound) {
-    const tempMatch = report.match(/(\d+(?:\.\d+)?)\s*°C/);
-    if (tempMatch) {
-      document.getElementById('current-temp').textContent = Math.round(parseFloat(tempMatch[1]));
-    } else {
-      document.getElementById('current-temp').textContent = '--';
+  // Último fallback: Usar forecast si está disponible
+  if (currentDailyForecast.length > 0) {
+    const today = currentDailyForecast[0];
+    if (today && today.temperatureMax && today.temperatureMin) {
+      const avgTemp = (today.temperatureMax + today.temperatureMin) / 2;
+      document.getElementById('current-temp').textContent = Math.round(avgTemp);
+      return;
     }
   }
+  
+  document.getElementById('current-temp').textContent = '--';
   
   const descMatch = report.match(/Estado predominante:\s*(.+)/i);
   const description = descMatch ? descMatch[1].trim() : 'Despejado';
