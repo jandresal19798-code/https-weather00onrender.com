@@ -102,13 +102,14 @@ async function searchWeather() {
     const data = await response.json();
     
     if (data.success) {
-      updateCurrentWeather(data.report);
       currentReport = data.report;
       await loadMap(location);
       await Promise.all([
         loadHourlyForecast(location),
         loadDailyForecast(location)
       ]);
+      // Update weather AFTER forecast data is loaded
+      updateCurrentWeather(data.report);
     } else {
       console.error(data.error);
     }
