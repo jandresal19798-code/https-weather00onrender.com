@@ -188,8 +188,28 @@ function updateCurrentWeather(report) {
   // Fallback final
   document.getElementById('current-temp').textContent = '--';
   
+  // Extraer descripción del clima con múltiples patrones
+  let description = null;
+  
+  // Patrón 1: "Estado predominante: X"
   const descMatch = report.match(/Estado predominante:\s*(.+)/i);
-  const description = descMatch ? descMatch[1].trim() : 'Despejado';
+  if (descMatch) description = descMatch[1].trim();
+  
+  // Patrón 2: Buscar en forecast si disponible
+  if (!description && currentDailyForecast.length > 0) {
+    description = currentDailyForecast[0]?.description || null;
+  }
+  
+  // Patrón 3: Buscar en hourly forecast
+  if (!description && hourlyForecastData.length > 0) {
+    description = hourlyForecastData[0]?.description || null;
+  }
+  
+  // Fallback final
+  if (!description) {
+    description = 'Despejado';
+  }
+  
   document.getElementById('weather-description').textContent = description;
   document.getElementById('weather-icon').textContent = getWeatherIcon(description);
   
