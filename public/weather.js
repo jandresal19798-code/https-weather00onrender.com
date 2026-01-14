@@ -1961,6 +1961,11 @@ const API_CONFIG = {
     model: 'llama-3.3-70b-versatile',
     apiKey: localStorage.getItem('zeus_groq_api_key') || ''
   },
+  deepseek: {
+    endpoint: 'https://api.deepseek.com/chat/completions',
+    model: 'deepseek-chat',
+    apiKey: localStorage.getItem('zeus_deepseek_api_key') || ''
+  },
   ollama: {
     endpoint: 'http://localhost:11434/api/generate',
     model: 'llama3.2'
@@ -1973,6 +1978,9 @@ function updateChatbotStatus() {
   if (API_CONFIG.groq.apiKey) {
     statusEl.textContent = 'Groq IA';
     statusEl.style.color = '#00c853';
+  } else if (API_CONFIG.deepseek.apiKey) {
+    statusEl.textContent = 'DeepSeek IA';
+    statusEl.style.color = '#00bcd4';
   } else {
     statusEl.textContent = 'IA Gratuita';
     statusEl.style.color = '#fff';
@@ -2403,10 +2411,107 @@ function testApiKey() {
   })
   .then(response => {
     if (response.ok) {
-      alert('✅ API Key válida. El chatbot ahora usará IA avanzada.');
+      alert('✅ API Key válida. El chatbot ahora usará IA avanzada de Groq.');
       saveApiKey();
     } else {
       alert('❌ API Key inválida. Verifícala en console.groq.com');
+    }
+  })
+  .catch(error => {
+    alert('❌ Error al conectar. Verifica tu conexión o API key.');
+  })
+  .finally(() => {
+    btn.textContent = 'Probar API Key';
+    btn.disabled = false;
+  });
+}
+
+// DeepSeek API Configuration
+function showDeepSeekConfig() {
+  const container = document.getElementById('chatbot-messages');
+  const configHtml = `
+    <div class="chatbot-config">
+      <div class="chatbot-config-header">
+        <span>🧠</span>
+        <strong>Configurar DeepSeek AI (Gratis)</strong>
+      </div>
+      <p>DeepSeek ofrece IA gratuita con alta velocidad. Obtén tu API key gratis:</p>
+      <ol>
+        <li>Ve a <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com</a></li>
+        <li>Crea una cuenta gratis</li>
+        <li>Copia tu API Key</li>
+        <li>Pégala aquí abajo</li>
+      </ol>
+      <div class="chatbot-input-container" style="margin-top: 12px;">
+        <input type="password" id="deepseek-api-key" placeholder="Pega tu API key de DeepSeek..." />
+        <button class="chatbot-send" onclick="saveDeepSeekKey()">💾</button>
+      </div>
+      <p style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Tu API key se guarda solo en tu navegador</p>
+      <button onclick="testDeepSeekKey()" style="margin-top: 8px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-tertiary); cursor: pointer;">Probar API Key</button>
+    </div>
+  `;
+  
+  container.insertAdjacentHTML('beforeend', configHtml);
+  container.scrollTop = container.scrollHeight;
+}
+
+function saveDeepSeekKey() {
+  const input = document.getElementById('deepseek-api-key');
+  if (!input) return;
+  const apiKey = input.value.trim();
+  
+  if (apiKey.length < 10) {
+    alert('La API key parece muy corta. Verifícala por favor.');
+    return;
+  }
+  
+  localStorage.setItem('zeus_deepseek_api_key', apiKey);
+  API_CONFIG.deepseek.apiKey = apiKey;
+  
+  const configDiv = document.querySelector('.chatbot-config');
+  if (configDiv) {
+    configDiv.innerHTML = `
+      <div style="text-align: center; padding: 20px;">
+        <span style="font-size: 48px;">✅</span>
+        <p style="margin-top: 12px;"><strong>¡API Key de DeepSeek guardada!</strong></p>
+        <p style="font-size: 13px; opacity: 0.7;">El chatbot ahora puede usar IA de DeepSeek</p>
+      </div>
+    `;
+  }
+}
+
+function testDeepSeekKey() {
+  const input = document.getElementById('deepseek-api-key');
+  if (!input) return;
+  const apiKey = input.value.trim();
+  
+  if (!apiKey) {
+    alert('Primero ingresa una API key');
+    return;
+  }
+  
+  const btn = document.querySelector('button[onclick="testDeepSeekKey()"]');
+  btn.textContent = '⏳ Probando...';
+  btn.disabled = true;
+  
+  fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [{ role: 'user', content: 'test' }],
+      max_tokens: 5
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      alert('✅ API Key válida. El chatbot ahora puede usar DeepSeek.');
+      saveDeepSeekKey();
+    } else {
+      alert('❌ API Key inválida. Verifícala en platform.deepseek.com');
     }
   })
   .catch(error => {
@@ -2427,13 +2532,22 @@ function handleSpecialCommands(message) {
     return true;
   }
   
+  if (lower === '/deepseek' || lower === 'configurar deepseek') {
+    showDeepSeekConfig();
+    return true;
+  }
+  
   if (lower === '/status' || lower === '/estado') {
     let status = '📊 Estado del Chatbot:\n\n';
     status += API_CONFIG.groq.apiKey ? '✅ Groq API: Configurada\n' : '⚪ Groq API: No configurada\n';
+    status += API_CONFIG.deepseek.apiKey ? '✅ DeepSeek API: Configurada\n' : '⚪ DeepSeek API: No configurada\n';
     status += '✅ Análisis de pronóstico: Activo\n';
     status += currentLocationName ? `📍 Ciudad cargada: ${currentLocationName}\n` : '';
     status += currentDailyForecast.length > 0 ? `📊 Datos del pronóstico: ${currentDailyForecast.length} días\n` : '';
-    status += localStorage.getItem('zeus_groq_api_key') ? '✅ API Key: Guardada' : '⚪ API Key: No guardada';
+    
+    if (API_CONFIG.groq.apiKey || API_CONFIG.deepseek.apiKey) {
+      status += '\n💡 El chatbot usará la IA disponible más rápida.';
+    }
     
     alert(status);
     return true;

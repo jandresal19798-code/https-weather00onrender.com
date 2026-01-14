@@ -140,15 +140,27 @@ export class NewWeatherSource extends WeatherSource {
 | Variable | Description |
 |----------|-------------|
 | `OLLAMA_URL` | Ollama server URL for local AI |
-| `GROQ_API_KEY` | Groq API key for cloud AI |
+| `GROQ_API_KEY` | Groq API key for cloud AI (optional) |
+| `DEEPSEEK_API_KEY` | DeepSeek API key for cloud AI (optional) - Get free key at platform.deepseek.com |
 | `PIRATE_WEATHER_API_KEY` | Pirate Weather API key (optional) - Get free key at pirate-weather.apiable.io |
 | `OPENWEATHER_API_KEY` | OpenWeatherMap API key (optional) |
 | `WEATHERAPI_KEY` | WeatherAPI.com key (optional) |
 | `PORT` | Server port (default: 3001) |
 
+## Chatbot AI Options
+
+The chatbot can use multiple AI providers:
+
+1. **Groq** (default, very fast) - Get free API key at console.groq.com
+2. **DeepSeek** (free tier available) - Get free API key at platform.deepseek.com
+3. **Ollama** (local, no API key needed) - Run locally with `ollama serve`
+
+Configure with `/config` for Groq or `/deepseek` for DeepSeek.
+
 ## Chatbot Commands
 
 - `/config` - Configure Groq API key
+- `/deepseek` - Configure DeepSeek API key
 - `/clear` - Clear chat history
 - `/status` - Show data source status
 - `/help` - Show available commands
