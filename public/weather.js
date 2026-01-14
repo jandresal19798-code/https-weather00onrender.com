@@ -148,54 +148,52 @@ function updateCurrentWeather(report) {
   
   document.getElementById('city-name').textContent = city;
   
-  // PRIORIDAD 1: Usar currentDailyForecast si está disponible (más confiable)
+  // === EXTRAER TEMPERATURA ===
+  let tempFound = false;
+  
+  // PRIORIDAD 1: Usar currentDailyForecast (más confiable)
   if (currentDailyForecast.length > 0) {
     const today = currentDailyForecast[0];
-    if (today) {
-      // Usar la temperatura del primer forecast disponible
-      if (today.temperatureMax !== undefined && today.temperatureMin !== undefined) {
-        const avgTemp = (today.temperatureMax + today.temperatureMin) / 2;
-        document.getElementById('current-temp').textContent = Math.round(avgTemp);
-        return;
-      }
-      if (today.temperatureMax !== undefined) {
-        document.getElementById('current-temp').textContent = Math.round(today.temperatureMax);
-        return;
+    if (today && today.temperatureMax !== undefined && today.temperatureMin !== undefined) {
+      const avgTemp = (today.temperatureMax + today.temperatureMin) / 2;
+      document.getElementById('current-temp').textContent = Math.round(avgTemp);
+      tempFound = true;
+    }
+  }
+  
+  // PRIORIDAD 2: Buscar en el reporte
+  if (!tempFound) {
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('•') && trimmed.includes('Promedio:')) {
+        const match = trimmed.match(/Promedio:\s*([\d.]+)/);
+        if (match) {
+          document.getElementById('current-temp').textContent = Math.round(parseFloat(match[1]));
+          tempFound = true;
+          break;
+        }
       }
     }
   }
   
-  // PRIORIDAD 2: Parsear el reporte buscando "Promedio: XX.X°C"
-  for (const line of lines) {
-    const trimmed = line.trim();
-    // Buscar línea que contenga solo "• Promedio: XX.X°C"
-    if (trimmed.startsWith('•') && trimmed.includes('Promedio:')) {
-      const match = trimmed.match(/Promedio:\s*([\d.]+)/);
-      if (match) {
-        document.getElementById('current-temp').textContent = Math.round(parseFloat(match[1]));
-        return;
-      }
+  // Fallback: Si no se encontró temperatura
+  if (!tempFound) {
+    const promedioMatch = report.match(/Promedio:\s*([\d.]+)/);
+    if (promedioMatch) {
+      document.getElementById('current-temp').textContent = Math.round(parseFloat(promedioMatch[1]));
+    } else {
+      document.getElementById('current-temp').textContent = '--';
     }
   }
   
-  // PRIORIDAD 3: Buscar cualquier línea con Promedio
-  const promedioMatch = report.match(/Promedio:\s*([\d.]+)/);
-  if (promedioMatch) {
-    document.getElementById('current-temp').textContent = Math.round(parseFloat(promedioMatch[1]));
-    return;
-  }
-  
-  // Fallback final
-  document.getElementById('current-temp').textContent = '--';
-  
-  // Extraer descripción del clima con múltiples patrones
+  // === EXTRAER DESCRIPCIÓN DEL CLIMA ===
   let description = null;
   
-  // Patrón 1: "Estado predominante: X"
+  // Patrón 1: "Estado predominante: X" en el reporte
   const descMatch = report.match(/Estado predominante:\s*(.+)/i);
   if (descMatch) description = descMatch[1].trim();
   
-  // Patrón 2: Buscar en forecast si disponible
+  // Patrón 2: Buscar en forecast actual
   if (!description && currentDailyForecast.length > 0) {
     description = currentDailyForecast[0]?.description || null;
   }
@@ -213,6 +211,7 @@ function updateCurrentWeather(report) {
   document.getElementById('weather-description').textContent = description;
   document.getElementById('weather-icon').textContent = getWeatherIcon(description);
   
+  // === ACTUALIZAR ESTADÍSTICAS ===
   const humidityMatch = report.match(/Humedad.*?(\d+)/);
   document.getElementById('humidity').textContent = humidityMatch ? humidityMatch[1] + '%' : '--%';
   
@@ -225,6 +224,7 @@ function updateCurrentWeather(report) {
   const pressureMatch = report.match(/Presi[óo]n.*?(\d+)/);
   document.getElementById('pressure').textContent = pressureMatch ? pressureMatch[1] + ' hPa' : '-- hPa';
   
+  // === SETEAR FECHA Y HORA ===
   const now = new Date();
   const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
   document.getElementById('current-date').textContent = now.toLocaleDateString('es-ES', options);
@@ -232,6 +232,7 @@ function updateCurrentWeather(report) {
   updateMoonInfo(now);
   updateAstronomy();
   
+  // === ACTUALIZAR VISUAL ===
   const visualContainer = document.getElementById('weather-visual');
   const visualLabel = document.getElementById('weather-visual-label');
   const visualContainerMain = document.getElementById('weather-visual-container');
