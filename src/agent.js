@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB, INUMET } from './weatherSources.js';
+import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB, INUMET, PirateWeather } from './weatherSources.js';
 import { ReportGenerator } from './reportGenerator.js';
 
 dotenv.config();
@@ -21,6 +21,11 @@ class WeatherAgent {
     this.sources.push(new WeatherDB());
     this.sources.push(new MetNorway());
     this.sources.push(new USNWS());
+
+    if (process.env.PIRATE_WEATHER_API_KEY && process.env.PIRATE_WEATHER_API_KEY !== 'tu_api_key_aqui') {
+      this.sources.push(new PirateWeather(process.env.PIRATE_WEATHER_API_KEY));
+      console.log('✅ Pirate Weather API configurada');
+    }
 
     if (process.env.OPENWEATHER_API_KEY && process.env.OPENWEATHER_API_KEY !== 'tu_api_key_aqui') {
       this.sources.push(new OpenWeatherMap(process.env.OPENWEATHER_API_KEY));
@@ -159,6 +164,7 @@ class WeatherAgent {
       'Tomorrow.io': 1.15,
       '7Timer': 1.1,
       'WttrIn': 1.1,
+      'PirateWeather': 1.05,
       'OpenMeteo': 1.0,
       'MetNorway': 1.0,
       'WeatherDB': 0.95,

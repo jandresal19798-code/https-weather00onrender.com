@@ -1389,3 +1389,141 @@ export class INUMET extends WeatherSource {
     return uruguayKeywords.some(keyword => searchLocation.includes(keyword));
   }
 }
+
+// Pirate Weather API - Free alternative to Dark Sky API
+// Requires free API key from https://pirate-weather.apiable.io/
+export class PirateWeather extends WeatherSource {
+  constructor(apiKey = null) {
+    super();
+    this.apiKey = apiKey || process.env.PIRATE_WEATHER_API_KEY || '';
+    this.baseUrl = 'https://api.pirateweather.net';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 3, language: 'es' }
+    });
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    if (!this.apiKey) {
+      throw new Error('Pirate Weather requiere API key. Obtén una gratis en pirate-weather.apiable.io');
+    }
+
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/forecast/${this.apiKey}/${coords.latitude},${coords.longitude}`, {
+        params: {
+          units: 'metric',
+          lang: 'es',
+          exclude: 'minutely,hourly,alerts,flags'
+        },
+        timeout: 10000
+      });
+
+      if (!response.data || !response.data.currently) {
+        throw new Error('Invalid Pirate Weather response');
+      }
+
+      return this.formatData(response.data.currently, coords.name);
+    } catch (error) {
+      if (error.message.includes('API key')) {
+        throw error;
+      }
+      throw new Error(`Pirate Weather no disponible para "${location}": ${error.message}`);
+    }
+  }
+
+  async get7DayForecast(location) {
+    if (!this.apiKey) {
+      throw new Error('Pirate Weather requiere API key');
+    }
+
+    try {
+      const coords = await this.getCoordinates(location);
+      const response = await axios.get(`${this.baseUrl}/forecast/${this.apiKey}/${coords.latitude},${coords.longitude}`, {
+        params: {
+          units: 'metric',
+          lang: 'es',
+          exclude: 'currently,minutely,hourly,alerts,flags'
+        },
+        timeout: 15000
+      });
+
+      if (!response.data || !response.data.daily || !response.data.daily.data) {
+        throw new Error('Invalid Pirate Weather forecast response');
+      }
+
+      return response.data.daily.data.map((day, index) => ({
+        source: 'PirateWeather',
+        date: this.unixToDate(day.time),
+        temperatureMax: day.temperatureHigh || day.temperatureMax || 20,
+        temperatureMin: day.temperatureLow || day.temperatureMin || 10,
+        weatherCode: this.getWeatherCode(day.icon),
+        description: this.getWeatherDescription(day.icon),
+        precipitation: day.precipAccumulation || day.precipIntensity * 24 || 0,
+        windMax: day.windSpeed || 5
+      }));
+    } catch (error) {
+      if (error.message.includes('API key')) {
+        throw error;
+      }
+      throw new Error(`Pirate Weather forecast no disponible: ${error.message}`);
+    }
+  }
+
+  unixToDate(unix) {
+    const date = new Date(unix * 1000);
+    return date.toISOString().split('T')[0];
+  }
+
+  getWeatherCode(icon) {
+    const codes = {
+      'clear-day': 0, 'clear-night': 0,
+      'rain': 61, 'snow': 71,
+      'sleet': 66, 'wind': 0,
+      'fog': 45, 'cloudy': 3,
+      'partly-cloudy-day': 2, 'partly-cloudy-night': 2
+    };
+    return codes[icon] || 0;
+  }
+
+  getWeatherDescription(icon) {
+    const descriptions = {
+      'clear-day': 'cielo despejado',
+      'clear-night': 'cielo despejado',
+      'rain': 'lluvia',
+      'snow': 'nieve',
+      'sleet': 'aguanieve',
+      'wind': 'ventoso',
+      'fog': 'niebla',
+      'cloudy': 'nublado',
+      'partly-cloudy-day': 'parcialmente nublado',
+      'partly-cloudy-night': 'parcialmente nublado'
+    };
+    return descriptions[icon] || icon || 'desconocido';
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'PirateWeather',
+      timestamp: new Date().toISOString(),
+      location: location,
+      temperature: data.temperature,
+      feelsLike: data.apparentTemperature || data.temperature,
+      humidity: data.humidity ? data.humidity * 100 : 50,
+      pressure: data.pressure,
+      windSpeed: data.windSpeed,
+      windDirection: data.windBearing || 0,
+      description: this.getWeatherDescription(data.icon),
+      visibility: data.visibility || 10,
+      clouds: data.cloudCover ? data.cloudCover * 100 : 50,
+      uvIndex: data.uvIndex || 0
+    };
+  }
+}

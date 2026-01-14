@@ -14,7 +14,8 @@ Zeus Meteo is a weather web application that aggregates data from multiple free 
 6. **WeatherDB** (free, no key) - Global coverage, no authentication
 7. **MetNorway** (free) - Used for European locations
 8. **USNWS** (free) - Used for US locations
-9. **MockWeatherSource** - Last resort with realistic random data
+9. **PirateWeather** (free key required) - Dark Sky API replacement, high detail
+10. **MockWeatherSource** - Last resort with realistic random data
 
 ## Source Weight System
 
@@ -27,6 +28,7 @@ Weather data is weighted by source reliability:
 | Tomorrow.io| 1.15   | High accuracy, global coverage     |
 | 7Timer     | 1.1    | Based on NOAA GFS, no API key      |
 | WttrIn     | 1.1    | Good for all locations             |
+| PirateWeather | 1.05 | Dark Sky replacement, high detail  |
 | OpenMeteo  | 1.0    | Primary source                     |
 | MetNorway  | 1.0    | Good for Europe                    |
 | WeatherDB  | 0.95   | No API key required                |
@@ -139,6 +141,7 @@ export class NewWeatherSource extends WeatherSource {
 |----------|-------------|
 | `OLLAMA_URL` | Ollama server URL for local AI |
 | `GROQ_API_KEY` | Groq API key for cloud AI |
+| `PIRATE_WEATHER_API_KEY` | Pirate Weather API key (optional) - Get free key at pirate-weather.apiable.io |
 | `OPENWEATHER_API_KEY` | OpenWeatherMap API key (optional) |
 | `WEATHERAPI_KEY` | WeatherAPI.com key (optional) |
 | `PORT` | Server port (default: 3001) |
