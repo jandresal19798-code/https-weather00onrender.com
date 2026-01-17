@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
 import { body, query, validationResult } from 'express-validator';
 
 const app = express();
@@ -16,10 +15,10 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
-}));
+app.use(limiter);
+app.use(cors());
+app.use(express.static('public'));
+app.use(express.json());
 app.use(limiter);
 app.use(cors());
 app.use(express.static('public'));
