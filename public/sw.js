@@ -38,7 +38,6 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
 
   if (url.origin !== self.location.origin) {
-    event.respondWith(networkFirstExternal(request));
     return;
   }
 
