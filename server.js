@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import { body, query, validationResult } from 'express-validator';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -14,6 +16,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+app.use(helmet());
 app.use(limiter);
 app.use(cors());
 app.use(express.static('public'));
@@ -29,8 +32,17 @@ app.use((req, res, next) => {
   next();
 });
 
+const validateRequest = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
+
 const cache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000;
+const MAX_CACHE_SIZE = 500;
 
 function getCached(key) {
   const cached = cache.get(key);
@@ -42,6 +54,10 @@ function getCached(key) {
 }
 
 function setCached(key, data) {
+  if (cache.size >= MAX_CACHE_SIZE) {
+    const firstKey = cache.keys().next().value;
+    cache.delete(firstKey);
+  }
   cache.set(key, { data, timestamp: Date.now() });
   
   setTimeout(() => {
@@ -227,7 +243,7 @@ app.get('/api/forecast-15days', async (req, res) => {
     }
 
     const response = { success: true, forecast, source: 'live' };
-    setCached(cacheKey, response, 300000);
+    setCached(cacheKey, response);
     
     res.json(response);
   } catch (error) {
@@ -258,13 +274,9 @@ app.get('/api/coordinates', async (req, res) => {
     const variations = [];
     
     const commonCountries = [
-      'argentina', 'uruguay', 'chile', 'brasil', 'paraguay', 'bolivia', 'peru', 'ecuador', 
+      'argentina', 'uruguay', 'chile', 'brasil', 'paraguay', 'bolivia', 'peru', 'ecuador',
       'colombia', 'venezuela', 'mexico', 'españa', 'portugal', 'francia', 'italia', 'alemania',
-      'estados unidos', 'usa', 'united states', 'canada', 'reino unido', 'uk', 'japon', 'china',
-      'argentina', 'uruguay', 'chile', 'brasil', 'paraguay', 'bolivia', 'peru', 'ecuador', 
-      'colombia', 'venezuela', 'mexico', 'spain', 'portugal', 'france', 'italy', 'germany',
-      'argentina', 'uruguay', 'chile', 'brazil', 'paraguay', 'bolivia', 'peru', 'ecuador',
-      'colombia', 'venezuela', 'mexico', 'spain', 'portugal', 'france', 'italy', 'germany',
+      'estados unidos', 'usa', 'united states', 'canada', 'reino Unido', 'uk', 'japon', 'china',
       'argentinian', 'uruguayan', 'chilean', 'brazilian', 'paraguayan', 'peruvian', 'ecuadorian',
       'colombian', 'venezuelan', 'mexican', 'spanish', 'portuguese', 'french', 'italian', 'german'
     ];
@@ -359,7 +371,7 @@ app.get('/api/search', async (req, res) => {
       display: `${r.name}${r.country ? ', ' + r.country : ''}${r.admin1 ? ' (' + r.admin1 + ')' : ''}`
     }));
 
-    setCached(cacheKey, suggestions, 60000);
+    setCached(cacheKey, suggestions);
     
     res.json(suggestions);
   } catch (error) {
