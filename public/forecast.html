@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="theme-color" content="#0B3D91">
   <meta name="description" content="Zeus Meteo - Pronóstico meteorológico detallado">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zeus Meteo">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
   <title>Zeus Meteo - Pronóstico</title>
   <link rel="stylesheet" href="weather.css">
   <link rel="stylesheet" href="home.css">
@@ -636,6 +643,18 @@
         searchWeather();
       }
     });
+    
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW registrado:', registration.scope);
+          })
+          .catch(error => {
+            console.log('SW no disponible:', error.message);
+          });
+      });
+    }
   </script>
 </body>
 </html>

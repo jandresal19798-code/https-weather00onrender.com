@@ -6,28 +6,40 @@
   "display": "standalone",
   "display_override": ["standalone", "browser"],
   "background_color": "#f0f4f8",
-  "theme_color": "#4285f4",
-  "orientation": "any",
+  "theme_color": "#0B3D91",
+  "orientation": "portrait-primary",
   "scope": "/",
   "lang": "es",
   "dir": "ltr",
   "categories": ["weather", "utilities", "lifestyle"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient><linearGradient id='sun' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23FFD93D'/><stop offset='100%25' stop-color='%23FF8C00'/></linearGradient><filter id='shadow'><feDropShadow dx='0' dy='4' stdDeviation='8' flood-color='%23000' flood-opacity='0.3'/></filter></defs><rect fill='url(%23bg)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='url(%23sun)' filter='url(%23shadow)'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/><circle cx='185' cy='190' r='10' fill='white'/><circle cx='245' cy='185' r='8' fill='white'/><path d='M190 220 Q200 235 210 220' stroke='white' stroke-width='5' fill='none' stroke-linecap='round'/></svg>",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='bg2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient><linearGradient id='sun2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23FFD93D'/><stop offset='100%25' stop-color='%23FF8C00'/></linearGradient></defs><rect fill='url(%23bg2)' width='192' height='192' rx='48'/><circle cx='75' cy='70' r='28' fill='url(%23sun2)'/><path d='M60 115 Q75 100 90 115 Q105 130 75 145 Q45 130 60 115' fill='white'/><circle cx='68' cy='65' r='4' fill='white'/><circle cx='92' cy='63' r='3' fill='white'/></svg>",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg3' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient><linearGradient id='sun3' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23FFD93D'/><stop offset='100%25' stop-color='%23FF8C00'/></linearGradient><filter id='shadow3'><feDropShadow dx='0' dy='4' stdDeviation='8' flood-color='%23000' flood-opacity='0.3'/></filter></defs><rect fill='url(%23bg3)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='url(%23sun3)' filter='url(%23shadow3)'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/><circle cx='185' cy='190' r='10' fill='white'/><circle cx='245' cy='185' r='8' fill='white'/><path d='M190 220 Q200 235 210 220' stroke='white' stroke-width='5' fill='none' stroke-linecap='round'/></svg>",
+      "src": "/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23bg)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     }
@@ -39,9 +51,40 @@
       "description": "Buscar el clima de una ciudad",
       "url": "/",
       "icons": []
+    },
+    {
+      "name": "Pronóstico 7 días",
+      "short_name": "7 Días",
+      "description": "Ver pronóstico de 7 días",
+      "url": "/forecast.html",
+      "icons": []
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide"
     }
   ],
   "related_applications": [],
   "prefer_related_applications": false,
-  "handle_links": "preferred"
+  "handle_links": "preferred",
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
