@@ -27,9 +27,9 @@ app.use(helmet({
       styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       styleSrcAttr: ["'unsafe-inline'"],
       fontSrc: ["'self'", "data:", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
-      frameSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "blob:", "https:"],
+      connectSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://api.open-meteo.com", "https://api.sunrisesunset.io", "https://geocoding-api.open-meteo.com"],
+      frameSrc: ["'self'", "https://www.google.com", "https://maps.google.com", "https://www.windy.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
     }
