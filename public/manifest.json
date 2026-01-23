@@ -4,45 +4,22 @@
   "description": "Clima inteligente con IA y pronósticos precisos en tiempo real",
   "start_url": "/",
   "display": "standalone",
-  "display_override": ["standalone", "browser"],
   "background_color": "#f0f4f8",
   "theme_color": "#0B3D91",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "es",
-  "dir": "ltr",
-  "categories": ["weather", "utilities", "lifestyle"],
+  "categories": ["weather", "utilities"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23bg)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23bg)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Buscar clima",
-      "short_name": "Buscar",
-      "description": "Buscar el clima de una ciudad",
-      "url": "/",
-      "icons": []
+      "type": "image/png"
     },
     {
-      "name": "Pronóstico 7 días",
-      "short_name": "7 Días",
-      "description": "Ver pronóstico de 7 días",
-      "url": "/forecast.html",
-      "icons": []
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false,
-  "handle_links": "preferred"
+  ]
 }
