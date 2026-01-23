@@ -2052,8 +2052,598 @@ a:hover {
 }
 
 /* ================================
-   RESPONSIVE BREAKPOINTS
-   ================================ */
+    RESPONSIVE BREAKPOINTS - MEJORADO
+    ================================ */
+
+/* ===== BASE RESPONSIVE: MÓVILES PEQUEÑOS ===== */
+@media screen and (max-width: 360px) {
+  :root {
+    --font-size-base: 14px;
+  }
+  
+  .hero-title {
+    font-size: 22px;
+  }
+  
+  .temp-value {
+    font-size: 42px;
+  }
+  
+  .weather-icon-large {
+    font-size: 52px;
+  }
+  
+  .city-name {
+    font-size: 24px;
+  }
+  
+  .header-container {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .nav-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .action-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .stat-badge {
+    padding: 8px 12px;
+    min-width: 65px;
+  }
+  
+  .stat-badge-value {
+    font-size: 16px;
+  }
+  
+  .search-box-nasa input {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  
+  .search-btn-nasa {
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+  
+  .quick-cities button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+/* ===== MÓVILES ESTÁNDAR ===== */
+@media screen and (min-width: 361px) and (max-width: 480px) {
+  .hero-title {
+    font-size: 26px;
+  }
+  
+  .temp-value {
+    font-size: 48px;
+  }
+  
+  .weather-icon-large {
+    font-size: 60px;
+  }
+  
+  .city-name {
+    font-size: 28px;
+  }
+  
+  .header-container {
+    padding: 12px 14px;
+  }
+  
+  .nav-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .action-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+/* ===== MÓVILES GRANDES / PHABLETS ===== */
+@media screen and (min-width: 481px) and (max-width: 600px) {
+  .hero-title {
+    font-size: 30px;
+  }
+  
+  .temp-value {
+    font-size: 54px;
+  }
+  
+  .weather-icon-large {
+    font-size: 68px;
+  }
+  
+  .city-name {
+    font-size: 32px;
+  }
+  
+  .search-box-nasa {
+    max-width: 450px;
+  }
+  
+  .quick-cities {
+    gap: 10px;
+  }
+  
+  .quick-cities button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+/* ===== TABLETS PEQUEÑAS ===== */
+@media screen and (min-width: 601px) and (max-width: 768px) {
+  .hero-title {
+    font-size: 36px;
+  }
+  
+  .temp-value {
+    font-size: 62px;
+  }
+  
+  .weather-icon-large {
+    font-size: 76px;
+  }
+  
+  .header-container {
+    padding: 14px 20px;
+  }
+  
+  .main-nav {
+    gap: 6px;
+  }
+  
+  .nav-btn {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+  
+  .sidebar-nasa {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .content-grid {
+    padding: 20px;
+  }
+}
+
+/* ===== TABLETS ESTÁNDAR ===== */
+@media screen and (min-width: 769px) and (max-width: 900px) {
+  .hero-title {
+    font-size: 42px;
+  }
+  
+  .hero-section {
+    padding: 50px 24px;
+  }
+  
+  .temp-value {
+    font-size: 68px;
+  }
+  
+  .weather-icon-large {
+    font-size: 84px;
+  }
+  
+  .city-main-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+  
+  .city-weather-main {
+    justify-content: center;
+  }
+  
+  .city-stats-row {
+    justify-content: center;
+  }
+  
+  .weather-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .weather-stat:nth-child(2) {
+    border-right: none;
+  }
+  
+  .weather-stat:nth-child(3),
+  .weather-stat:nth-child(4) {
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-nasa {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* ===== TABLETS GRANDES / LANDSCAPE ===== */
+@media screen and (min-width: 901px) and (max-width: 1024px) {
+  .sun-moon-grid-nasa {
+    grid-template-columns: 1fr;
+  }
+  
+  .sun-section-nasa {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .time-row-nasa {
+    justify-content: center;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-nasa {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .main-weather-display {
+    gap: 28px;
+    padding: 40px 24px;
+  }
+  
+  .temp-value {
+    font-size: 70px;
+  }
+  
+  .weather-icon-large {
+    font-size: 88px;
+  }
+}
+
+/* ===== PANTALLAS PEQUEÑAS ===== */
+@media screen and (min-width: 1025px) and (max-width: 1200px) {
+  .main-weather-display {
+    gap: 24px;
+    padding: 36px 20px;
+  }
+  
+  .temp-value {
+    font-size: 74px;
+  }
+  
+  .weather-icon-large {
+    font-size: 88px;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-nasa {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* ===== PANTALLAS GRANDES ===== */
+@media screen and (min-width: 1201px) and (max-width: 1400px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-nasa {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* ===== MODO PAISAJE EN MÓVILES ===== */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .hero-section {
+    padding: 20px 24px;
+  }
+  
+  .hero-title {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+  
+  .hero-subtitle {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .search-box-nasa {
+    max-width: 400px;
+    margin-bottom: 16px;
+  }
+  
+  .search-box-nasa input {
+    padding: 12px 16px;
+  }
+  
+  .search-btn-nasa {
+    padding: 12px 20px;
+  }
+  
+  .quick-cities {
+    gap: 8px;
+  }
+  
+  .quick-cities button {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+  
+  .main-weather-display {
+    padding: 20px;
+    gap: 16px;
+  }
+  
+  .weather-icon-large {
+    font-size: 48px;
+  }
+  
+  .temp-value {
+    font-size: 36px;
+  }
+  
+  .condition-text {
+    font-size: 16px;
+  }
+  
+  .weather-stats-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .weather-stat {
+    padding: 12px;
+  }
+  
+  .weather-stat .stat-value {
+    font-size: 16px;
+  }
+  
+  .weather-stat .stat-label {
+    font-size: 10px;
+  }
+}
+
+/* ===== IPAD SPECIFIC ===== */
+@media only screen and (min-width: 768px) and (max-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) {
+  .header-container {
+    padding: 14px 24px;
+  }
+  
+  .main-nav {
+    gap: 8px;
+  }
+  
+  .nav-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  .sidebar-nasa {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== IPHONE X Y SUPERIOR (SAFE AREA) ===== */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .chatbot-fab-nasa {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    right: calc(24px + env(safe-area-inset-right));
+  }
+  
+  .chatbot-container-nasa {
+    bottom: calc(100px + env(safe-area-inset-bottom));
+    right: calc(24px + env(safe-area-inset-right));
+  }
+  
+  .nasa-footer {
+    padding-bottom: calc(40px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ===== TOUCH OPTIMIZATION ===== */
+@media (hover: none) and (pointer: coarse) {
+  .nav-btn,
+  .action-btn,
+  .filter-btn,
+  .map-btn,
+  .search-btn-nasa {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .quick-cities button {
+    padding: 12px 20px;
+  }
+  
+  .calendar-day-nasa {
+    min-height: 40px;
+    min-width: 40px;
+  }
+  
+  .activity-card-nasa {
+    padding: 24px 16px;
+  }
+  
+  .suggestion-item {
+    min-height: 52px;
+  }
+  
+  .btn-3d:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--nasa-blue-dark), 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .btn-3d:hover {
+    transform: none;
+  }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000000;
+    --text-secondary: #1a1a1a;
+    --bg-light: #ffffff;
+  }
+  
+  .nasa-card,
+  .card-header,
+  .day-card-nasa,
+  .hourly-card-nasa,
+  .glass-card {
+    border: 2px solid #000000;
+  }
+  
+  .weather-stat {
+    border-right: 1px solid #000000;
+  }
+  
+  .weather-stat:nth-child(2) {
+    border-right: none;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .nasa-header,
+  .chatbot-fab-nasa,
+  .chatbot-container-nasa,
+  .nasa-footer,
+  .search-section {
+    display: none !important;
+  }
+  
+  .city-banner {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #000000;
+  }
+  
+  body {
+    background: white;
+  }
+  
+  .content-grid {
+    display: block;
+  }
+  
+  .sidebar-nasa {
+    display: none;
+  }
+}
+
+/* ===== DARK MODE SPECIFIC ===== */
+[data-theme="dark"] body.dark-mode,
+body.dark-mode {
+  background: var(--bg-light);
+}
+
+[data-theme="dark"] .nasa-card,
+body.dark-mode .nasa-card {
+  background: var(--bg-white);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .day-card-nasa,
+body.dark-mode .day-card-nasa,
+[data-theme="dark"] .hourly-card-nasa,
+body.dark-mode .hourly-card-nasa,
+[data-theme="dark"] .detail-card-nasa,
+body.dark-mode .detail-card-nasa,
+[data-theme="dark"] .activity-card-nasa,
+body.dark-mode .activity-card-nasa {
+  background: var(--bg-gray);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .calendar-day-nasa.today,
+body.dark-mode .calendar-day-nasa.today {
+  background: var(--nasa-blue);
+  color: white;
+}
+
+[data-theme="dark"] .loading-overlay-top,
+body.dark-mode .loading-overlay-top {
+  background: linear-gradient(135deg, #0B3D91 0%, #1E3A5F 100%);
+}
+
+[data-theme="dark"] .chatbot-container-nasa,
+body.dark-mode .chatbot-container-nasa {
+  background: var(--bg-white);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .chatbot-message.assistant,
+body.dark-mode .chatbot-message.assistant {
+  background: var(--bg-gray);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] input,
+body.dark-mode input,
+[data-theme="dark"] textarea,
+body.dark-mode textarea {
+  background: var(--bg-gray);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .action-btn,
+body.dark-mode .action-btn {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .action-btn:hover,
+body.dark-mode .action-btn:hover {
+  background: var(--nasa-blue);
+  border-color: var(--nasa-blue);
+}
+
+[data-theme="dark"] .nav-btn,
+body.dark-mode .nav-btn {
+  color: rgba(255,255,255,0.7);
+}
+
+[data-theme="dark"] .nav-btn.active,
+body.dark-mode .nav-btn.active {
+  background: var(--nasa-blue);
+  color: white;
+}
+
+/* ===== LEGACY BREAKPOINTS (mantenidos para compatibilidad) ===== */
 
 /* Large Desktop */
 @media (max-width: 1400px) {
@@ -2195,21 +2785,21 @@ a:hover {
   .search-box-nasa input {
     text-align: center;
   }
-   
-   .sun-moon-cards {
-     grid-template-columns: 1fr;
-   }
-   
-   .chatbot-container-nasa {
-     width: calc(100vw - 32px);
-     right: 16px;
-     bottom: 90px;
-   }
-   
-   .chatbot-status-indicator {
-     display: none;
-   }
- }
+  
+  .sun-moon-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .chatbot-container-nasa {
+    width: calc(100vw - 32px);
+    right: 16px;
+    bottom: 90px;
+  }
+  
+  .chatbot-status-indicator {
+    display: none;
+  }
+}
 
 /* Mobile Small */
 @media (max-width: 480px) {
@@ -2241,24 +2831,24 @@ a:hover {
   .quick-cities {
     gap: 8px;
   }
-   
-   .quick-cities button {
-     padding: 8px 16px;
-     font-size: 13px;
-   }
-   
-   .calendar-day-nasa {
-     font-size: 12px;
-   }
-   
-   .nasa-card {
-     border-radius: var(--radius-lg);
-   }
-   
-   .card-header {
-     padding: 12px 16px;
-   }
- }
+  
+  .quick-cities button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .calendar-day-nasa {
+    font-size: 12px;
+  }
+  
+  .nasa-card {
+    border-radius: var(--radius-lg);
+  }
+  
+  .card-header {
+    padding: 12px 16px;
+  }
+}
 
 /* Extra Small Mobile */
 @media (max-width: 360px) {
@@ -2290,132 +2880,6 @@ a:hover {
   }
 }
 
-/* Print Styles */
-@media print {
-  .nasa-header,
-  .chatbot-fab-nasa,
-  .chatbot-container-nasa,
-  .nasa-footer {
-    display: none;
-  }
-  
-  .city-banner {
-    background: white !important;
-    color: black !important;
-    border: 1px solid #ddd;
-  }
-  
-  body {
-    background: white;
-  }
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* High Contrast Mode */
-@media (prefers-contrast: high) {
-  :root {
-    --border-color: #000;
-    --text-secondary: #333;
-  }
-  
-  .nasa-card,
-  .card-header,
-  .day-card-nasa,
-  .hourly-card-nasa {
-    border: 2px solid #000;
-  }
-}
-
-/* Dark Mode Specific Overrides */
-[data-theme="dark"] body.dark-mode,
-body.dark-mode {
-  background: var(--bg-light);
-}
-
-[data-theme="dark"] .nasa-card,
-body.dark-mode .nasa-card {
-  background: var(--bg-white);
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .day-card-nasa,
-body.dark-mode .day-card-nasa,
-[data-theme="dark"] .hourly-card-nasa,
-body.dark-mode .hourly-card-nasa,
-[data-theme="dark"] .detail-card-nasa,
-body.dark-mode .detail-card-nasa,
-[data-theme="dark"] .activity-card-nasa,
-body.dark-mode .activity-card-nasa {
-  background: var(--bg-gray);
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .calendar-day-nasa.today,
-body.dark-mode .calendar-day-nasa.today {
-  background: var(--nasa-blue);
-  color: white;
-}
-
-[data-theme="dark"] .loading-overlay-top,
-body.dark-mode .loading-overlay-top {
-  background: linear-gradient(135deg, #0B3D91 0%, #1E3A5F 100%);
-}
-
-[data-theme="dark"] .chatbot-container-nasa,
-body.dark-mode .chatbot-container-nasa {
-  background: var(--bg-white);
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .chatbot-message.assistant,
-body.dark-mode .chatbot-message.assistant {
-  background: var(--bg-gray);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] input,
-body.dark-mode input,
-[data-theme="dark"] textarea,
-body.dark-mode textarea {
-  background: var(--bg-gray);
-  color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .action-btn,
-body.dark-mode .action-btn {
-  background: rgba(255,255,255,0.1);
-  color: white;
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .action-btn:hover,
-body.dark-mode .action-btn:hover {
-  background: var(--nasa-blue);
-  border-color: var(--nasa-blue);
-}
-
-[data-theme="dark"] .nav-btn,
-body.dark-mode .nav-btn {
-  color: rgba(255,255,255,0.7);
-}
-
-[data-theme="dark"] .nav-btn.active,
-body.dark-mode .nav-btn.active {
-  background: var(--nasa-blue);
-  color: white;
-}
-
 /* Loading Animation Progress */
 .loading-progress {
   width: 200px;
@@ -2441,306 +2905,5 @@ body.dark-mode .nav-btn.active {
 }
 
 /* ================================
-   END OF WEATHER.CSS
-   ================================ */
-}
-
-.moon-info .moon-illumination {
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-.moon-details {
- 8px;
-  margin-top:  font-size: 12px;
-  opacity: 0.7;
-}
-
-/* Facts Card */
-.facts-card .facts-list {
-  padding: 16px;
-}
-
-.facts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.fact-item {
-  display: flex;
-  gap: 12px;
-  padding: 12px;
-  background: var(--bg-light);
-  border-radius: var(--radius-md);
-}
-
-.fact-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.fact-item p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-/* Facts Grid */
-.facts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-}
-
-.fact-card-nasa {
-  background: var(--bg-white);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  text-align: center;
-  border: 1px solid var(--border-color);
-  transition: transform 0.3s ease;
-}
-
-.fact-card-nasa:hover {
-  transform: translateY(-2px);
-}
-
-.fact-icon-nasa {
-  font-size: 36px;
-  display: block;
-  margin-bottom: 12px;
-}
-
-.fact-card-nasa h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 8px;
-}
-
-.fact-card-nasa p {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 0 0 8px;
-}
-
-.fact-source {
-  font-size: 10px;
-  color: var(--text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Search Section */
-.search-section {
-  background: var(--bg-white);
-  padding: 24px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.search-container {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.quick-cities-inline {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.quick-cities-inline button {
-  padding: 6px 14px;
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.quick-cities-inline button:hover {
-  background: var(--nasa-blue);
-  color: white;
-  border-color: var(--nasa-blue);
-}
-
-/* Forecast Header */
-.forecast-header {
-  background: var(--bg-white);
-  border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.forecast-main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-/* Weather Animation */
-.weather-visual-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.weather-visual {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.03;
-  transition: all 1s ease;
-}
-
-.weather-visual.sunny {
-  background: radial-gradient(circle, #FFE066 0%, #FFF9E6 50%, transparent 70%);
-  opacity: 0.15;
-}
-
-.weather-visual.cloudy {
-  background: linear-gradient(180deg, #B8C6DB 0%, #F5F7FA 100%);
-  opacity: 0.2;
-}
-
-.weather-visual.rainy {
-  background: linear-gradient(180deg, #4A6A8A 0%, #6B8BA4 50%, #8AA4B8 100%);
-  opacity: 0.15;
-}
-
-.weather-visual.stormy {
-  background: linear-gradient(180deg, #2C3E50 0%, #34495E 50%, #4A5A6A 100%);
-  opacity: 0.2;
-}
-
-.weather-visual.snowy {
-  background: linear-gradient(180deg, #E8F4F8 0%, #F0F8FF 50%, #FFFFFF 100%);
-  opacity: 0.2;
-}
-
-.weather-conditions {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 14px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-/* Rain drops */
-.rain-drop {
-  position: absolute;
-  width: 2px;
-  height: 20px;
-  background: linear-gradient(transparent, rgba(100, 149, 237, 0.6));
-  animation: rain-fall 0.8s linear infinite;
-}
-
-@keyframes rain-fall {
-  from { transform: translateY(-20px); opacity: 1; }
-  to { transform: translateY(100vh); opacity: 0; }
-}
-
-/* Snowflakes */
-.snowflake {
-  position: absolute;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.8;
-  animation: snow-fall 5s linear infinite;
-}
-
-@keyframes snow-fall {
-  from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-  to { transform: translateY(100vh) rotate(360deg); opacity: 0.3; }
-}
-
-/* Lightning */
-.lightning {
-  position: absolute;
-  width: 4px;
-  height: 100px;
-  background: linear-gradient(transparent, #FFF9C4, transparent);
-  animation: flash 0.3s ease-in-out infinite;
-  opacity: 0;
-}
-
-@keyframes flash {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
-}
-
-/* Chatbot Status Indicator */
-.chatbot-status-indicator {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  background: var(--bg-white);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  box-shadow: var(--shadow-md);
-  z-index: 999;
-  border: 1px solid var(--border-color);
-}
-
-body.dark-mode .chatbot-status-indicator {
-  background: var(--bg-gray);
-  color: var(--text-secondary);
-  border-color: var(--border-color);
-}
-
-/* Weather card animation */
-.stat-card.main-stat {
-  animation: fadeInUp 0.5s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Loading animation enhanced */
-.nasa-loader {
-  position: relative;
-}
-
-.nasa-spinner svg {
-  animation: spin 3s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.earth-globe {
-  animation: rotate-earth 20s linear infinite;
-}
-
-@keyframes rotate-earth {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+    END OF WEATHER.CSS
+    ================================ */
