@@ -714,11 +714,15 @@ async function searchWeather() {
   
   try {
     if (searchController) {
-      searchController.abort();
+      try { searchController.abort(); } catch(e) {}
     }
     searchController = new AbortController();
     
-    const timeout = setTimeout(() => searchController.abort(), 30000);
+    const timeout = setTimeout(() => {
+      if (searchController) {
+        try { searchController.abort(); } catch(e) {}
+      }
+    }, 30000);
     
     const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
       signal: searchController.signal
@@ -750,7 +754,7 @@ async function searchWeather() {
       console.log('Request cancelled');
     } else {
       console.error('Error:', error);
-      showNotification('Error al obtener datos. Verifica tu conexión.', 'error');
+      showNotification('Error al obtener datos. Verifica tu conexión o intenta de nuevo.', 'error');
     }
   } finally {
     hideLoading();
@@ -949,7 +953,7 @@ function getMockForecast() {
 async function loadDailyForecast(location, retryCount = 0) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
     
     const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`, {
       signal: controller.signal
@@ -967,7 +971,7 @@ async function loadDailyForecast(location, retryCount = 0) {
     
     const data = await response.json();
     
-    if (data.success) {
+    if (data.success && data.forecast && data.forecast.length > 0) {
       currentDailyForecast = data.forecast || [];
       currentLocationName = location;
       displayDailyForecast(data.forecast);
@@ -989,6 +993,7 @@ async function loadDailyForecast(location, retryCount = 0) {
       updateAstronomy();
     }
   } catch (error) {
+    console.warn('Error pronóstico diario:', error.message);
     const mockData = getMockForecast();
     displayDailyForecast(mockData);
     updateWeatherDetails(mockData);
@@ -1239,12 +1244,24 @@ async function loadMap(location) {
     
     if (data.success) {
       currentCoords = { lat: data.latitude, lng: data.longitude };
+      currentLocationData = {
+        name: data.location || location,
+        country: data.country || '',
+        latitude: data.latitude,
+        longitude: data.longitude
+      };
       updateMap('satellite');
       updateCityInfo();
       updateAstronomy();
     }
   } catch (error) {
     console.error('Error al cargar mapa:', error);
+    currentLocationData = {
+      name: location,
+      country: '',
+      latitude: 0,
+      longitude: 0
+    };
     updateCityInfo();
     updateAstronomy();
   }
