@@ -247,7 +247,7 @@ body.dark-mode .home-header {
 }
 
 .hero-title {
-  font-size: 48px;
+  font-size: clamp(28px, 5vw, 48px);
   font-weight: 800;
   line-height: 1.1;
   margin: 0 0 20px;
@@ -493,7 +493,7 @@ body.dark-mode .home-header {
 }
 
 .section-title {
-  font-size: 36px;
+  font-size: clamp(24px, 4vw, 36px);
   font-weight: 800;
   margin: 0 0 12px;
   color: var(--text-darkest);
@@ -665,7 +665,7 @@ body.dark-mode .home-header {
 }
 
 .quick-search-title {
-  font-size: 36px;
+  font-size: clamp(24px, 4vw, 36px);
   font-weight: 800;
   color: white;
   margin: 0 0 12px;
@@ -2181,6 +2181,10 @@ body.dark-mode .moon-phase {
   right: 24px;
   width: 380px;
   max-width: calc(100vw - 48px);
+  max-width: 100%;
+  left: 16px;
+  right: 16px;
+  width: auto;
   background: var(--bg-white);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
@@ -2289,6 +2293,13 @@ body.dark-mode .moon-phase {
    ================================ */
 
 /* Large Desktop */
+@media (max-width: 1500px) {
+  .forecast-grid {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+/* Desktop */
 @media (max-width: 1400px) {
   .forecast-grid {
     grid-template-columns: 1fr;
@@ -2300,7 +2311,7 @@ body.dark-mode .moon-phase {
   }
 }
 
-/* Desktop */
+/* Desktop Small */
 @media (max-width: 1200px) {
   .hero-content {
     gap: 48px;
@@ -2313,6 +2324,10 @@ body.dark-mode .moon-phase {
   .weather-showcase {
     width: 300px;
     height: 380px;
+  }
+  
+  .forecast-grid {
+    grid-template-columns: 1fr 300px;
   }
 }
 
