@@ -75,7 +75,9 @@
       <div class="header-actions">
         <a href="index.html" class="action-btn" title="Volver al inicio">🏠 Inicio</a>
         <button class="action-btn" onclick="downloadPDF()" title="Descargar PDF">📄 PDF</button>
-        <button class="action-btn" onclick="toggleTheme()" title="Cambiar tema">☀️/🌙</button>
+        <button class="action-btn theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema" aria-label="Cambiar tema">☀️/🌙</button>
+        <button class="action-btn" id="unit-toggle-btn" onclick="toggleTemperatureUnit()" title="Cambiar unidad">°C</button>
+        <button class="action-btn" onclick="searchCurrentLocation()" title="Ubicación actual">📍</button>
       </div>
     </div>
   </header>
@@ -96,6 +98,13 @@
           </button>
         </div>
         <div id="search-suggestions" class="search-suggestions" style="display: none;"></div>
+        
+        <!-- Favorites Section -->
+        <div id="favorites-container" class="favorites-section"></div>
+        
+        <!-- Recent Searches -->
+        <div id="recent-searches" class="recent-searches-section"></div>
+        
         <div class="quick-cities-inline">
           <button onclick="quickSearch('Buenos Aires')">Buenos Aires</button>
           <button onclick="quickSearch('Madrid')">Madrid</button>
@@ -109,6 +118,12 @@
 
     <!-- City Info Banner -->
     <section class="city-banner" id="city-banner" style="display: none;">
+      <!-- Weather Alerts Container -->
+      <div id="weather-alerts"></div>
+      
+      <!-- Clothing Recommendations -->
+      <div id="clothing-recommendation"></div>
+      
       <div class="city-banner-content">
         <div class="city-main-info">
           <div class="city-weather-main">
@@ -270,6 +285,9 @@
             <h2 class="card-title">💡 Detalles Meteorológicos</h2>
           </div>
           <div class="details-grid-nasa">
+            <!-- Air Quality -->
+            <div id="air-quality" class="detail-card-nasa full-width"></div>
+            
             <div class="detail-card-nasa">
               <span class="detail-icon-nasa">☀️</span>
               <div class="detail-content-nasa">
@@ -557,7 +575,7 @@
     </div>
   </div>
 
-  <script src="weather.js?v=35&ts=20260114"></script>
+  <script src="weather-enhanced.js"></script>
   <script>
     let searchTimeout = null;
     let currentSuggestions = [];

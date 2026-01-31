@@ -1,25 +1,47 @@
 {
   "name": "Zeus Meteo",
   "short_name": "Zeus",
-  "description": "Clima inteligente con IA y pronósticos precisos en tiempo real",
+  "description": "Sistema de Inteligencia Meteorológica con IA - Pronósticos precisos del clima",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f0f4f8",
+  "background_color": "#0B3D91",
   "theme_color": "#0B3D91",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "es",
-  "categories": ["weather", "utilities"],
+  "categories": ["weather", "utilities", "lifestyle"],
   "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Buscar clima",
+      "short_name": "Buscar",
+      "description": "Buscar el clima de una ciudad",
+      "url": "/forecast.html"
+    },
+    {
+      "name": "Ciudades favoritas",
+      "short_name": "Favoritos",
+      "description": "Ver ciudades favoritas",
+      "url": "/forecast.html#favorites"
     }
   ]
 }
