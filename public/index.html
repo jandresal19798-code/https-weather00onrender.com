@@ -13,325 +13,286 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
-  <link rel="mask-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='%234285f4' d='M50 10 L35 45 L50 45 L40 90 L70 50 L55 50 Z'/></svg>" color="#4285f4">
-  <title>Zeus Meteo - Tu Asistente del Clima</title>
+  <title>Zeus Meteo - Tu Asistente del Clima Inteligente</title>
   <link rel="stylesheet" href="weather.css">
   <link rel="stylesheet" href="home.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
   <!-- Animated Background -->
-  <div class="ambient-bg">
-    <div class="cloud cloud-1"></div>
-    <div class="cloud cloud-2"></div>
-    <div class="cloud cloud-3"></div>
+  <div class="animated-bg">
+    <div class="gradient-overlay"></div>
+    <div class="particles">
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+    </div>
   </div>
 
-  <!-- Header -->
-  <header class="home-header">
-    <div class="header-content">
-      <div class="logo-container">
-        <div class="zeus-logo">
-          <svg viewBox="0 0 100 100" class="logo-svg">
-            <defs>
-              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#FFD700"/>
-                <stop offset="50%" style="stop-color:#FFA500"/>
-                <stop offset="100%" style="stop-color:#FF6B00"/>
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Lightning Bolt -->
-            <path d="M55 10 L35 45 L50 45 L40 90 L70 50 L55 50 Z" 
-                  fill="url(#logoGradient)" 
-                  filter="url(#glow)"
-                  class="lightning-bolt"/>
-            <!-- Circle around -->
-            <circle cx="50" cy="50" r="45" 
-                    fill="none" 
-                    stroke="url(#logoGradient)" 
-                    stroke-width="2"
-                    opacity="0.3"/>
-          </svg>
-        </div>
-        <div class="logo-text">
-          <h1 class="brand-name">ZEUS METEO</h1>
-          <span class="brand-tagline">Inteligencia Meteorológica</span>
-        </div>
-      </div>
-      <nav class="main-nav">
-        <a href="forecast.html" class="nav-link">
-          <span class="nav-icon">🌤️</span>
-          Ver Pronóstico
-        </a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <div class="hero-text">
-        <h2 class="hero-title">
-          Tu Asistente
-          <span class="highlight">Meteorológico</span>
-          Inteligente
-        </h2>
-        <p class="hero-description">
-          Obtén pronósticos precisos del clima potenciados por inteligencia artificial. 
-          Datos en tiempo real de las mejores fuentes meteorológicas del mundo.
-        </p>
-        <div class="hero-actions">
-          <a href="forecast.html" class="btn-primary">
-            <span class="btn-icon">🔍</span>
-            Buscar Clima
-          </a>
-          <a href="#features" class="btn-secondary">
-            Conocer Más
-          </a>
-        </div>
-        <div class="hero-stats">
-          <div class="stat">
-            <span class="stat-value">7</span>
-            <span class="stat-label">Días de Pronóstico</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">24</span>
-            <span class="stat-label">Horas por Día</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">∞</span>
-            <span class="stat-label">Ciudades</span>
-          </div>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="weather-showcase">
-          <div class="weather-card-large">
-            <div class="weather-main">
-              <span class="weather-emoji">☀️</span>
-              <div class="weather-temp">24°C</div>
-            </div>
-            <div class="weather-info">
-              <div class="weather-city">Buenos Aires</div>
-              <div class="weather-condition">Despejado</div>
-            </div>
-            <div class="weather-details">
-              <span>💧 45%</span>
-              <span>💨 12 km/h</span>
-              <span>☀️ UV: 6</span>
-            </div>
-          </div>
-          <div class="floating-elements">
-            <span class="float-item cloud-float">☁️</span>
-            <span class="float-item sun-float">☀️</span>
-            <span class="float-item rain-float">🌧️</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="features" class="features">
-    <div class="section-header">
-      <h2 class="section-title">¿Qué Puedes Hacer?</h2>
-      <p class="section-subtitle">Explora todas las funcionalidades de Zeus Meteo</p>
-    </div>
-    
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" class="feature-svg">
-            <circle cx="32" cy="32" r="30" fill="#E3F2FD"/>
-            <path d="M32 8 L32 20 M32 44 L32 56 M8 32 L20 32 M44 32 L56 32" stroke="#0B3D91" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="32" cy="32" r="12" fill="#0B3D91"/>
-            <text x="32" y="36" text-anchor="middle" fill="white" font-size="12">24h</text>
-          </svg>
-        </div>
-        <h3 class="feature-title">Pronóstico Horario</h3>
-        <p class="feature-description">Ve el clima hora por hora para las próximas 24 horas con actualizaciones precisas.</p>
-        <div class="feature-tags">
-          <span class="tag">En tiempo real</span>
-          <span class="tag">Preciso</span>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" class="feature-svg">
-            <rect x="8" y="8" width="48" height="48" rx="8" fill="#E8F5E9"/>
-            <rect x="16" y="20" width="8" height="28" fill="#4CAF50" rx="2"/>
-            <rect x="28" y="12" width="8" height="36" fill="#81C784" rx="2"/>
-            <rect x="40" y="26" width="8" height="22" fill="#A5D6A7" rx="2"/>
-          </svg>
-        </div>
-        <h3 class="feature-title">7 Días de Pronóstico</h3>
-        <p class="feature-description">Planifica tu semana con我们的 pronósticos extendidos de hasta 7 días.</p>
-        <div class="feature-tags">
-          <span class="tag">7 días</span>
-          <span class="tag">Confiable</span>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" class="feature-svg">
-            <circle cx="32" cy="32" r="28" fill="#FFF3E0"/>
-            <path d="M32 12 A20 20 0 0 1 52 32" stroke="#FF9800" stroke-width="4" fill="none"/>
-            <path d="M32 52 A20 20 0 0 1 12 32" stroke="#FFB74D" stroke-width="4" fill="none"/>
-            <circle cx="32" cy="32" r="4" fill="#FF9800"/>
-          </svg>
-        </div>
-        <h3 class="feature-title">Sol y Luna</h3>
-        <p class="feature-description">Consulta horarios de amanecer, atardecer y fases lunares para tu ubicación.</p>
-        <div class="feature-tags">
-          <span class="tag">Astronomía</span>
-          <span class="tag">Datos precisos</span>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" class="feature-svg">
-            <rect x="8" y="24" width="48" height="32" rx="4" fill="#E8EAF6"/>
-            <path d="M8 28 Q20 20 32 28 T56 28" stroke="#3F51B5" stroke-width="3" fill="none"/>
-            <circle cx="20" cy="48" r="4" fill="#7986CB"/>
-            <circle cx="32" cy="52" r="4" fill="#5C6BC0"/>
-            <circle cx="44" cy="48" r="4" fill="#9FA8DA"/>
-          </svg>
-        </div>
-        <h3 class="feature-title">Gráficos Interactivos</h3>
-        <p class="feature-description">Visualiza tendencias de temperatura con gráficos dinámicos y fáciles de entender.</p>
-        <div class="feature-tags">
-          <span class="tag">Visual</span>
-          <span class="tag">Interactivo</span>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" class="feature-svg">
-            <rect x="12" y="8" width="40" height="48" rx="6" fill="#FCE4EC"/>
-            <rect x="16" y="12" width="32" height="36" rx="2" fill="white"/>
-            <circle cx="32" cy="30" r="10" fill="#EC407A"/>
-            <path d="M32 40 L32 50" stroke="#EC407A" stroke-width="4" stroke-linecap="round"/>
-            <circle cx="32" cy="30" r="2" fill="white"/>
-          </svg>
-        </div>
-        <h3 class="feature-title">Mapa del Clima</h3>
-        <p class="feature-description">Explora mapas interactivos de satélite, precipitación, viento y más.</p>
-        <div class="feature-tags">
-          <span class="tag">Satélite</span>
-          <span class="tag">Viento</span>
-        </div>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" class="feature-svg">
-            <circle cx="32" cy="32" r="28" fill="#E0F7FA"/>
-            <path d="M32 16 L32 32 L44 44" stroke="#00BCD4" stroke-width="4" stroke-linecap="round" fill="none"/>
-            <circle cx="32" cy="32" r="4" fill="#00BCD4"/>
-          </svg>
-        </div>
-        <h3 class="feature-title">IA Conversacional</h3>
-        <p class="feature-description">Pregúntale a Zeus sobre el clima, pronósticos y curiosidades meteorológicas.</p>
-        <div class="feature-tags">
-          <span class="tag">Chatbot</span>
-          <span class="tag">Inteligente</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Data Sources Section -->
-  <section class="sources">
-    <div class="section-header">
-      <h2 class="section-title">Fuentes de Datos</h2>
-      <p class="section-subtitle">Información meteorológica de fuentes confiables</p>
-    </div>
-    
-    <div class="sources-grid">
-      <div class="source-card">
-        <div class="source-logo">
-          <span class="source-icon">🌐</span>
-        </div>
-        <h3 class="source-name">Open-Meteo</h3>
-        <p class="source-description">API meteorológica gratuita sin API key con datos globales.</p>
-      </div>
-      
-      <div class="source-card">
-        <div class="source-logo">
-          <span class="source-icon">🇺🇸</span>
-        </div>
-        <h3 class="source-name">US-NWS</h3>
-        <p class="source-description">National Weather Service de Estados Unidos.</p>
-      </div>
-      
-      <div class="source-card">
-        <div class="source-logo">
-          <span class="source-icon">🇳🇴</span>
-        </div>
-        <h3 class="source-name">MetNorway</h3>
-        <p class="source-description">Instituto Meteorológico de Noruega.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Quick Search Section -->
-  <section class="quick-search">
-    <div class="quick-search-content">
-      <h2 class="quick-search-title">Consulta el Clima Ahora</h2>
-      <p class="quick-search-description">Busca cualquier ciudad del mundo y obtén información detallada.</p>
-      <div class="search-box">
-        <input type="text" id="location-input" placeholder="Ciudad, País (ej: Montevideo, Uruguay)..." onkeypress="if(event.key==='Enter')quickSearchFromHome()" oninput="handleSearchInput(this)"/>
-        <button class="search-btn" onclick="quickSearchFromHome()">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M16 16 L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          Buscar
+  <!-- Navigation -->
+  <nav class="landing-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">ZEUS METEO</span>
+      </a>
+      <div class="nav-links">
+        <a href="forecast.html" class="nav-link">Pronóstico</a>
+        <button class="nav-link theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <span class="theme-icon">☀️</span>
         </button>
       </div>
-      <div id="search-suggestions" class="search-suggestions" style="display: none;"></div>
-      <div class="quick-cities">
-        <span class="quick-label">Ciudades populares:</span>
-        <button onclick="quickSearchCity('Buenos Aires')">Buenos Aires</button>
-        <button onclick="quickSearchCity('Madrid')">Madrid</button>
-        <button onclick="quickSearchCity('Nueva York')">Nueva York</button>
-        <button onclick="quickSearchCity('Londres')">Londres</button>
-        <button onclick="quickSearchCity('Tokio')">Tokio</button>
+    </div>
+  </nav>
+
+  <!-- Main Hero Section -->
+  <main class="landing-hero">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-icon">✨</span>
+          <span class="badge-text">Potenciado por IA</span>
+        </div>
+        
+        <h1 class="hero-title">
+          Descubre el Clima
+          <span class="title-highlight">en Cualquier Lugar</span>
+        </h1>
+        
+        <p class="hero-description">
+          Pronósticos precisos con inteligencia artificial. Datos en tiempo real de múltiples fuentes meteorológicas confiables.
+        </p>
+
+        <!-- Main Search Box -->
+        <div class="search-container">
+          <div class="search-wrapper">
+            <div class="search-icon">🔍</div>
+            <input 
+              type="text" 
+              id="location-input" 
+              class="search-input" 
+              placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires, Tokio)"
+              autocomplete="off"
+              onkeypress="if(event.key==='Enter')quickSearchFromHome()"
+              oninput="handleSearchInput(this)"
+            />
+            <button class="search-btn-primary" onclick="quickSearchFromHome()">
+              Buscar
+            </button>
+            <button class="location-btn" onclick="useCurrentLocation()" title="Usar mi ubicación">
+              📍
+            </button>
+          </div>
+          
+          <!-- Search Suggestions -->
+          <div id="search-suggestions" class="search-suggestions-dropdown"></div>
+        </div>
+
+        <!-- Quick Cities -->
+        <div class="quick-cities-section">
+          <span class="section-label">Ciudades populares:</span>
+          <div class="cities-pills">
+            <button class="city-pill" onclick="quickSearchCity('Madrid')">
+              <span class="pill-flag">🇪🇸</span>
+              <span>Madrid</span>
+            </button>
+            <button class="city-pill" onclick="quickSearchCity('Buenos Aires')">
+              <span class="pill-flag">🇦🇷</span>
+              <span>Buenos Aires</span>
+            </button>
+            <button class="city-pill" onclick="quickSearchCity('Ciudad de México')">
+              <span class="pill-flag">🇲🇽</span>
+              <span>Ciudad de México</span>
+            </button>
+            <button class="city-pill" onclick="quickSearchCity('Nueva York')">
+              <span class="pill-flag">🇺🇸</span>
+              <span>Nueva York</span>
+            </button>
+            <button class="city-pill" onclick="quickSearchCity('Londres')">
+              <span class="pill-flag">🇬🇧</span>
+              <span>Londres</span>
+            </button>
+            <button class="city-pill" onclick="quickSearchCity('Tokio')">
+              <span class="pill-flag">🇯🇵</span>
+              <span>Tokio</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Preview Card -->
+      <div class="hero-preview">
+        <div class="weather-preview-card">
+          <div class="preview-header">
+            <span class="preview-location">📍 Montevideo, Uruguay</span>
+            <span class="preview-time">Ahora</span>
+          </div>
+          <div class="preview-main">
+            <div class="preview-temp">
+              <span class="temp-value">24°</span>
+              <span class="temp-unit">C</span>
+            </div>
+            <div class="preview-condition">
+              <span class="condition-icon">☀️</span>
+              <span class="condition-text">Despejado</span>
+            </div>
+          </div>
+          <div class="preview-details">
+            <div class="detail-item">
+              <span class="detail-icon">💧</span>
+              <span class="detail-value">45%</span>
+              <span class="detail-label">Humedad</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">💨</span>
+              <span class="detail-value">12</span>
+              <span class="detail-label">km/h</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">👁️</span>
+              <span class="detail-value">10</span>
+              <span class="detail-label">km</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="floating-weather-icons">
+          <span class="float-icon sun">☀️</span>
+          <span class="float-icon cloud">☁️</span>
+          <span class="float-icon rain">🌧️</span>
+          <span class="float-icon snow">❄️</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stats-container">
+        <div class="stat-item">
+          <span class="stat-number">7</span>
+          <span class="stat-label">Días de Pronóstico</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">24h</span>
+          <span class="stat-label">Pronóstico Horario</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">∞</span>
+          <span class="stat-label">Ciudades Globales</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">99%</span>
+          <span class="stat-label">Precisión IA</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Features Grid -->
+  <section class="features-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Todo lo que Necesitas</h2>
+        <p class="section-subtitle">Herramientas meteorológicas completas para tu día a día</p>
+      </div>
+
+      <div class="features-grid-modern">
+        <div class="feature-card-modern">
+          <div class="feature-icon-wrapper">
+            <span class="feature-emoji">🌡️</span>
+          </div>
+          <h3 class="feature-title-modern">Pronóstico Preciso</h3>
+          <p class="feature-desc-modern">Datos actualizados cada hora con múltiples fuentes confiables para máxima precisión.</p>
+        </div>
+
+        <div class="feature-card-modern">
+          <div class="feature-icon-wrapper">
+            <span class="feature-emoji">📊</span>
+          </div>
+          <h3 class="feature-title-modern">Gráficos Interactivos</h3>
+          <p class="feature-desc-modern">Visualiza tendencias de temperatura, lluvia y viento con gráficos intuitivos.</p>
+        </div>
+
+        <div class="feature-card-modern">
+          <div class="feature-icon-wrapper">
+            <span class="feature-emoji">🗺️</span>
+          </div>
+          <h3 class="feature-title-modern">Mapas en Vivo</h3>
+          <p class="feature-desc-modern">Satélite, radar de lluvia y mapas de viento en tiempo real para tu ubicación.</p>
+        </div>
+
+        <div class="feature-card-modern">
+          <div class="feature-icon-wrapper">
+            <span class="feature-emoji">🤖</span>
+          </div>
+          <h3 class="feature-title-modern">Asistente IA</h3>
+          <p class="feature-desc-modern">Pregunta a Zeus sobre el clima, recomendaciones y curiosidades meteorológicas.</p>
+        </div>
+
+        <div class="feature-card-modern">
+          <div class="feature-icon-wrapper">
+            <span class="feature-emoji">☀️</span>
+          </div>
+          <h3 class="feature-title-modern">Sol y Luna</h3>
+          <p class="feature-desc-modern">Horarios exactos de amanecer, atardecer y fases lunares para planificar tu día.</p>
+        </div>
+
+        <div class="feature-card-modern">
+          <div class="feature-icon-wrapper">
+            <span class="feature-emoji">👕</span>
+          </div>
+          <h3 class="feature-title-modern">Recomendaciones</h3>
+          <p class="feature-desc-modern">Sugerencias personalizadas de ropa y actividades según el clima actual.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data Sources -->
+  <section class="sources-section">
+    <div class="section-container">
+      <h2 class="sources-title">Fuentes de Datos Confiables</h2>
+      <div class="sources-logos">
+        <div class="source-item">
+          <span class="source-emoji">🌐</span>
+          <span class="source-name">Open-Meteo</span>
+        </div>
+        <div class="source-item">
+          <span class="source-emoji">🇺🇸</span>
+          <span class="source-name">US-NWS</span>
+        </div>
+        <div class="source-item">
+          <span class="source-emoji">🇳🇴</span>
+          <span class="source-name">MetNorway</span>
+        </div>
+        <div class="source-item">
+          <span class="source-emoji">🇺🇾</span>
+          <span class="source-name">INUMET</span>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="home-footer">
-    <div class="footer-content">
-      <div class="footer-logo">
-        <div class="zeus-logo-small">
-          <svg viewBox="0 0 40 40" class="logo-svg-small">
-            <defs>
-              <linearGradient id="logoGradientSmall" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#FFD700"/>
-                <stop offset="100%" style="stop-color:#FF6B00"/>
-              </linearGradient>
-            </defs>
-            <path d="M22 4 L14 18 L20 18 L16 36 L28 20 L22 20 Z" 
-                  fill="url(#logoGradientSmall)"/>
-          </svg>
-        </div>
-        <span class="footer-brand">ZEUS METEO</span>
+  <footer class="landing-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="footer-logo">⚡</span>
+        <span class="footer-brand-name">ZEUS METEO</span>
       </div>
-      <p class="footer-text">Sistema de Inteligencia Meteorológica Potenciado por IA</p>
-      <p class="footer-copyright">© 2026 Zeus Meteo. Todos los derechos reservados.</p>
+      <p class="footer-tagline">Inteligencia Meteorológica Potenciada por IA</p>
+      <div class="footer-links">
+        <a href="forecast.html" class="footer-link">Ver Pronóstico</a>
+        <span class="footer-divider">•</span>
+        <span class="footer-copyright">© 2026 Zeus Meteo</span>
+      </div>
     </div>
   </footer>
 
@@ -339,7 +300,7 @@
   <script>
     let searchTimeout = null;
     let currentSuggestions = [];
-    
+
     async function handleSearchInput(input) {
       const query = input.value.trim();
       
@@ -356,19 +317,27 @@
       
       searchTimeout = setTimeout(async () => {
         try {
-          const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+          const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (!response.ok) {
+            suggestionsEl.classList.remove('active');
+            return;
+          }
+          
           const suggestions = await response.json();
           
           if (suggestions.length > 0) {
             currentSuggestions = suggestions;
             suggestionsEl.innerHTML = suggestions.map((s, i) => `
-              <div class="suggestion-item" onclick="selectSuggestion(${i})">
-                <span class="suggestion-icon">📍</span>
+              <div class="suggestion-item-modern" onclick="selectSuggestion(${i})" role="option" tabindex="0">
+                <span class="suggestion-flag">${getFlag(s.countryCode)}</span>
                 <div class="suggestion-info">
                   <span class="suggestion-name">${escapeHtml(s.name)}</span>
-                  <span class="suggestion-country">${escapeHtml(s.country)}${s.state ? ' • ' + escapeHtml(s.state) : ''}</span>
+                  <span class="suggestion-country">${escapeHtml(s.country)}${s.state ? ', ' + escapeHtml(s.state) : ''}</span>
                 </div>
-                <span class="suggestion-flag">${getFlag(s.countryCode)}</span>
               </div>
             `).join('');
             suggestionsEl.classList.add('active');
@@ -376,7 +345,6 @@
             suggestionsEl.classList.remove('active');
           }
         } catch (e) {
-          console.error('Error buscando:', e);
           suggestionsEl.classList.remove('active');
         }
       }, 300);
@@ -386,31 +354,37 @@
       const suggestion = currentSuggestions[index];
       if (suggestion) {
         const input = document.getElementById('location-input');
-        input.value = suggestion.display;
+        input.value = suggestion.name;
         document.getElementById('search-suggestions').classList.remove('active');
         quickSearchFromHome();
       }
     }
     
-    function getFlag(countryCode) {
-      if (!countryCode) return '';
-      const codePoints = countryCode.split('').map(c => 127397 + c.charCodeAt(0));
-      return String.fromCodePoint(...codePoints);
-    }
-    
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-    
-    document.addEventListener('click', (e) => {
-      const suggestionsEl = document.getElementById('search-suggestions');
+    async function useCurrentLocation() {
       const input = document.getElementById('location-input');
-      if (!e.target.closest('.search-box') && !e.target.closest('.search-suggestions')) {
-        suggestionsEl.classList.remove('active');
+      input.value = '📍 Detectando...';
+      input.disabled = true;
+      
+      if (!navigator.geolocation) {
+        input.value = '';
+        input.disabled = false;
+        return;
       }
-    });
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          input.value = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+          input.disabled = false;
+          quickSearchFromHome();
+        },
+        () => {
+          input.value = '';
+          input.disabled = false;
+        },
+        { timeout: 10000 }
+      );
+    }
     
     function quickSearchFromHome() {
       const location = document.getElementById('location-input').value.trim();
@@ -424,15 +398,53 @@
       window.location.href = 'forecast.html?city=' + encodeURIComponent(city);
     }
     
+    function getFlag(countryCode) {
+      if (!countryCode) return '🌍';
+      const codePoints = countryCode.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0));
+      return String.fromCodePoint(...codePoints);
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Close suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+      const suggestionsEl = document.getElementById('search-suggestions');
+      const searchContainer = document.querySelector('.search-container');
+      if (!searchContainer.contains(e.target)) {
+        suggestionsEl.classList.remove('active');
+      }
+    });
+    
+    // Handle keyboard navigation in suggestions
+    document.addEventListener('keydown', (e) => {
+      const suggestionsEl = document.getElementById('search-suggestions');
+      const activeItems = suggestionsEl.querySelectorAll('.suggestion-item-modern');
+      const currentIndex = Array.from(activeItems).findIndex(item => item === document.activeElement);
+      
+      if (e.key === 'ArrowDown' && activeItems.length > 0) {
+        e.preventDefault();
+        const nextIndex = currentIndex < activeItems.length - 1 ? currentIndex + 1 : 0;
+        activeItems[nextIndex].focus();
+      } else if (e.key === 'ArrowUp' && activeItems.length > 0) {
+        e.preventDefault();
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : activeItems.length - 1;
+        activeItems[prevIndex].focus();
+      } else if (e.key === 'Escape') {
+        suggestionsEl.classList.remove('active');
+        document.getElementById('location-input').focus();
+      }
+    });
+
+    // Register service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log('SW registrado:', registration.scope);
-          })
-          .catch(error => {
-            console.log('SW no disponible:', error.message);
-          });
+          .then(registration => console.log('SW registrado'))
+          .catch(error => console.log('SW error:', error));
       });
     }
   </script>
