@@ -1374,21 +1374,53 @@ async function loadMap(location) {
 }
 
 function updateMap(type) {
-  if (!currentCoords) return;
-  
+  const mapContainer = document.querySelector('.map-container-nasa');
   const mapFrame = document.getElementById('map-frame');
+  if (!mapFrame) return;
+  
+  if (!currentCoords || !currentCoords.lat || !currentCoords.lng) {
+    mapFrame.style.display = 'none';
+    if (mapContainer) {
+      mapContainer.innerHTML = `
+        <div class="map-placeholder">
+          <span class="map-placeholder-icon">🌍</span>
+          <span class="map-placeholder-text">Mapa no disponible<br>Busca una ciudad para ver el mapa</span>
+        </div>
+      `;
+    }
+    return;
+  }
+  
+  mapFrame.style.display = 'block';
   const { lat, lng } = currentCoords;
   
   let url;
   if (type === 'satellite') {
-    url = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${lat}LjM4NzAy!5e0!3m2!1ses!2sus!4v1234567890!5m2!1ses!2sus&maptype=satellite`;
+    url = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.1},${lat-0.1},${lng+0.1},${lat+0.1}&layer=mapnik&marker=${lat},${lng}`;
   } else if (type === 'weather') {
-    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&windstream=true&overlay=wind`;
+    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&windstream=true&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
   } else if (type === 'precipitation') {
-    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&overlay=rain`;
+    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&overlay=rain&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
   } else if (type === 'wind') {
-    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&overlay=wind`;
+    url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=8&type=map&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
   }
+  
+  mapFrame.onload = function() {
+    if (mapContainer) {
+      mapContainer.classList.add('loaded');
+    }
+  };
+  
+  mapFrame.onerror = function() {
+    if (mapContainer) {
+      mapContainer.innerHTML = `
+        <div class="map-placeholder">
+          <span class="map-placeholder-icon">⚠️</span>
+          <span class="map-placeholder-text">No se pudo cargar el mapa<br>Intenta con otra capa</span>
+        </div>
+      `;
+    }
+  };
   
   mapFrame.src = url;
 }

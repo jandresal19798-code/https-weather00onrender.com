@@ -725,14 +725,59 @@ body.skeleton-loading {
    ============================================ */
 .map-container-nasa {
   position: relative;
+  width: 100%;
+  height: clamp(200px, 35vh, 350px);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   overflow: hidden;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 250px;
+}
+
+.map-container-nasa::before {
+  content: '🗺️ Cargando mapa...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.map-container-nasa.loaded::before {
+  display: none;
 }
 
 .map-frame-nasa {
   width: 100%;
   height: 100%;
   border: none;
+  display: block;
+}
+
+.map-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.map-placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.map-placeholder-text {
+  font-size: 14px;
+  opacity: 0.8;
 }
 
 /* ============================================
