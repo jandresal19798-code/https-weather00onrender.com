@@ -256,10 +256,56 @@ app.get('/api/forecast-15days', async (req, res) => {
 
 app.get('/api/coordinates', async (req, res) => {
   try {
-    let location = req.query.location;
+    const location = req.query.location;
+    const lat = req.query.lat;
+    const lng = req.query.lng;
     
+    // Si se proporcionan lat/lng, hacer reverse geocoding
+    if (lat && lng) {
+      const cacheKey = getCacheKey('/api/coordinates', { lat, lng });
+      const cached = getCached(cacheKey);
+      
+      if (cached) {
+        return res.json(cached);
+      }
+      
+      try {
+        // Usar API de reverse geocoding (Open-Meteo u otra)
+        const axios = (await import('axios')).default;
+        const response = await axios.get(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=es`,
+          { timeout: 5000 }
+        );
+        
+        const data = response.data;
+        const result = {
+          success: true,
+          location: data.city || data.locality || data.principalSubdivision || 'Ubicación desconocida',
+          country: data.countryName || '',
+          countryCode: data.countryCode || '',
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lng)
+        };
+        
+        setCached(cacheKey, result);
+        return res.json(result);
+      } catch (error) {
+        console.log('Reverse geocoding falló, usando coordenadas directamente');
+        // Si falla el reverse geocoding, devolver las coordenadas
+        return res.json({
+          success: true,
+          location: `${lat}, ${lng}`,
+          country: '',
+          countryCode: '',
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lng)
+        });
+      }
+    }
+    
+    // Si se proporciona location (nombre de ciudad), hacer geocoding normal
     if (!location) {
-      return res.status(400).json({ error: 'Ubicación requerida' });
+      return res.status(400).json({ error: 'Se requiere location o lat/lng' });
     }
 
     const cacheKey = getCacheKey('/api/coordinates', { location });
@@ -278,9 +324,7 @@ app.get('/api/coordinates', async (req, res) => {
     const commonCountries = [
       'argentina', 'uruguay', 'chile', 'brasil', 'paraguay', 'bolivia', 'peru', 'ecuador',
       'colombia', 'venezuela', 'mexico', 'españa', 'portugal', 'francia', 'italia', 'alemania',
-      'estados unidos', 'usa', 'united states', 'canada', 'reino Unido', 'uk', 'japon', 'china',
-      'argentinian', 'uruguayan', 'chilean', 'brazilian', 'paraguayan', 'peruvian', 'ecuadorian',
-      'colombian', 'venezuelan', 'mexican', 'spanish', 'portuguese', 'french', 'italian', 'german'
+      'estados unidos', 'usa', 'united states', 'canada', 'reino Unido', 'uk', 'japon', 'china'
     ];
     
     variations.push(location);
@@ -290,12 +334,10 @@ app.get('/api/coordinates', async (req, res) => {
       if (parts.length >= 2) {
         variations.push(parts[0]);
         variations.push(`${parts[0]}, ${parts[1].toLowerCase()}`);
-        variations.push(`${parts[0]}, ${parts[1].toUpperCase()}`);
       }
     } else {
       for (const country of commonCountries) {
         variations.push(`${location}, ${country}`);
-        variations.push(`${location} ${country}`);
       }
     }
     
