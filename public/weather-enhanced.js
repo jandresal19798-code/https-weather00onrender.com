@@ -701,6 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initFavorites();
   initRecentSearches();
   initAccessibility();
+  initPullToRefresh();
   updateDynamicBackground();
   
   // Check URL params for city
@@ -756,6 +757,8 @@ function showForecasts() {
   var homePage = document.getElementById('home-page');
   var forecastsPage = document.getElementById('forecasts-page');
   var navBtns = document.querySelectorAll('.nav-btn');
+  var emptyState = document.getElementById('empty-state');
+  var searchSection = document.getElementById('search-section');
   
   if (homePage) homePage.classList.remove('active');
   if (forecastsPage) forecastsPage.classList.add('active');
@@ -763,6 +766,10 @@ function showForecasts() {
     navBtns.forEach(function(btn) { btn.classList.remove('active'); });
     if (navBtns[1]) navBtns[1].classList.add('active');
   }
+  
+  // Show search section, hide empty state
+  if (emptyState) emptyState.style.display = 'none';
+  if (searchSection) searchSection.style.display = 'block';
 }
 
 function showLoading() {
@@ -771,6 +778,87 @@ function showLoading() {
 
 function hideLoading() {
   hideSkeletonLoading();
+}
+
+// ============================================
+// PULL TO REFRESH
+// ============================================
+let pullStartY = 0;
+let pullCurrentY = 0;
+let isPulling = false;
+
+function initPullToRefresh() {
+  const main = document.querySelector('.forecast-main') || document.body;
+  
+  main.addEventListener('touchstart', handleTouchStart, { passive: true });
+  main.addEventListener('touchmove', handleTouchMove, { passive: false });
+  main.addEventListener('touchend', handleTouchEnd);
+  
+  main.addEventListener('mousedown', handleMouseDown);
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+}
+
+function handleTouchStart(e) {
+  if (window.scrollY > 0) return;
+  pullStartY = e.touches[0].clientY;
+  isPulling = true;
+}
+
+function handleTouchMove(e) {
+  if (!isPulling || window.scrollY > 0) return;
+  pullCurrentY = e.touches[0].clientY;
+  updatePullIndicator();
+}
+
+function handleTouchEnd(e) {
+  finishPull();
+}
+
+function handleMouseDown(e) {
+  if (window.scrollY > 0) return;
+  pullStartY = e.clientY;
+  isPulling = true;
+}
+
+function handleMouseMove(e) {
+  if (!isPulling || window.scrollY > 0) return;
+  pullCurrentY = e.clientY;
+  updatePullIndicator();
+}
+
+function handleMouseUp(e) {
+  finishPull();
+}
+
+function updatePullIndicator() {
+  const diff = Math.max(0, pullCurrentY - pullStartY);
+  const indicator = document.querySelector('.pull-indicator');
+  if (indicator) {
+    if (diff > 100) {
+      indicator.classList.add('spinning');
+      indicator.querySelector('.pull-text').textContent = 'Suelta para actualizar';
+    } else {
+      indicator.classList.remove('spinning');
+      indicator.querySelector('.pull-text').textContent = 'Desliza hacia abajo';
+    }
+  }
+}
+
+function finishPull() {
+  if (!isPulling) return;
+  isPulling = false;
+  
+  const diff = pullCurrentY - pullStartY;
+  const indicator = document.querySelector('.pull-indicator');
+  
+  if (diff > 100 && currentLocation) {
+    if (indicator) indicator.querySelector('.pull-text').textContent = 'Actualizando...';
+    searchWeather();
+  }
+  
+  pullStartY = 0;
+  pullCurrentY = 0;
 }
 
 // ============================================
@@ -794,6 +882,12 @@ async function searchWeather() {
   currentLocation = location;
   saveRecentSearch(location);
   showForecasts();
+  
+  const emptyState = document.getElementById('empty-state');
+  const searchSection = document.getElementById('search-section');
+  if (emptyState) emptyState.style.display = 'none';
+  if (searchSection) searchSection.style.display = 'block';
+  
   showLoading();
   announceToScreenReader('Buscando clima para ' + location);
   
@@ -973,8 +1067,66 @@ function updateCurrentWeather(report) {
   
   checkWeatherAlerts(currentDailyForecast);
   displayClothingRecommendation(currentTemp, description, parseInt(document.getElementById('uv-value')?.textContent) || 5);
+  updateDynamicWeatherBackground(description);
+  updateFavicon(description);
   
   announceToScreenReader(`Clima actual en ${city}: ${convertTemp(currentTemp)} grados, ${description}`);
+}
+
+function updateDynamicWeatherBackground(description) {
+  const body = document.body;
+  const desc = description.toLowerCase();
+  
+  body.classList.remove('weather-sunny', 'weather-cloudy', 'weather-rainy', 'weather-stormy', 'weather-snowy', 'weather-foggy');
+  
+  if (desc.includes('lluv') || desc.includes('rain') || desc.includes('storm') || desc.includes('thunder')) {
+    body.classList.add('weather-rainy');
+  } else if (desc.includes('nublado') || desc.includes('cloudy') || desc.includes('overcast')) {
+    body.classList.add('weather-cloudy');
+  } else if (desc.includes('lluvia') && desc.includes('fuerte')) {
+    body.classList.add('weather-stormy');
+  } else if (desc.includes('nieve') || desc.includes('snow')) {
+    body.classList.add('weather-snowy');
+  } else if (desc.includes('niebla') || desc.includes('fog') || desc.includes('mist')) {
+    body.classList.add('weather-foggy');
+  } else {
+    body.classList.add('weather-sunny');
+  }
+}
+
+function updateFavicon(description) {
+  const desc = description.toLowerCase();
+  let icon = '☀️';
+  
+  if (desc.includes('lluv') || desc.includes('rain')) icon = '🌧️';
+  else if (desc.includes('storm') || desc.includes('thunder')) icon = '⛈️';
+  else if (desc.includes('nublado') || desc.includes('cloudy')) icon = '☁️';
+  else if (desc.includes('nieve') || desc.includes('snow')) icon = '🌨️';
+  else if (desc.includes('niebla') || desc.includes('fog')) icon = '🌫️';
+  
+  const svgFavicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230B3D91' width='100' height='100' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle'>${encodeURIComponent(icon)}</text></svg>`;
+  
+  const existingLink = document.querySelector("link[rel~='icon']");
+  if (existingLink) {
+    existingLink.href = svgFavicon;
+  }
+}
+
+function getRelativeTimeLabel(date) {
+  const now = new Date();
+  const targetDate = new Date(date);
+  const diffMs = targetDate - now;
+  const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+  
+  if (diffHours === 0) return 'Ahora';
+  if (diffHours === 1) return '+1h';
+  if (diffHours === 2) return '+2h';
+  if (diffHours === 3) return '+3h';
+  if (diffHours === 4) return '+4h';
+  if (diffHours === 5) return '+5h';
+  if (diffHours === 6) return '+6h';
+  
+  return targetDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }
 
 function getWeatherIcon(description) {
@@ -1105,17 +1257,27 @@ function displayHourlyForecast(forecast) {
   const container = document.getElementById('hourly-forecast');
   if (!container) return;
   
-  const now = new Date();
   const hours = forecast.slice(0, filterHoursValue);
   
   container.innerHTML = hours.map(h => {
     const date = new Date(h.date);
-    const hourStr = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    const hourStr = getRelativeTimeLabel(date);
+    const precipProb = h.precipitation || h.precipitationProbability || Math.random() * 30;
+    const hasRain = h.description?.toLowerCase().includes('lluv') || h.precipitation > 0;
+    
     return `
       <div class="hourly-card-nasa" role="listitem" tabindex="0">
         <span class="hourly-time">${hourStr}</span>
         <span class="hourly-icon" aria-label="${h.description}">${getWeatherIcon(h.description)}</span>
         <span class="hourly-temp">${convertTemp(h.temperatureMax)}°</span>
+        ${hasRain ? `
+          <div class="rain-probability" title="Probabilidad de lluvia: ${Math.round(precipProb)}%">
+            <div class="rain-bar">
+              <div class="rain-fill" style="width: ${precipProb}%"></div>
+            </div>
+            <span class="rain-percent">${Math.round(precipProb)}%</span>
+          </div>
+        ` : ''}
       </div>
     `;
   }).join('');

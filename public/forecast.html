@@ -21,6 +21,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+  <!-- Pull to Refresh Indicator -->
+  <div class="pull-to-refresh" id="pull-refresh">
+    <div class="pull-indicator">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0B3D91" stroke-width="2">
+        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+      <span class="pull-text">Desliza hacia abajo</span>
+    </div>
+  </div>
+  
   <!-- Loading Overlay -->
   <div class="loading-overlay-top" id="loading">
     <div class="loading-content-top">
@@ -84,7 +94,18 @@
 
   <!-- Main Content -->
   <main class="forecast-main">
-    <!-- Search Section -->
+    <!-- Empty State -->
+    <div class="empty-state" id="empty-state">
+      <div class="empty-state-icon">🌤️</div>
+      <h2 class="empty-state-title">Descubre el clima en tu ciudad</h2>
+      <p class="empty-state-description">Ingresa el nombre de una ciudad o usa tu ubicación actual para ver el pronóstico del tiempo.</p>
+      <button class="empty-state-action" onclick="searchCurrentLocation()">
+        <span>📍</span> Usar mi ubicación
+      </button>
+    </div>
+    
+    <!-- Search Section (hidden when empty) -->
+    <section class="search-section" id="search-section" style="display: none;">
     <section class="search-section">
       <div class="search-container">
         <div class="search-box-nasa main-search">
