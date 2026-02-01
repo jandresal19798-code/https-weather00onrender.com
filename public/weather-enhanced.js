@@ -131,18 +131,61 @@ async function searchCurrentLocation() {
   const locationInput = document.getElementById('location-input');
   if (!locationInput) return;
   
-  locationInput.value = 'Detectando ubicación...';
+  if (!navigator.geolocation) {
+    showNotification('Tu navegador no soporta geolocalización', 'warning');
+    return;
+  }
+  
+  locationInput.value = '📍 Detectando...';
   locationInput.disabled = true;
   
   try {
-    const location = await getCurrentLocation();
-    locationInput.value = location;
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      });
+    });
+    
+    const { latitude, longitude } = position.coords;
+    
+    try {
+      const response = await fetch(`/api/coordinates?lat=${latitude}&lng=${longitude}`, {
+        mode: 'cors',
+        cache: 'no-cache'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.location) {
+          locationInput.value = data.location;
+          locationInput.disabled = false;
+          searchWeather();
+          return;
+        }
+      }
+    } catch (e) {
+      // Fallback: usar coordenadas directamente
+    }
+    
+    // Fallback con coordenadas
+    locationInput.value = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+    locationInput.disabled = false;
     searchWeather();
+    
   } catch (error) {
-    console.warn('Error de geolocalización:', error);
+    console.warn('Geolocalización rechazada o fallida:', error.message);
     locationInput.value = '';
     locationInput.disabled = false;
-    showNotification('No se pudo detectar tu ubicación. Puedes buscar manualmente.', 'warning');
+    
+    if (error.code === error.PERMISSION_DENIED) {
+      showNotification('Permiso de ubicación denegado. Busca manualmente.', 'warning');
+    } else if (error.code === error.TIMEOUT) {
+      showNotification('Tiempo agotado. Intenta de nuevo.', 'warning');
+    } else {
+      showNotification('No se pudo detectar tu ubicación. Puedes buscar manualmente.', 'warning');
+    }
   }
 }
 
@@ -572,39 +615,81 @@ async function handleSearchInputEnhanced(input) {
     return;
   }
   
-  searchTimeout = setTimeout(async () => {
-    // Check cache first
-    const cacheKey = `search_${query.toLowerCase()}`;
-    let suggestions = loadFromCache(cacheKey);
-    
-    if (!suggestions) {
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        suggestions = await response.json();
-        saveToCache(cacheKey, suggestions);
-      } catch (e) {
-        console.error('Error buscando:', e);
-        suggestions = [];
+    searchTimeout = setTimeout(async () => {
+      const cacheKey = `search_${query.toLowerCase()}`;
+      let suggestions = loadFromCache(cacheKey);
+      
+      if (!suggestions) {
+        try {
+          const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+          
+          if (!response.ok) {
+            suggestions = getLocalSuggestions(query);
+          } else {
+            suggestions = await response.json();
+            saveToCache(cacheKey, suggestions);
+          }
+        } catch (e) {
+          suggestions = getLocalSuggestions(query);
+        }
       }
-    }
-    
-    if (suggestions.length > 0) {
-      currentSuggestions = suggestions;
-      suggestionsEl.innerHTML = suggestions.map((s, i) => `
-        <div class="suggestion-item" onclick="selectSuggestion(${i})" role="option" aria-selected="false" tabindex="0" onkeydown="if(event.key==='Enter')selectSuggestion(${i})">
-          <span class="suggestion-icon" aria-hidden="true">📍</span>
-          <div class="suggestion-info">
-            <span class="suggestion-name">${escapeHtml(s.name)}</span>
-            <span class="suggestion-country">${escapeHtml(s.country)}${s.state ? ' • ' + escapeHtml(s.state) : ''}</span>
+      
+      if (suggestions.length > 0) {
+        currentSuggestions = suggestions;
+        suggestionsEl.innerHTML = suggestions.map((s, i) => `
+          <div class="suggestion-item" onclick="selectSuggestion(${i})" role="option" aria-selected="false" tabindex="0" onkeydown="if(event.key==='Enter')selectSuggestion(${i})">
+            <span class="suggestion-icon" aria-hidden="true">📍</span>
+            <div class="suggestion-info">
+              <span class="suggestion-name">${escapeHtml(s.name)}</span>
+              <span class="suggestion-country">${escapeHtml(s.country)}${s.state ? ' • ' + escapeHtml(s.state) : ''}</span>
+            </div>
+            <span class="suggestion-flag" aria-hidden="true">${getFlag(s.countryCode)}</span>
           </div>
-          <span class="suggestion-flag" aria-hidden="true">${getFlag(s.countryCode)}</span>
-        </div>
-      `).join('');
-      suggestionsEl.classList.add('active');
-    } else {
-      suggestionsEl.classList.remove('active');
-    }
-  }, 300);
+        `).join('');
+        suggestionsEl.classList.add('active');
+      } else {
+        suggestionsEl.classList.remove('active');
+      }
+    }, 300);
+}
+
+function getLocalSuggestions(query) {
+  const localCities = [
+    { name: 'Montevideo', country: 'Uruguay', countryCode: 'UY', state: '' },
+    { name: 'Buenos Aires', country: 'Argentina', countryCode: 'AR', state: '' },
+    { name: 'Madrid', country: 'España', countryCode: 'ES', state: '' },
+    { name: 'Barcelona', country: 'España', countryCode: 'ES', state: 'Cataluña' },
+    { name: 'Ciudad de México', country: 'México', countryCode: 'MX', state: '' },
+    { name: 'Nueva York', country: 'Estados Unidos', countryCode: 'US', state: 'NY' },
+    { name: 'Londres', country: 'Reino Unido', countryCode: 'GB', state: '' },
+    { name: 'París', country: 'Francia', countryCode: 'FR', state: '' },
+    { name: 'Tokio', country: 'Japón', countryCode: 'JP', state: '' },
+    { name: 'Santiago', country: 'Chile', countryCode: 'CL', state: '' },
+    { name: 'Lima', country: 'Perú', countryCode: 'PE', state: '' },
+    { name: 'Bogotá', country: 'Colombia', countryCode: 'CO', state: '' },
+    { name: 'Caracas', country: 'Venezuela', countryCode: 'VE', state: '' },
+    { name: 'Asunción', country: 'Paraguay', countryCode: 'PY', state: '' },
+    { name: 'La Paz', country: 'Bolivia', countryCode: 'BO', state: '' },
+    { name: 'Quito', country: 'Ecuador', countryCode: 'EC', state: '' },
+    { name: 'Havana', country: 'Cuba', countryCode: 'CU', state: '' },
+    { name: 'San José', country: 'Costa Rica', countryCode: 'CR', state: '' },
+    { name: 'Panamá', country: 'Panamá', countryCode: 'PA', state: '' },
+    { name: 'São Paulo', country: 'Brasil', countryCode: 'BR', state: '' }
+  ];
+  
+  const queryLower = query.toLowerCase();
+  return localCities.filter(city => 
+    city.name.toLowerCase().includes(queryLower) ||
+    city.country.toLowerCase().includes(queryLower)
+  ).slice(0, 5).map(city => ({
+    ...city,
+    display: `${city.name}${city.state ? ' (' + city.state + ')' : ''}, ${city.country}`,
+    latitude: 0,
+    longitude: 0
+  }));
 }
 
 // ============================================
@@ -722,15 +807,24 @@ async function searchWeather() {
       if (searchController) {
         try { searchController.abort(); } catch(e) {}
       }
-    }, 30000);
+    }, 45000);
     
     const response = await fetch(`/api/weather?location=${encodeURIComponent(location)}`, {
-      signal: searchController.signal
+      signal: searchController.signal,
+      mode: 'cors',
+      cache: 'no-cache'
     });
     
     clearTimeout(timeout);
     
     if (!response.ok) {
+      if (response.status === 429) {
+        showNotification('Demasiadas solicitudes. Espera un momento.', 'warning');
+      } else if (response.status === 404) {
+        showNotification('Ciudad no encontrada. Verifica el nombre.', 'warning');
+      } else {
+        showNotification('Error del servidor. Intenta de nuevo.', 'error');
+      }
       throw new Error(`HTTP ${response.status}`);
     }
     
@@ -751,10 +845,10 @@ async function searchWeather() {
     }
   } catch (error) {
     if (error.name === 'AbortError') {
-      console.log('Request cancelled');
+      showNotification('Búsqueda cancelada por tiempo.', 'warning');
     } else {
-      console.error('Error:', error);
-      showNotification('Error al obtener datos. Verifica tu conexión o intenta de nuevo.', 'error');
+      console.warn('Error en búsqueda:', error.message);
+      showNotification('No se pudo conectar al servidor. El servidor puede estar休眠ando. Intenta en unos segundos.', 'error');
     }
   } finally {
     hideLoading();
@@ -904,10 +998,12 @@ function getWeatherIcon(description) {
 async function loadHourlyForecast(location, retryCount = 0) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
     
     const response = await fetch(`/api/forecast-7days?location=${encodeURIComponent(location)}`, {
-      signal: controller.signal
+      signal: controller.signal,
+      mode: 'cors',
+      cache: 'no-cache'
     });
     
     clearTimeout(timeout);
@@ -917,6 +1013,23 @@ async function loadHourlyForecast(location, retryCount = 0) {
         await new Promise(r => setTimeout(r, 2000));
         return loadHourlyForecast(location, retryCount + 1);
       }
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const data = await response.json();
+
+    if (data.success && data.forecast && data.forecast.length > 0) {
+      hourlyForecastData = data.forecast;
+      displayHourlyForecast(hourlyForecastData);
+    } else {
+      hourlyForecastData = getMockForecast();
+      displayHourlyForecast(hourlyForecastData);
+    }
+  } catch (error) {
+    hourlyForecastData = getMockForecast();
+    displayHourlyForecast(hourlyForecastData);
+  }
+}
       throw new Error(`HTTP ${response.status}`);
     }
     
@@ -1239,7 +1352,15 @@ function updateAstronomy() {
 
 async function loadMap(location) {
   try {
-    const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/coordinates?location=${encodeURIComponent(location)}`, {
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
     const data = await response.json();
     
     if (data.success) {
@@ -1253,9 +1374,11 @@ async function loadMap(location) {
       updateMap('satellite');
       updateCityInfo();
       updateAstronomy();
+    } else {
+      throw new Error('No se obtuvieron coordenadas');
     }
   } catch (error) {
-    console.error('Error al cargar mapa:', error);
+    console.warn('No se pudo cargar el mapa:', error.message);
     currentLocationData = {
       name: location,
       country: '',
