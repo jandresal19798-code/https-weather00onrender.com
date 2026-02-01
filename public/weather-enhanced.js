@@ -1030,23 +1030,6 @@ async function loadHourlyForecast(location, retryCount = 0) {
     displayHourlyForecast(hourlyForecastData);
   }
 }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (data.success) {
-      hourlyForecastData = data.forecast;
-      displayHourlyForecast(hourlyForecastData);
-    } else {
-      hourlyForecastData = getMockForecast();
-      displayHourlyForecast(hourlyForecastData);
-    }
-  } catch (error) {
-    hourlyForecastData = getMockForecast();
-    displayHourlyForecast(hourlyForecastData);
-  }
-}
 
 function getMockForecast() {
   const today = new Date();
