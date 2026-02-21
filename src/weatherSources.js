@@ -152,7 +152,7 @@ export class OpenMeteo extends WeatherSource {
         forecast_days: days
       }
     });
-    return response.data.hourly.time.map((time, index) => 
+    return response.data.hourly.time.map((time, index) =>
       this.formatData({
         time,
         temperature_2m: response.data.hourly.temperature_2m[index],
@@ -179,7 +179,7 @@ export class OpenMeteo extends WeatherSource {
         forecast_days: 7
       }
     });
-    
+
     return response.data.daily.time.map((date, index) => ({
       source: 'OpenMeteo',
       date: date,
@@ -203,10 +203,10 @@ export class OpenMeteo extends WeatherSource {
         forecast_days: 16
       }
     });
-    
+
     // Limit to 15 days
     const days = response.data.daily.time.slice(0, 15);
-    
+
     return days.map((date, index) => ({
       source: 'OpenMeteo',
       date: date,
@@ -298,7 +298,7 @@ export class MetNorway extends WeatherSource {
       params: { lat: coords.latitude, lon: coords.longitude },
       headers: { 'User-Agent': 'WeatherAgent/1.0' }
     });
-    return response.data.properties.timeseries.slice(0, days * 24).map(item => 
+    return response.data.properties.timeseries.slice(0, days * 24).map(item =>
       this.formatData(item.data.instant.details, item.data.next_1_hours, coords.name, item.time)
     );
   }
@@ -309,26 +309,26 @@ export class MetNorway extends WeatherSource {
       params: { lat: coords.latitude, lon: coords.longitude },
       headers: { 'User-Agent': 'WeatherAgent/1.0' }
     });
-    
+
     const timeseries = response.data.properties.timeseries;
     const dailyData = new Map();
-    
+
     timeseries.forEach(item => {
       const date = item.time.split('T')[0];
       const temp = item.data.instant.details.air_temperature;
       const weatherCode = item.data.next_1_hours?.summary?.symbol_code;
-      
+
       if (!dailyData.has(date)) {
         dailyData.set(date, { temps: [temp], weatherCodes: [], precipSum: 0, windMax: 0 });
       }
-      
+
       const day = dailyData.get(date);
       day.temps.push(temp);
       if (weatherCode) day.weatherCodes.push(weatherCode);
       day.precipSum += item.data.next_1_hours?.details?.precipitation_amount || 0;
       day.windMax = Math.max(day.windMax, item.data.instant.details.wind_speed || 0);
     });
-    
+
     return Array.from(dailyData.entries()).slice(0, 7).map(([date, data]) => ({
       source: 'MetNorway',
       date: date,
@@ -397,54 +397,54 @@ export class USNWS extends WeatherSource {
 
   async getCurrentWeather(location) {
     const coords = await this.getCoordinates(location);
-    
+
     const pointsResponse = await axios.get(`${this.weatherUrl}/points/${coords.latitude},${coords.longitude}`, {
       headers: { 'User-Agent': 'ZeusMeteo/1.0 (contact@zeusmeteo.com)' }
     });
-    
+
     const forecastUrl = pointsResponse.data.properties.forecast;
     const stationsUrl = pointsResponse.data.properties.stations;
-    
+
     const [forecastResponse] = await Promise.all([
       axios.get(forecastUrl, { headers: { 'User-Agent': 'ZeusMeteo/1.0' } }),
       axios.get(stationsUrl, { headers: { 'User-Agent': 'ZeusMeteo/1.0' } }).catch(() => ({ data: { properties: { stations: [] } } }))
     ]);
-    
+
     const currentPeriod = forecastResponse.data.properties.periods[0];
-    
+
     return this.formatData(currentPeriod, coords.name);
   }
 
   async get7DayForecast(location) {
     const coords = await this.getCoordinates(location);
-    
+
     const pointsResponse = await axios.get(`${this.weatherUrl}/points/${coords.latitude},${coords.longitude}`, {
       headers: { 'User-Agent': 'ZeusMeteo/1.0' }
     });
-    
+
     const forecastUrl = pointsResponse.data.properties.forecast;
-    const forecastResponse = await axios.get(forecastUrl, { 
-      headers: { 'User-Agent': 'ZeusMeteo/1.0' } 
+    const forecastResponse = await axios.get(forecastUrl, {
+      headers: { 'User-Agent': 'ZeusMeteo/1.0' }
     });
-    
+
     const periods = forecastResponse.data.properties.periods;
     const dailyData = new Map();
-    
+
     periods.forEach(period => {
       const date = period.startTime.split('T')[0];
       const temp = period.temperature;
       const description = period.shortForecast.toLowerCase();
-      
+
       if (!dailyData.has(date)) {
         dailyData.set(date, { temps: [], weatherCode: 0, descriptions: [], periods: [] });
       }
-      
+
       const day = dailyData.get(date);
       day.temps.push(temp);
       day.descriptions.push(description);
       day.periods.push(period);
     });
-    
+
     return Array.from(dailyData.entries()).slice(0, 7).map(([date, data]) => ({
       source: 'USNWS',
       date: date,
@@ -621,11 +621,11 @@ export class WttrIn extends WeatherSource {
         params: { name: location, count: 3, language: 'es' },
         timeout: 5000
       });
-      
+
       if (!response.data.results || response.data.results.length === 0) {
         throw new Error(`Ubicación no encontrada: ${location}`);
       }
-      
+
       return {
         latitude: response.data.results[0].latitude,
         longitude: response.data.results[0].longitude
@@ -687,11 +687,11 @@ export class WeatherDB extends WeatherSource {
     try {
       const coords = await this.getCoordinates(location);
       const response = await axios.get(`${this.baseUrl}/weather/${coords.latitude},${coords.longitude}`);
-      
+
       if (!response.data.data || !response.data.data.forecast) {
         throw new Error('Invalid WeatherDB response');
       }
-      
+
       return response.data.data.forecast.slice(0, 7).map(day => ({
         source: 'WeatherDB',
         date: day.date,
@@ -762,11 +762,11 @@ export class Meteostat extends WeatherSource {
         params: { lat: coords.latitude, lon: coords.longitude, radius: 50000 },
         headers: { 'x-api-key': process.env.METEOSTAT_KEY || '' }
       });
-      
+
       if (!response.data.data || response.data.data.length === 0) {
         throw new Error('No weather stations nearby');
       }
-      
+
       const station = response.data.data[0];
       return this.formatData(station, coords.name);
     } catch (error) {
@@ -814,12 +814,12 @@ export class WeatherGov extends WeatherSource {
     try {
       const coords = await this.getCoordinates(location);
       const pointsResponse = await axios.get(`${this.baseUrl}/points/${coords.latitude},${coords.longitude}`);
-      
+
       const forecastUrl = pointsResponse.data.properties.forecast;
       const forecastResponse = await axios.get(forecastUrl);
-      
+
       const currentPeriod = forecastResponse.data.properties.periods[0];
-      
+
       return this.formatData(currentPeriod, coords.name);
     } catch (error) {
       throw new Error(`Weather.gov no disponible para "${location}": ${error.message}`);
@@ -830,27 +830,27 @@ export class WeatherGov extends WeatherSource {
     try {
       const coords = await this.getCoordinates(location);
       const pointsResponse = await axios.get(`${this.baseUrl}/points/${coords.latitude},${coords.longitude}`);
-      
+
       const forecastUrl = pointsResponse.data.properties.forecast;
       const forecastResponse = await axios.get(forecastUrl);
-      
+
       const periods = forecastResponse.data.properties.periods;
       const dailyData = new Map();
-      
+
       periods.forEach(period => {
         const date = period.startTime.split('T')[0];
         const temp = period.temperature;
         const description = period.shortForecast.toLowerCase();
-        
+
         if (!dailyData.has(date)) {
           dailyData.set(date, { temps: [], descriptions: [] });
         }
-        
+
         const day = dailyData.get(date);
         day.temps.push(temp);
         day.descriptions.push(description);
       });
-      
+
       return Array.from(dailyData.entries()).slice(0, 7).map(([date, data]) => ({
         source: 'Weather.gov',
         date: date,
@@ -1068,8 +1068,9 @@ export class SevenTimer extends WeatherSource {
 
 // Tomorrow.io API - Free tier available (500 calls/day)
 export class TomorrowIO extends WeatherSource {
-  constructor() {
+  constructor(apiKey = null) {
     super();
+    this.apiKey = apiKey || process.env.TOMORROW_IO_API_KEY || '';
     this.baseUrl = 'https://api.tomorrow.io/v4';
     this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
   }
@@ -1089,7 +1090,8 @@ export class TomorrowIO extends WeatherSource {
       const coords = await this.getCoordinates(location);
       const response = await axios.get(`${this.baseUrl}/weather/realtime`, {
         params: {
-          location: `${coords.latitude},${coords.longitude}`
+          location: `${coords.latitude},${coords.longitude}`,
+          apikey: this.apiKey
         },
         timeout: 10000
       });
@@ -1107,7 +1109,8 @@ export class TomorrowIO extends WeatherSource {
         params: {
           location: `${coords.latitude},${coords.longitude}`,
           timesteps: '1d',
-          units: 'metric'
+          units: 'metric',
+          apikey: this.apiKey
         },
         timeout: 15000
       });
@@ -1211,7 +1214,7 @@ export class WeatherAggregator extends WeatherSource {
 
   async getCurrentWeather(location) {
     const errors = [];
-    
+
     for (const source of this.sources) {
       try {
         const weather = await source.getCurrentWeather(location);
@@ -1222,7 +1225,7 @@ export class WeatherAggregator extends WeatherSource {
         console.log(`⚠️ ${source.constructor.name} failed: ${error.message}`);
       }
     }
-    
+
     throw new Error('All weather sources failed');
   }
 
@@ -1238,7 +1241,7 @@ export class WeatherAggregator extends WeatherSource {
         console.log(`⚠️ ${source.constructor.name} 7-day forecast failed: ${error.message}`);
       }
     }
-    
+
     throw new Error('No 7-day forecast available');
   }
 }
@@ -1277,7 +1280,7 @@ export class INUMET extends WeatherSource {
 
   async getCoordinates(location) {
     const searchLocation = location.toLowerCase().trim();
-    
+
     for (const [cityName, coords] of Object.entries(this.cities)) {
       if (searchLocation.includes(cityName) || cityName.includes(searchLocation)) {
         return {
@@ -1290,28 +1293,28 @@ export class INUMET extends WeatherSource {
         };
       }
     }
-    
+
     const response = await axios.get(`${this.geoUrl}/search`, {
       params: { name: location, count: 3, language: 'es' }
     });
-    
+
     if (!response.data.results || response.data.results.length === 0) {
       throw new Error(`Ubicación no encontrada: ${location}`);
     }
-    
+
     const result = response.data.results[0];
-    
+
     if (result.country_code?.toLowerCase() === 'uy' || result.country?.toLowerCase() === 'uruguay') {
       return result;
     }
-    
+
     throw new Error(`No es una ubicación de Uruguay: ${location}`);
   }
 
   async getCurrentWeather(location) {
     try {
       const coords = await this.getCoordinates(location);
-      
+
       const response = await axios.get('https://api.open-meteo.com/v1/forecast', {
         params: {
           latitude: coords.latitude,
@@ -1331,7 +1334,7 @@ export class INUMET extends WeatherSource {
   async get7DayForecast(location) {
     try {
       const coords = await this.getCoordinates(location);
-      
+
       const response = await axios.get('https://api.open-meteo.com/v1/forecast', {
         params: {
           latitude: coords.latitude,
@@ -1408,11 +1411,11 @@ export class INUMET extends WeatherSource {
     const searchLocation = location.toLowerCase();
     const uruguayKeywords = ['uruguay', 'montevideo', 'uy', 'oriental'];
     const cityNames = Object.keys(this.cities);
-    
+
     for (const city of cityNames) {
       if (searchLocation.includes(city)) return true;
     }
-    
+
     return uruguayKeywords.some(keyword => searchLocation.includes(keyword));
   }
 }

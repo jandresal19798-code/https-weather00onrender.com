@@ -1,7 +1,7 @@
-const CACHE_NAME = 'zeus-meteo-v11';
-const STATIC_CACHE = 'zeus-meteo-static-v11';
-const RUNTIME_CACHE = 'zeus-meteo-runtime-v11';
-const API_CACHE = 'zeus-meteo-api-v11';
+const CACHE_NAME = 'zeus-meteo-v12';
+const STATIC_CACHE = 'zeus-meteo-static-v12';
+const RUNTIME_CACHE = 'zeus-meteo-runtime-v12';
+const API_CACHE = 'zeus-meteo-api-v12';
 
 const STATIC_URLS = [
   '/',

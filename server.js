@@ -309,6 +309,7 @@ app.get('/api/coordinates', async (req, res) => {
 
     const { OpenMeteo } = await import('./src/weatherSources.js');
     const openMeteo = new OpenMeteo();
+    let coords;
 
     const cleanLocation = location.split('(')[0]
       .replace(/Muy Fiel y Reconquistadora Ciudad de San Felipe y Santiago de/i, '')

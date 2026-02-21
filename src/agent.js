@@ -16,7 +16,7 @@ class WeatherAgent {
     this.sources.push(new INUMET());
     this.sources.push(new OpenMeteo());
     this.sources.push(new SevenTimer());
-    this.sources.push(new TomorrowIO());
+    this.sources.push(new TomorrowIO(process.env.TOMORROW_IO_API_KEY));
     this.sources.push(new WttrIn());
     this.sources.push(new WeatherDB());
     this.sources.push(new MetNorway());
@@ -34,7 +34,7 @@ class WeatherAgent {
     if (process.env.WEATHERAPI_KEY && process.env.WEATHERAPI_KEY !== 'tu_api_key_aqui') {
       this.sources.push(new WeatherAPI(process.env.WEATHERAPI_KEY));
     }
-    
+
     this.mockSource = new MockWeatherSource();
   }
 
@@ -65,10 +65,10 @@ class WeatherAgent {
 
     for (const source of this.sources) {
       let locationFound = false;
-      
+
       for (const loc of locationsToTry) {
         if (locationFound) break;
-        
+
         try {
           let data;
           if (useForecast) {
@@ -77,7 +77,7 @@ class WeatherAgent {
           } else {
             data = await source.getCurrentWeather(loc);
           }
-          
+
           if (data && data.temperature !== undefined && data.temperature !== null) {
             weatherData.push(data);
             console.log(`✅ ${data.source}: ${data.temperature}°C - ${data.description}`);
@@ -95,7 +95,7 @@ class WeatherAgent {
     if (weatherData.length === 0) {
       console.log('\n⚠️ Todas las APIs fallaron. Usando datos de respaldo...');
       console.log('💡 Los datos pueden no ser precisos para esta ubicación.');
-      
+
       try {
         const mockData = await this.mockSource.getCurrentWeather(location);
         mockData.description = `Clima estimado para ${location}`;
@@ -108,7 +108,7 @@ class WeatherAgent {
     }
 
     console.log('\n🧠 Aplicando IA de Zeus Meteo...');
-    
+
     const aiAnalysis = this.applyAIAnalysis(weatherData, location, date);
 
     console.log('\n📝 Generando informe...\n');
@@ -140,7 +140,7 @@ class WeatherAgent {
 
     const weights = data.map(d => this.getSourceWeight(d.source));
     const totalWeight = weights.reduce((a, b) => a + b, 0);
-    
+
     const avgTemp = data.reduce((sum, d, i) => sum + d.temperature * weights[i], 0) / totalWeight;
     const avgHumidity = data.reduce((sum, d, i) => sum + (d.humidity || 50) * weights[i], 0) / totalWeight;
     const avgWind = data.reduce((sum, d, i) => sum + (d.windSpeed || 0) * weights[i], 0) / totalWeight;
@@ -179,7 +179,7 @@ class WeatherAgent {
 
     const sorted = [...data].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     const tempDiff = sorted[sorted.length - 1].temperature - sorted[0].temperature;
-    
+
     let direction = 'estable';
     if (tempDiff > 2) direction = 'subiendo';
     else if (tempDiff < -2) direction = 'bajando';
@@ -211,7 +211,7 @@ class WeatherAgent {
     const sourceCount = data.length;
     const consistency = this.calculateConsistency(data);
     const dataQuality = this.assessDataQuality(data);
-    
+
     let confidence = 0;
     confidence += Math.min(sourceCount * 15, 45);
     confidence += consistency * 30;
@@ -239,7 +239,7 @@ class WeatherAgent {
 
   generateRecommendation(ensemble, trend) {
     const recs = [];
-    
+
     if (ensemble.avg > 25) {
       recs.push('Usar protector solar');
     }
@@ -255,13 +255,13 @@ class WeatherAgent {
     if (ensemble.wind > 10) {
       recs.push('Precaución con viento fuerte');
     }
-    
+
     return recs.length > 0 ? recs : ['Clima favorable para actividades'];
   }
 
   generateAlerts(ensemble, anomaly) {
     const alerts = [];
-    
+
     if (anomaly.isAnomaly) {
       alerts.push(`⚠️ Variación detectada de ${anomaly.mean.toFixed(1)}°C`);
     }
@@ -271,20 +271,20 @@ class WeatherAgent {
     if (ensemble.wind > 15) {
       alerts.push('💨 Viento fuerte - precaución');
     }
-    
+
     return alerts;
   }
 
   enhanceReportWithAI(report, aiAnalysis, isMockData = false) {
     let enhanced = report;
-    
+
     if (isMockData) {
       enhanced += `
 
 ⚠️ NOTA: Los datos shown son estimaciones. Las APIs meteorológicas están temporalmente no disponibles.
 `;
     }
-    
+
     enhanced += `
 
 ═══════════════════════════════════════════
@@ -320,7 +320,7 @@ ${aiAnalysis.recommendation.map(r => `   • ${r}`).join('\n')}
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length < 1) {
     console.log(`
  ⚡ Zeus Meteo - Agente de Análisis del Clima
