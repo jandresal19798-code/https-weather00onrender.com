@@ -310,42 +310,60 @@ app.get('/api/coordinates', async (req, res) => {
     const { OpenMeteo } = await import('./src/weatherSources.js');
     const openMeteo = new OpenMeteo();
 
-    let coords = null;
-    const variations = [location];
+    const cleanLocation = location.split('(')[0]
+      .replace(/Muy Fiel y Reconquistadora Ciudad de San Felipe y Santiago de/i, '')
+      .replace(/Distrito|District/i, '')
+      .trim();
+
+    const variations = [location, cleanLocation];
+
+    if (cleanLocation.toLowerCase().includes('montevideo')) {
+      variations.push('Montevideo, Uruguay');
+    }
 
     const commonCountries = [
       'argentina', 'uruguay', 'chile', 'brasil', 'paraguay', 'bolivia', 'peru', 'ecuador',
-      'colombia', 'venezuela', 'mexico', 'españa', 'portugal', 'francia', 'italia', 'alemania',
-      'estados unidos', 'usa', 'united states', 'canada', 'reino Unido', 'uk', 'japon', 'china'
+      'colombia', 'venezuela', 'mexico', 'españa', 'portugal', 'francia'
     ];
 
-    if (location.includes(',')) {
-      const parts = location.split(',').map(p => p.trim());
-      if (parts.length >= 2) {
-        variations.push(parts[0]);
-        variations.push(`${parts[0]}, ${parts[1].toLowerCase()}`);
-      }
+    if (cleanLocation.includes(',')) {
+      const parts = cleanLocation.split(',').map(p => p.trim());
+      variations.push(parts[0]);
+      if (parts.length >= 2) variations.push(`${parts[0]}, ${parts[1]}`);
     } else {
-      for (const country of commonCountries) {
-        variations.push(`${location}, ${country}`);
-      }
+      // Si la búsqueda es simple, intentar con países comunes si falla
+      variations.push(`${cleanLocation}, Uruguay`);
+      variations.push(`${cleanLocation}, Argentina`);
+      variations.push(`${cleanLocation}, España`);
     }
 
     const triedLocations = new Set();
     for (const loc of variations) {
-      if (triedLocations.has(loc.toLowerCase())) continue;
-      triedLocations.add(loc.toLowerCase());
+      const normalized = loc.trim().toLowerCase();
+      if (!normalized || normalized.length < 2 || triedLocations.has(normalized)) continue;
+      triedLocations.add(normalized);
 
+      console.log(`🔍 Intentando geocodificar: "${loc}"`);
       try {
         coords = await openMeteo.getCoordinates(loc);
-        if (coords && coords.country) break;
+        if (coords && (coords.latitude || coords.lat)) break;
       } catch (e) {
         continue;
       }
     }
 
     if (!coords) {
-      throw new Error(`Ubicación no encontrada: ${location}`);
+      // Último recurso: si contiene una coma, intentar solo con la primera parte
+      if (location.includes(',')) {
+        const firstPart = location.split(',')[0].trim();
+        try {
+          coords = await openMeteo.getCoordinates(firstPart);
+        } catch (e) { }
+      }
+    }
+
+    if (!coords) {
+      throw new Error(`Ubicación no encontrada: ${location}. Intenta con un nombre más simple (ej: Montevideo).`);
     }
 
     const response = {

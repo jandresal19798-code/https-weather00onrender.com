@@ -1684,14 +1684,32 @@ function addChatMessage(role, content) {
   const messageDiv = document.createElement('div');
   messageDiv.className = `chatbot-message-nasa ${role}`;
 
-  // Convertir saltos de línea en <br>
-  const formattedContent = escapeHtml(content).replace(/\n/g, '<br>');
-  messageDiv.innerHTML = `<div class="message-bubble">${formattedContent}</div>`;
-
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble';
+  messageDiv.appendChild(bubble);
   container.appendChild(messageDiv);
-  container.scrollTop = container.scrollHeight;
 
-  // Guardar en historial (limitar a 10 para contexto)
+  if (role === 'assistant' && content.length > 10) {
+    let i = 0;
+    bubble.innerHTML = '';
+    const speed = 15; // Velocidad de escritura
+
+    function typeWriter() {
+      if (i < content.length) {
+        const char = content.charAt(i);
+        bubble.innerHTML += char === '\n' ? '<br>' : char;
+        i++;
+        container.scrollTop = container.scrollHeight;
+        setTimeout(typeWriter, speed);
+      }
+    }
+    typeWriter();
+  } else {
+    bubble.innerHTML = escapeHtml(content).replace(/\n/g, '<br>');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Guardar en historial
   chatHistory.push({ role, content });
   if (chatHistory.length > 10) chatHistory.shift();
 }
