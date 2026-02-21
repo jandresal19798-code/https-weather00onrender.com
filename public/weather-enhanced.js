@@ -152,9 +152,11 @@ function updateCurrentWeather(report) {
 
   // Update Map
   const mapFrame = document.getElementById('map-iframe');
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=REPLACE_ME_OR_USE_IFRAME_ALT&q=${encodeURIComponent(report.location)}&zoom=10`;
-  // Usando una alternativa libre para el mapa
-  mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${report.lng - 0.1},${report.lat - 0.1},${report.lng + 0.1},${report.lat + 0.1}&layer=mapnik`;
+  if (mapFrame && report.lat && report.lng && !isNaN(report.lat) && !isNaN(report.lng)) {
+    const lat = parseFloat(report.lat);
+    const lng = parseFloat(report.lng);
+    mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.1},${lat - 0.1},${lng + 0.1},${lat + 0.1}&layer=mapnik`;
+  }
 
   // AI Analysis in Panel
   renderAIAnalysis(report);

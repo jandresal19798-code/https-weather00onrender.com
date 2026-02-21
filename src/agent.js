@@ -129,8 +129,8 @@ class WeatherAgent {
       humidity: aiAnalysis.ensemble.humidity,
       windSpeed: aiAnalysis.ensemble.wind,
       pressure: weatherData[0].pressure || 1013,
-      lat: weatherData[0].latitude || weatherData[0].lat,
-      lng: weatherData[0].longitude || weatherData[0].lng,
+      lat: parseFloat(weatherData[0].latitude || weatherData[0].lat || 0),
+      lng: parseFloat(weatherData[0].longitude || weatherData[0].lng || 0),
       analysis: enhancedReport,
       aiAnalysis: aiAnalysis,
       timestamp: new Date().toISOString()
