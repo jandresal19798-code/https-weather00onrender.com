@@ -798,13 +798,7 @@ function showForecasts() {
   if (searchSection) searchSection.style.display = 'block';
 }
 
-function showLoading() {
-  showSkeletonLoading();
-}
-
-function hideLoading() {
-  hideSkeletonLoading();
-}
+// Las funciones de carga se definen en la sección SKELETON SCREENS (línea 200 aprox)
 
 // ============================================
 // PULL TO REFRESH
