@@ -116,7 +116,22 @@ class WeatherAgent {
 
     const enhancedReport = this.enhanceReportWithAI(report, aiAnalysis, weatherData.length === 1);
 
-    return enhancedReport;
+    // Retornamos un objeto estructurado para que la UI pueda procesarlo
+    return {
+      location: location,
+      temperature: aiAnalysis.ensemble.avg,
+      temperatureMin: aiAnalysis.ensemble.min,
+      temperatureMax: aiAnalysis.ensemble.max,
+      description: weatherData[0].description || 'Condiciones variables',
+      humidity: aiAnalysis.ensemble.humidity,
+      windSpeed: aiAnalysis.ensemble.wind,
+      pressure: weatherData[0].pressure || 1013,
+      lat: weatherData[0].latitude || weatherData[0].lat,
+      lng: weatherData[0].longitude || weatherData[0].lng,
+      analysis: enhancedReport,
+      aiAnalysis: aiAnalysis,
+      timestamp: new Date().toISOString()
+    };
   }
 
   applyAIAnalysis(data, location, date) {

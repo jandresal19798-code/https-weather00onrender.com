@@ -173,7 +173,7 @@ function displayDailyForecast(days) {
 
 function renderAIAnalysis(report) {
   const panel = document.getElementById('ai-recommendation');
-  const text = `Basado en las condiciones actuales en ${report.location} (${report.temperature}°C), el sistema Zeus detecta un clima ${report.description}. Se recomienda ${report.temperature > 25 ? 'hidratación constante y uso de protector solar.' : report.temperature < 15 ? 'vestir prendas de abrigo y evitar exposición prolongada al frío.' : 'ropa ligera pero con una chaqueta adicional para la tarde.'} La humedad del ${report.humidity}% favorece una sensación térmica estable.`;
+  const text = report.analysis || `Basado en las condiciones actuales en ${report.location} (${report.temperature}°C), el sistema Zeus detecta un clima ${report.description}. Se recomienda ${report.temperature > 25 ? 'hidratación constante y uso de protector solar.' : report.temperature < 15 ? 'vestir prendas de abrigo y evitar exposición prolongada al frío.' : 'ropa ligera pero con una chaqueta adicional para la tarde.'} La humedad del ${report.humidity}% favorece una sensación térmica estable.`;
 
   typewriterEffect(panel, text);
 }
@@ -252,6 +252,7 @@ function typewriterEffect(element, text) {
 }
 
 function getWeatherIcon(desc) {
+  if (!desc) return '⛅';
   desc = desc.toLowerCase();
   if (desc.includes('despejado') || desc.includes('sol')) return '☀️';
   if (desc.includes('parcialmente')) return '🌤️';
