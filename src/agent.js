@@ -93,8 +93,11 @@ class WeatherAgent {
     }
 
     if (weatherData.length === 0) {
-      console.log('\n⚠️ Todas las APIs fallaron. Usando datos de respaldo...');
-      console.log('💡 Los datos pueden no ser precisos para esta ubicación.');
+      const allApiMissingKeys = errors.every(e => e.includes('API key') || e.includes('401') || e.includes('Unauthorized'));
+
+      if (!allApiMissingKeys) {
+        console.log('\n⚠️ Todas las APIs fallaron. Usando datos de respaldo...');
+      }
 
       try {
         const mockData = await this.mockSource.getCurrentWeather(location);

@@ -313,7 +313,6 @@ app.get('/api/coordinates', async (req, res) => {
 
     const cleanLocation = location.split('(')[0]
       .replace(/Muy Fiel y Reconquistadora Ciudad de San Felipe y Santiago de/i, '')
-      .replace(/Distrito|District/i, '')
       .trim();
 
     const variations = [location, cleanLocation];
