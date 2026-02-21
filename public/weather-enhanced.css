@@ -1493,3 +1493,192 @@ input[type="text"]:focus {
     border: 1px solid #ccc;
   }
 }
+
+/* ============================================
+   CHATBOT STYLES - ZEUS IA
+   ============================================ */
+.chatbot-fab-nasa {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: var(--gradient-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: white;
+  border-radius: 50%;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  z-index: 9999;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: none;
+}
+
+.chatbot-fab-nasa:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+}
+
+.chatbot-container-nasa {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 380px;
+  max-width: calc(100vw - 60px);
+  height: 500px;
+  max-height: calc(100vh - 150px);
+  background: var(--bg-white, #fff);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+  z-index: 9998;
+  overflow: hidden;
+  border: 1px solid var(--border-color, #eee);
+  transition: all 0.3s ease;
+}
+
+.chatbot-container-nasa.active {
+  display: flex;
+  animation: chatbot-slide-up 0.3s ease forwards;
+}
+
+@keyframes chatbot-slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chatbot-header-nasa {
+  padding: 15px 20px;
+  background: var(--gradient-primary, #667eea);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+.chatbot-messages-nasa {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background: var(--bg-light, #f8f9fa);
+}
+
+.chatbot-message-nasa {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+}
+
+.chatbot-message-nasa.user {
+  align-self: flex-end;
+}
+
+.chatbot-message-nasa.assistant {
+  align-self: flex-start;
+}
+
+.message-bubble {
+  padding: 12px 16px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+}
+
+.user .message-bubble {
+  background: var(--nasa-blue, #667eea);
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.assistant .message-bubble {
+  background: white;
+  color: #333;
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.chatbot-input-nasa {
+  padding: 15px;
+  background: white;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #eee;
+}
+
+.chatbot-input-nasa input {
+  flex: 1;
+  border: 1px solid #eee;
+  padding: 10px 15px;
+  border-radius: 25px;
+  outline: none;
+  font-size: 14px;
+}
+
+.chatbot-input-nasa button {
+  background: var(--gradient-primary, #667eea);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.chatbot-input-nasa button:hover {
+  transform: scale(1.1);
+}
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  background: #ccc;
+  border-radius: 50%;
+  animation: typing 1s infinite alternate;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  from { opacity: 0.3; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(-4px); }
+}
+
+.dark-mode .chatbot-container-nasa {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.dark-mode .assistant .message-bubble {
+  background: #334155;
+  color: white;
+}
+
+.dark-mode .chatbot-input-nasa {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-mode .chatbot-input-nasa input {
+  background: #1e293b;
+  border-color: #334155;
+  color: white;
+}
