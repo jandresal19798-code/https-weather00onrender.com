@@ -1,71 +1,86 @@
-/* ============================================
-   ZEUS METEO - ENHANCED CSS
-   All new styles for new features
-   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Roboto+Mono&display=swap');
+
+:root {
+  --premium-blue: #0f172a;
+  --premium-accent: #38bdf8;
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: 16px;
+  --radius-premium: 24px;
+  --font-main: 'Outfit', sans-serif;
+}
 
 /* ============================================
-   DYNAMIC WEATHER BACKGROUNDS
+   DYNAMIC WEATHER BACKGROUNDS - RÉGIMEN PREMIUM
    ============================================ */
 body.weather-sunny {
-  --weather-bg: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #6c5ce7 100%);
+  --weather-bg: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
   --weather-text: #ffffff;
 }
 
 body.weather-cloudy {
-  --weather-bg: linear-gradient(135deg, #b2bec3 0%, #636e72 50%, #2d3436 100%);
+  --weather-bg: linear-gradient(135deg, #475569 0%, #64748b 50%, #94a3b8 100%);
   --weather-text: #ffffff;
 }
 
 body.weather-rainy {
-  --weather-bg: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #1abc9c 100%);
+  --weather-bg: linear-gradient(135deg, #1e293b 0%, #334155 50%, #0ea5e9 100%);
   --weather-text: #ffffff;
-}
-
-body.weather-stormy {
-  --weather-bg: linear-gradient(135deg, #2d3436 0%, #000000 50%, #636e72 100%);
-  --weather-text: #ffffff;
-}
-
-body.weather-snowy {
-  --weather-bg: linear-gradient(135deg, #dfe6e9 0%, #b2bec3 50%, #74b9ff 100%);
-  --weather-text: #2d3436;
-}
-
-body.weather-foggy {
-  --weather-bg: linear-gradient(135deg, #b2bec3 0%, #dfe6e9 50%, #ecf0f1 100%);
-  --weather-text: #2d3436;
 }
 
 body {
-  background: var(--weather-bg, var(--bg-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)));
+  font-family: var(--font-main);
+  background: var(--weather-bg, #0f172a);
   min-height: 100vh;
-  color: var(--weather-text, var(--text-primary, #1a1a2e));
-  transition: background 0.8s ease, color 0.3s ease;
+  margin: 0;
+  color: var(--weather-text, #f8fafc);
+  transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
 }
 
+/* Glassmorphism Core */
 .forecast-main {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-premium);
   margin: 20px;
-  padding: 20px;
-}
-
-body.weather-sunny .forecast-main,
-body.weather-cloudy .forecast-main,
-body.weather-rainy .forecast-main,
-body.weather-stormy .forecast-main {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-body.weather-snowy .forecast-main,
-body.weather-foggy .forecast-main {
-  background: rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================
-   RAIN PROBABILITY BARS
+   SKELETON LOADING EFFECTS
    ============================================ */
+.skeleton-loading {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.skeleton-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .rain-probability {
   display: flex;
   align-items: center;
@@ -121,8 +136,13 @@ body.skeleton-loading {
 }
 
 @keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .skeleton-text {
@@ -275,18 +295,21 @@ body.skeleton-loading {
 /* ============================================
    BUTTONS WITH MICROINTERACTIONS
    ============================================ */
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
-.btn-primary:hover, .btn-secondary:hover {
+.btn-primary:hover,
+.btn-secondary:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.btn-primary:active, .btn-secondary:active {
+.btn-primary:active,
+.btn-secondary:active {
   transform: translateY(-1px);
 }
 
@@ -377,6 +400,7 @@ body.skeleton-loading {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -493,6 +517,7 @@ body.skeleton-loading {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -647,6 +672,7 @@ body.skeleton-loading {
     opacity: 0;
     transform: translateX(100px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -688,7 +714,8 @@ body.skeleton-loading {
 /* ============================================
    THEME & UNIT TOGGLE BUTTONS
    ============================================ */
-.theme-toggle-btn, .unit-toggle-btn {
+.theme-toggle-btn,
+.unit-toggle-btn {
   background: var(--bg-light);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
@@ -698,7 +725,8 @@ body.skeleton-loading {
   transition: all 0.3s ease;
 }
 
-.theme-toggle-btn:hover, .unit-toggle-btn:hover {
+.theme-toggle-btn:hover,
+.unit-toggle-btn:hover {
   background: var(--nasa-blue);
   color: white;
   transform: scale(1.05);
@@ -799,7 +827,8 @@ body.skeleton-loading {
   padding: 20px;
 }
 
-.sun-card, .moon-card {
+.sun-card,
+.moon-card {
   background: rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -832,8 +861,15 @@ body.skeleton-loading {
 }
 
 @keyframes sunPulse {
-  0%, 100% { box-shadow: 0 0 30px rgba(243, 156, 18, 0.6); }
-  50% { box-shadow: 0 0 50px rgba(243, 156, 18, 0.8); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 30px rgba(243, 156, 18, 0.6);
+  }
+
+  50% {
+    box-shadow: 0 0 50px rgba(243, 156, 18, 0.8);
+  }
 }
 
 .sun-arc-path {
@@ -862,8 +898,15 @@ body.skeleton-loading {
 }
 
 @keyframes moonFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 .moon-info {
@@ -1005,8 +1048,15 @@ body.skeleton-loading {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 .empty-state-title {
@@ -1109,17 +1159,17 @@ body.skeleton-loading {
     padding-right: 20px;
     scrollbar-width: none;
   }
-  
+
   .hourly-forecast-nasa::-webkit-scrollbar {
     display: none;
   }
-  
+
   .hourly-card-nasa {
     flex-shrink: 0;
     width: 90px;
     scroll-snap-align: start;
   }
-  
+
   .forecast-7days {
     display: flex;
     gap: 12px;
@@ -1132,11 +1182,11 @@ body.skeleton-loading {
     padding-left: 20px;
     padding-right: 20px;
   }
-  
+
   .forecast-7days::-webkit-scrollbar {
     display: none;
   }
-  
+
   .day-card-nasa {
     flex-shrink: 0;
     width: 100px;
@@ -1335,18 +1385,37 @@ body.skeleton-loading {
    ANIMATED ICONS
    ============================================ */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .weather-icon-large {
@@ -1433,20 +1502,20 @@ input[type="text"]:focus {
     max-width: calc(100vw - 40px);
     padding: 12px 16px;
   }
-  
+
   .weather-alert {
     flex-wrap: wrap;
   }
-  
+
   .clothing-items {
     justify-content: center;
   }
-  
+
   .forecast-15day-item {
     grid-template-columns: 60px 30px 1fr;
     gap: 8px;
   }
-  
+
   .forecast-15day-desc {
     display: none;
   }
@@ -1457,12 +1526,12 @@ input[type="text"]:focus {
     min-width: 70px;
     padding: 12px 8px;
   }
-  
+
   .hourly-card-nasa {
     min-width: 60px;
     padding: 10px 6px;
   }
-  
+
   .activity-card-nasa {
     padding: 16px 12px;
   }
@@ -1472,6 +1541,7 @@ input[type="text"]:focus {
    PRINT STYLES
    ============================================ */
 @media print {
+
   .search-suggestions,
   .weather-alert,
   #clothing-recommendation,
@@ -1481,12 +1551,12 @@ input[type="text"]:focus {
   .loading-overlay-top {
     display: none !important;
   }
-  
+
   body {
     background: white !important;
     color: black !important;
   }
-  
+
   .nasa-card {
     break-inside: avoid;
     box-shadow: none;
@@ -1511,7 +1581,7 @@ input[type="text"]:focus {
   justify-content: center;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   z-index: 9999;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: none;
@@ -1519,7 +1589,7 @@ input[type="text"]:focus {
 
 .chatbot-fab-nasa:hover {
   transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 }
 
 .chatbot-container-nasa {
@@ -1532,7 +1602,7 @@ input[type="text"]:focus {
   max-height: calc(100vh - 150px);
   background: var(--bg-white, #fff);
   border-radius: 20px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
   display: none;
   flex-direction: column;
   z-index: 9998;
@@ -1547,8 +1617,15 @@ input[type="text"]:focus {
 }
 
 @keyframes chatbot-slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chatbot-header-nasa {
@@ -1603,7 +1680,7 @@ input[type="text"]:focus {
   background: white;
   color: #333;
   border-bottom-left-radius: 2px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .chatbot-input-nasa {
@@ -1654,12 +1731,24 @@ input[type="text"]:focus {
   animation: typing 1s infinite alternate;
 }
 
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes typing {
-  from { opacity: 0.3; transform: translateY(0); }
-  to { opacity: 1; transform: translateY(-4px); }
+  from {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
 }
 
 .dark-mode .chatbot-container-nasa {
@@ -1682,3 +1771,8 @@ input[type="text"]:focus {
   border-color: #334155;
   color: white;
 }
+/* Prompt Chips - Interactividad Zeus IA */
+.prompt-chip { background: rgba(11, 61, 145, 0.1); border: 1px solid rgba(255, 255, 255, 0.1); color: inherit; padding: 8px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.3s ease; font-family: inherit; font-weight: 500; }
+.prompt-chip:hover { background: #0B3D91; color: white; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.dark-mode .prompt-chip { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+.dark-mode .prompt-chip:hover { background: #38bdf8; color: #0f172a; }

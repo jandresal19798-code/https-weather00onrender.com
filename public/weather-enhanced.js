@@ -1644,6 +1644,14 @@ function handleChatKeyPress(event) {
   }
 }
 
+function setChatPrompt(text) {
+  const input = document.getElementById('chatbot-input-nasa');
+  if (input) {
+    input.value = text;
+    sendChatMessage();
+  }
+}
+
 async function sendChatMessage() {
   const input = document.getElementById('chatbot-input-nasa');
   if (!input) return;

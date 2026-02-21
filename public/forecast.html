@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -10,38 +11,46 @@
   <meta name="apple-mobile-web-app-title" content="Zeus Meteo">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
+  <link rel="apple-touch-icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
   <title>Zeus Meteo - Pronóstico</title>
   <link rel="stylesheet" href="weather.css">
   <link rel="stylesheet" href="home.css">
   <link rel="stylesheet" href="forecast-modern.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
   <!-- Animated Background -->
   <div class="forecast-bg"></div>
   <div class="forecast-overlay"></div>
-  
+
   <!-- Pull to Refresh Indicator -->
   <div class="pull-to-refresh" id="pull-refresh">
     <div class="pull-indicator">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
       </svg>
       <span class="pull-text">Desliza hacia abajo</span>
     </div>
   </div>
-  
+
   <!-- Loading Overlay -->
   <div class="loading-overlay-modern" id="loading">
-    <div class="loading-content-modern">
-      <div class="loading-spinner-modern"></div>
-      <h2 class="loading-title-modern">ZEUS METEO</h2>
-      <p class="loading-subtitle-modern">Analizando datos meteorológicos...</p>
+    <div class="loading-content-modern" style="text-align: center;">
+      <div class="loading-spinner-modern" style="margin: 0 auto 20px;"></div>
+      <h2 class="loading-title-modern" style="font-family: 'Outfit', sans-serif; letter-spacing: 2px;">ZEUS METEO</h2>
+      <p class="loading-subtitle-modern" id="loading-message">Analizando datos meteorológicos...</p>
+      <div style="margin-top: 15px; font-size: 12px; opacity: 0.7; color: white;" id="loading-detail">
+        Despertando al agente meteorológico... un momento, por favor.
+      </div>
     </div>
   </div>
 
@@ -61,8 +70,10 @@
       <div class="header-actions-modern">
         <a href="index.html" class="action-btn-modern" title="Volver al inicio">🏠</a>
         <button class="action-btn-modern" onclick="downloadPDF()" title="Descargar PDF">📄</button>
-        <button class="action-btn-modern theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema" aria-label="Cambiar tema">☀️</button>
-        <button class="action-btn-modern" id="unit-toggle-btn" onclick="toggleTemperatureUnit()" title="Cambiar unidad">°C</button>
+        <button class="action-btn-modern theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema"
+          aria-label="Cambiar tema">☀️</button>
+        <button class="action-btn-modern" id="unit-toggle-btn" onclick="toggleTemperatureUnit()"
+          title="Cambiar unidad">°C</button>
         <button class="action-btn-modern" onclick="searchCurrentLocation()" title="Ubicación actual">📍</button>
       </div>
     </div>
@@ -74,29 +85,32 @@
     <div class="empty-state-modern" id="empty-state">
       <div class="empty-state-icon">🌤️</div>
       <h2 class="empty-state-title">Descubre el clima en tu ciudad</h2>
-      <p class="empty-state-desc">Ingresa el nombre de una ciudad o usa tu ubicación actual para ver el pronóstico del tiempo.</p>
+      <p class="empty-state-desc">Ingresa el nombre de una ciudad o usa tu ubicación actual para ver el pronóstico del
+        tiempo.</p>
       <button class="empty-state-btn" onclick="searchCurrentLocation()">
         <span>📍</span> Usar mi ubicación
       </button>
     </div>
-    
+
     <!-- Search Section (hidden when empty) -->
     <section class="search-section-modern" id="search-section" style="display: none;">
       <div class="search-container-modern">
         <div class="search-box-modern">
           <span class="search-icon-modern">🔍</span>
-          <input type="text" id="location-input" class="search-input-modern" placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires)" onkeypress="if(event.key==='Enter')searchWeather()" oninput="handleSearchInput(this)"/>
+          <input type="text" id="location-input" class="search-input-modern"
+            placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires)"
+            onkeypress="if(event.key==='Enter')searchWeather()" oninput="handleSearchInput(this)" />
           <button class="location-btn" onclick="searchCurrentLocation()" title="Usar mi ubicación">📍</button>
           <button class="search-btn-modern" onclick="searchWeather()">Buscar</button>
         </div>
         <div id="search-suggestions" class="search-suggestions-dropdown"></div>
-        
+
         <!-- Favorites Section -->
         <div id="favorites-container" class="favorites-section"></div>
-        
+
         <!-- Recent Searches -->
         <div id="recent-searches" class="recent-searches-section"></div>
-        
+
         <div class="quick-cities-inline">
           <button onclick="quickSearch('Buenos Aires')">Buenos Aires</button>
           <button onclick="quickSearch('Madrid')">Madrid</button>
@@ -112,10 +126,10 @@
     <section class="city-banner" id="city-banner" style="display: none;">
       <!-- Weather Alerts Container -->
       <div id="weather-alerts"></div>
-      
+
       <!-- Clothing Recommendations -->
       <div id="clothing-recommendation"></div>
-      
+
       <div class="city-banner-content">
         <div class="city-main-info">
           <div class="city-weather-main">
@@ -279,7 +293,7 @@
           <div class="details-grid-nasa">
             <!-- Air Quality -->
             <div id="air-quality" class="detail-card-nasa full-width"></div>
-            
+
             <div class="detail-card-nasa">
               <span class="detail-icon-nasa">☀️</span>
               <div class="detail-content-nasa">
@@ -453,28 +467,32 @@
               <div class="science-icon">🌡️</div>
               <div class="science-text">
                 <h4>¿Qué es la sensación térmica?</h4>
-                <p>Es la temperatura percibida por el cuerpo humano, que tiene en cuenta factores como el viento y la humedad. El viento frío hace que perdamos calor más rápido.</p>
+                <p>Es la temperatura percibida por el cuerpo humano, que tiene en cuenta factores como el viento y la
+                  humedad. El viento frío hace que perdamos calor más rápido.</p>
               </div>
             </div>
             <div class="science-item">
               <div class="science-icon">💨</div>
               <div class="science-text">
                 <h4>¿Cómo se forma el viento?</h4>
-                <p>El viento se forma por diferencias de presión atmosférica. El aire fluye desde zonas de alta presión hacia zonas de baja presión.</p>
+                <p>El viento se forma por diferencias de presión atmosférica. El aire fluye desde zonas de alta presión
+                  hacia zonas de baja presión.</p>
               </div>
             </div>
             <div class="science-item">
               <div class="science-icon">☁️</div>
               <div class="science-text">
                 <h4>Tipos de nubes</h4>
-                <p>Las nubes se clasifican por su altitud: cirrus (alta), cumulus (media) y stratus (baja). Cada tipo indica diferentes condiciones climáticas.</p>
+                <p>Las nubes se clasifican por su altitud: cirrus (alta), cumulus (media) y stratus (baja). Cada tipo
+                  indica diferentes condiciones climáticas.</p>
               </div>
             </div>
             <div class="science-item">
               <div class="science-icon">🌈</div>
               <div class="science-text">
                 <h4>¿Cómo se forma el arcoíris?</h4>
-                <p>El arcoíris se forma por la refracción y reflexión de la luz solar en las gotas de agua suspendidas en la atmósfera.</p>
+                <p>El arcoíris se forma por la refracción y reflexión de la luz solar en las gotas de agua suspendidas
+                  en la atmósfera.</p>
               </div>
             </div>
           </div>
@@ -557,12 +575,19 @@
     </div>
     <div class="chatbot-messages-nasa" id="chatbot-messages">
       <div class="chatbot-welcome-nasa">
-        <p>¡Hola! Soy Zeus AI, tu asistente meteorológico.</p>
-        <p>Pregúntame sobre el clima, pronósticos o datos científicos.</p>
+        <p>¡Hola! Soy <strong>Zeus AI</strong>, tu asistente meteorológico inteligente. 🌤️</p>
+        <p>Puedo ayudarte a planificar tu día o darte consejos basados en el clima actual.</p>
+
+        <div class="prompt-suggestions" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px;">
+          <button class="prompt-chip" onclick="setChatPrompt('¿Necesito paraguas?')">☔ ¿Paraguas?</button>
+          <button class="prompt-chip" onclick="setChatPrompt('¿Qué ropa me recomiendas?')">👕 Ropa hoy</button>
+          <button class="prompt-chip" onclick="setChatPrompt('¿Cómo estará el clima hoy?')">🌤️ Clima hoy</button>
+        </div>
       </div>
     </div>
     <div class="chatbot-input-nasa">
-      <input type="text" id="chatbot-input-nasa" placeholder="Escribe tu pregunta..." onkeypress="handleChatKeyPress(event)"/>
+      <input type="text" id="chatbot-input-nasa" placeholder="Escribe tu pregunta..."
+        onkeypress="handleChatKeyPress(event)" />
       <button onclick="sendChatMessage()">➤</button>
     </div>
   </div>
@@ -571,26 +596,26 @@
   <script>
     let searchTimeout = null;
     let currentSuggestions = [];
-    
+
     async function handleSearchInput(input) {
       const query = input.value.trim();
-      
+
       if (searchTimeout) {
         clearTimeout(searchTimeout);
       }
-      
+
       const suggestionsEl = document.getElementById('search-suggestions');
-      
+
       if (query.length < 2) {
         suggestionsEl.classList.remove('active');
         return;
       }
-      
+
       searchTimeout = setTimeout(async () => {
         try {
           const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
           const suggestions = await response.json();
-          
+
           if (suggestions.length > 0) {
             currentSuggestions = suggestions;
             suggestionsEl.innerHTML = suggestions.map((s, i) => `
@@ -613,7 +638,7 @@
         }
       }, 300);
     }
-    
+
     function selectSuggestion(index) {
       const suggestion = currentSuggestions[index];
       if (suggestion) {
@@ -623,19 +648,19 @@
         searchWeather();
       }
     }
-    
+
     function getFlag(countryCode) {
       if (!countryCode) return '';
       const codePoints = countryCode.split('').map(c => 127397 + c.charCodeAt(0));
       return String.fromCodePoint(...codePoints);
     }
-    
+
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
-    
+
     document.addEventListener('click', (e) => {
       const suggestionsEl = document.getElementById('search-suggestions');
       const input = document.getElementById('location-input');
@@ -643,9 +668,9 @@
         suggestionsEl.classList.remove('active');
       }
     });
-    
+
     // Check for city parameter on load
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const urlParams = new URLSearchParams(window.location.search);
       const city = urlParams.get('city');
       if (city) {
@@ -653,7 +678,7 @@
         searchWeather();
       }
     });
-    
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
@@ -667,4 +692,5 @@
     }
   </script>
 </body>
+
 </html>
