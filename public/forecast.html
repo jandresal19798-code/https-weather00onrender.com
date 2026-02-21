@@ -124,10 +124,131 @@
 
       <!-- Analysis Column -->
       <div class="forecast-right">
-        <section class="glass-card">
+        <section class="glass-card" style="margin-top: 2rem;">
           <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">🧠 Análisis del Agente</h2>
           <div id="ai-recommendation" style="font-size: 1rem; line-height: 1.6; opacity: 0.9;">
             Analizando variables meteorológicas...
+          </div>
+        </section>
+
+        <!-- Weather Alerts Section -->
+        <section class="glass-card" id="weather-alerts" style="margin-top: 2rem; display: none;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">⚠️ Alertas Meteorológicas</h2>
+          <div id="alerts-container"></div>
+        </section>
+
+        <!-- Air Quality Section -->
+        <section class="glass-card" style="margin-top: 2rem;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">💨 Calidad del Aire</h2>
+          <div class="aqi-container" id="aqi-display">
+            <div class="aqi-main">
+              <span class="aqi-value" id="aqi-value">--</span>
+              <span class="aqi-label">AQI</span>
+            </div>
+            <div class="aqi-details">
+              <div class="aqi-detail-item">
+                <span class="aqi-detail-label">PM2.5</span>
+                <span class="aqi-detail-value" id="pm25">--</span>
+              </div>
+              <div class="aqi-detail-item">
+                <span class="aqi-detail-label">PM10</span>
+                <span class="aqi-detail-value" id="pm10">--</span>
+              </div>
+              <div class="aqi-detail-item">
+                <span class="aqi-detail-label">O₃</span>
+                <span class="aqi-detail-value" id="o3">--</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Additional Metrics -->
+        <section class="glass-card" style="margin-top: 2rem;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">📊 Métricas Adicionales</h2>
+          <div class="metrics-grid" id="additional-metrics">
+            <div class="metric-card">
+              <span class="metric-icon">🌡️</span>
+              <span class="metric-label">Sensación</span>
+              <span class="metric-value" id="feels-like">--°</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon">💧</span>
+              <span class="metric-label">Punto de Rocío</span>
+              <span class="metric-value" id="dew-point">--°</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon">☀️</span>
+              <span class="metric-label">Índice UV</span>
+              <span class="metric-value" id="uv-index">--</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon">👁️</span>
+              <span class="metric-label">Visibilidad</span>
+              <span class="metric-value" id="visibility">-- km</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon">☁️</span>
+              <span class="metric-label">Nubosidad</span>
+              <span class="metric-value" id="cloud-cover">--%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-icon">🌬️</span>
+              <span class="metric-label">Ráfagas</span>
+              <span class="metric-value" id="gusts">-- km/h</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data Quality Indicator -->
+        <section class="glass-card" style="margin-top: 2rem;">
+          <div class="data-quality" id="data-quality">
+            <span class="quality-icon">📡</span>
+            <span class="quality-text">Fuente: <span id="data-source">Cargando...</span></span>
+            <span class="quality-badge" id="quality-badge">Verificando</span>
+          </div>
+        </section>
+
+        <!-- Recent Searches -->
+        <section class="glass-card" style="margin-top: 2rem;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">🔍 Búsquedas Recientes</h2>
+          <div class="recent-searches" id="recent-searches"></div>
+        </section>
+
+        <!-- Share Button -->
+        <section class="glass-card" style="margin-top: 2rem;">
+          <button class="share-btn" onclick="shareWeather()">
+            <span>📤</span> Compartir Clima
+          </button>
+        </section>
+
+        <!-- Moon Phase Widget -->
+        <section class="glass-card" style="margin-top: 2rem;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">🌙 Fase Lunar</h2>
+          <div class="moon-widget" id="moon-widget">
+            <div class="moon-visual-large">
+              <span class="moon-icon-large" id="moon-icon-large">🌕</span>
+            </div>
+            <div class="moon-details">
+              <div class="moon-phase-name" id="moon-phase-name">Luna Llena</div>
+              <div class="moon-illumination-detail" id="moon-illumination">100% iluminada</div>
+              <div class="moon-next-phase" id="moon-next-phase">Próxima: Cuarto Menguante en 7 días</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Compare Cities -->
+        <section class="glass-card" style="margin-top: 2rem;">
+          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">🌍 Comparar Ciudades</h2>
+          <div class="compare-cities" id="compare-cities">
+            <div class="compare-input-group">
+              <input type="text" id="compare-city-input" class="search-input-modern" 
+                placeholder="Agregar ciudad para comparar..."
+                onkeypress="if(event.key==='Enter')compareCity()">
+              <button class="btn-premium" onclick="compareCity()" style="padding: 0.5rem 1rem;">
+                <span>+</span>
+              </button>
+            </div>
+            <div class="compare-results" id="compare-results"></div>
           </div>
         </section>
 
