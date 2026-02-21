@@ -6,95 +6,189 @@
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-blur: 16px;
-  --radius-premium: 24px;
+  --radius-premium: 32px;
   --font-main: 'Outfit', sans-serif;
+
+  /* Weather Colors */
+  --sunny-grad: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
+  --cloudy-grad: linear-gradient(135deg, #475569 0%, #64748b 50%, #94a3b8 100%);
+  --rainy-grad: linear-gradient(135deg, #1e293b 0%, #334155 50%, #0ea5e9 100%);
 }
 
-/* ============================================
-   DYNAMIC WEATHER BACKGROUNDS - RÉGIMEN PREMIUM
-   ============================================ */
-body.weather-sunny {
-  --weather-bg: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
-  --weather-text: #ffffff;
-}
-
-body.weather-cloudy {
-  --weather-bg: linear-gradient(135deg, #475569 0%, #64748b 50%, #94a3b8 100%);
-  --weather-text: #ffffff;
-}
-
-body.weather-rainy {
-  --weather-bg: linear-gradient(135deg, #1e293b 0%, #334155 50%, #0ea5e9 100%);
-  --weather-text: #ffffff;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   font-family: var(--font-main);
-  background: var(--weather-bg, #0f172a);
+  background: var(--premium-blue);
+  color: #fff;
   min-height: 100vh;
-  margin: 0;
-  color: var(--weather-text, #f8fafc);
-  transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 1.5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
 }
 
-/* Glassmorphism Core */
-.forecast-main {
+/* Backgrounds dinámicos premium */
+body.weather-sunny {
+  background: var(--sunny-grad);
+}
+
+body.weather-cloudy {
+  background: var(--cloudy-grad);
+}
+
+body.weather-rainy {
+  background: var(--rainy-grad);
+}
+
+/* Main Glass Container */
+.forecast-main-modern {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header Premium */
+.forecast-header-modern {
+  padding: 24px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-title-modern {
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(to right, #fff, var(--premium-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* SEARCH BOX PREMIUM */
+.search-container-modern {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  padding: 10px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  max-width: 600px;
+  margin: 40px auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.search-container-modern:focus-within {
+  transform: scale(1.02);
+  border-color: var(--premium-accent);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.search-input-modern {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 15px 25px;
+  color: white;
+  font-size: 18px;
+  font-family: var(--font-main);
+  outline: none;
+}
+
+.search-btn-modern {
+  background: var(--premium-accent);
+  color: var(--premium-blue);
+  border: none;
+  padding: 12px 30px;
+  border-radius: 100px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-btn-modern:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+/* CITY BANNER - THE MASTERPIECE */
+.city-banner {
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-premium);
-  margin: 20px;
-  padding: 30px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-/* ============================================
-   SKELETON LOADING EFFECTS
-   ============================================ */
-.skeleton-loading {
+  padding: 60px;
+  margin-top: 40px;
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
 }
 
-.skeleton-loading::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(255, 255, 255, 0) 100%);
-  animation: shimmer 2s infinite;
+.city-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
+.temp-display {
+  font-size: 120px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -4px;
+  display: flex;
+  align-items: flex-start;
 }
 
+.temp-unit {
+  font-size: 40px;
+  margin-top: 20px;
+  color: var(--premium-accent);
+}
+
+.city-name {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.city-condition {
+  font-size: 24px;
+  opacity: 0.8;
+  text-transform: capitalize;
+}
+
+/* SKELETON LOADING */
 .skeleton-text {
   height: 1.2rem;
   width: 120px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  display: inline-block;
-  animation: shimmer-fade 1.5s infinite alternate;
-}
-
-.skeleton-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
   display: inline-block;
   animation: shimmer-fade 1.5s infinite alternate;
 }
@@ -109,1561 +203,44 @@ body {
   }
 }
 
-.rain-probability {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.rain-bar {
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.rain-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #74b9ff, #0984e3);
-  border-radius: 2px;
-  transition: width 0.5s ease;
-}
-
-.rain-percent {
-  font-size: 10px;
-  color: currentColor;
-  opacity: 0.8;
-  min-width: 22px;
-  text-align: right;
-}
-
-body.weather-snowy .rain-fill,
-body.weather-foggy .rain-fill {
-  background: linear-gradient(90deg, #b2bec3, #636e72);
-}
-
-/* ============================================
-   SKELETON LOADING
-   ============================================ */
-body.skeleton-loading {
-  overflow: hidden;
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-  border-radius: 4px;
-}
-
-.dark-mode .skeleton {
-  background: linear-gradient(90deg, #2d2d2d 25%, #3d3d3d 50%, #2d2d2d 75%);
-  background-size: 200% 100%;
-}
-
-@keyframes skeleton-loading {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.skeleton-text {
-  height: 16px;
-  margin-bottom: 8px;
-}
-
-.skeleton-title {
-  height: 24px;
-  width: 60%;
-  margin-bottom: 12px;
-}
-
-.skeleton-circle {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-}
-
-.skeleton-rect {
-  height: 100px;
-  width: 100%;
-}
-
-.loading-skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 20px;
-}
-
-.loading-skeleton-card {
-  background: var(--bg-white);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-md);
-}
-
-.loading-skeleton-row {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding: 20px;
-}
-
-.loading-skeleton-item {
-  min-width: 80px;
-  text-align: center;
-}
-
-.loading-skeleton-item .skeleton {
-  margin: 0 auto 8px;
-}
-
-/* ============================================
-   MICROINTERACCIONES - HOVER EFFECTS
-   ============================================ */
-.nasa-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  border: 1px solid var(--border-color);
-}
-
-.nasa-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  border-color: var(--nasa-blue);
-}
-
-.day-card-nasa {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-
-.day-card-nasa:hover {
-  transform: translateY(-6px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(11, 61, 145, 0.3);
-  background: var(--nasa-blue);
-  color: white;
-}
-
-.day-card-nasa:hover .day-temp-low {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.hourly-card-nasa {
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.hourly-card-nasa:hover {
-  transform: scale(1.1);
-  background: var(--nasa-blue);
-  color: white;
-  box-shadow: 0 4px 15px rgba(11, 61, 145, 0.4);
-}
-
-.activity-card-nasa {
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.activity-card-nasa:hover {
-  transform: translateX(8px);
-  background: var(--nasa-blue);
-  color: white;
-}
-
-.activity-card-nasa:hover .activity-desc {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.detail-card-nasa {
-  transition: all 0.3s ease;
-}
-
-.detail-card-nasa:hover {
-  transform: scale(1.03);
-  background: var(--bg-light);
-}
-
-.dark-mode .detail-card-nasa:hover {
-  background: rgba(11, 61, 145, 0.3);
-}
-
-.feature-card {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-
-.feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-}
-
-.feature-card:hover .feature-icon {
-  transform: scale(1.15) rotate(5deg);
-}
-
-.source-card {
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.source-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  border-color: var(--accent);
-}
-
-/* ============================================
-   BUTTONS WITH MICROINTERACTIONS
-   ============================================ */
-.btn-primary,
-.btn-secondary {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-primary:hover,
-.btn-secondary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.btn-primary:active,
-.btn-secondary:active {
-  transform: translateY(-1px);
-}
-
-.quick-cities button {
-  transition: all 0.3s ease;
-}
-
-.quick-cities button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.nav-btn {
-  transition: all 0.3s ease;
-}
-
-.nav-btn:hover {
-  background: rgba(11, 61, 145, 0.1);
-  transform: translateY(-2px);
-}
-
-.nav-btn.active {
-  background: var(--nasa-blue);
-  color: white;
-  transform: scale(1.05);
-}
-
-.action-btn {
-  transition: all 0.3s ease;
-}
-
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.favorite-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.favorite-btn:hover {
-  background: var(--nasa-blue);
-  color: white;
-  transform: scale(1.05);
-}
-
-.favorite-remove {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.favorite-btn:hover .favorite-remove {
-  opacity: 1;
-}
-
-/* ============================================
-   SEARCH AUTOCOMPLETE & SUGGESTIONS
-   ============================================ */
-.search-suggestions {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: var(--bg-white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 1000;
-  margin-top: 4px;
-}
-
-.search-suggestions.active {
-  display: block;
-  animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.suggestion-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.suggestion-item:hover,
-.suggestion-item:focus {
-  background: var(--bg-light);
-  outline: none;
-}
-
-.suggestion-item:last-child {
-  border-bottom: none;
-}
-
-.suggestion-icon {
-  font-size: 20px;
-}
-
-.suggestion-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.suggestion-name {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.suggestion-country {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.suggestion-flag {
-  font-size: 20px;
-}
-
-/* ============================================
-   FAVORITES & RECENT SEARCHES
-   ============================================ */
-#favorites-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.no-favorites {
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-style: italic;
-}
-
-.recent-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.recent-btn {
-  padding: 6px 14px;
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.3s ease;
-}
-
-.recent-btn:hover {
-  background: var(--nasa-blue);
-  color: white;
-}
-
-.recent-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-}
-
-/* ============================================
-   WEATHER ALERTS
-   ============================================ */
-#weather-alerts {
-  margin: 0 0 20px;
-}
-
-.weather-alert {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  margin-bottom: 8px;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.weather-alert.high {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border: 1px solid #ef4444;
-  color: #991b1b;
-}
-
-.weather-alert.medium {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid #f59e0b;
-  color: #92400e;
-}
-
-.weather-alert.low {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border: 1px solid #3b82f6;
-  color: #1e40af;
-}
-
-.alert-icon {
-  font-size: 24px;
-}
-
-.alert-message {
-  flex: 1;
-  font-weight: 600;
-}
-
-.alert-dismiss {
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-}
-
-.alert-dismiss:hover {
-  opacity: 1;
-}
-
-/* ============================================
-   CLOTHING RECOMMENDATIONS
-   ============================================ */
-#clothing-recommendation {
-  background: var(--bg-light);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.clothing-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.clothing-icon {
-  font-size: 20px;
-}
-
-.clothing-title {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.clothing-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.clothing-item {
-  padding: 6px 12px;
-  background: var(--bg-white);
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  box-shadow: var(--shadow-xs);
-}
-
-/* ============================================
-   AIR QUALITY
-   ============================================ */
-.aqi-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--bg-light);
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--nasa-blue);
-}
-
-.aqi-icon {
-  font-size: 24px;
-}
-
-.aqi-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.aqi-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.aqi-value {
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.aqi-desc {
-  font-size: 11px;
-  color: var(--text-light);
-}
-
-/* ============================================
-   NOTIFICATIONS
-   ============================================ */
-.notifications-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.notification {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  background: var(--bg-white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  animation: slideInRight 0.3s ease;
-  max-width: 350px;
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(100px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.notification.fade-out {
-  animation: slideOutRight 0.3s ease forwards;
-}
-
-@keyframes slideOutRight {
-  to {
-    opacity: 0;
-    transform: translateX(100px);
-  }
-}
-
-.notification.success {
-  border-left: 4px solid #10B981;
-}
-
-.notification.warning {
-  border-left: 4px solid #F59E0B;
-}
-
-.notification.error {
-  border-left: 4px solid #EF4444;
-}
-
-.notification.info {
-  border-left: 4px solid #3B82F6;
-}
-
-.notif-message {
-  flex: 1;
-  font-size: 14px;
-}
-
-/* ============================================
-   THEME & UNIT TOGGLE BUTTONS
-   ============================================ */
-.theme-toggle-btn,
-.unit-toggle-btn {
-  background: var(--bg-light);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-full);
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.theme-toggle-btn:hover,
-.unit-toggle-btn:hover {
-  background: var(--nasa-blue);
-  color: white;
-  transform: scale(1.05);
-}
-
-#unit-toggle-btn {
-  font-weight: 700;
-  min-width: 50px;
-}
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
-.keyboard-navigation *:focus {
-  outline: 3px solid var(--nasa-blue) !important;
-  outline-offset: 2px !important;
-}
-
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--nasa-blue);
-  color: white;
-  padding: 8px 16px;
-  z-index: 10000;
-  transition: top 0.3s ease;
-}
-
-.skip-link:focus {
-  top: 0;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* ============================================
-   15 DAY FORECAST
-   ============================================ */
-.forecast-15days {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.forecast-15day-item {
-  display: grid;
-  grid-template-columns: 80px 40px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--bg-light);
-  border-radius: var(--radius-md);
-  transition: all 0.3s ease;
-}
-
-.forecast-15day-item:hover {
-  background: var(--nasa-blue);
-  color: white;
-  transform: translateX(5px);
-}
-
-.forecast-15day-date {
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.forecast-15day-icon {
-  font-size: 24px;
-}
-
-.forecast-15day-temp {
-  font-size: 14px;
-}
-
-.forecast-15day-desc {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-/* ============================================
-   SUN/MOON ARC VISUALIZATION
-   ============================================ */
-.sun-moon-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  padding: 20px;
-}
-
-.sun-card,
-.moon-card {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  text-align: center;
-}
-
-.sun-visual {
-  position: relative;
-  width: 120px;
-  height: 60px;
-  margin: 0 auto 16px;
-}
-
-.sun-arc {
-  width: 100%;
-  height: 100%;
-}
-
-.sun-circle {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #f39c12, #f1c40f);
-  border-radius: 50%;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  box-shadow: 0 0 30px rgba(243, 156, 18, 0.6);
-  animation: sunPulse 3s ease-in-out infinite;
-}
-
-@keyframes sunPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 30px rgba(243, 156, 18, 0.6);
-  }
-
-  50% {
-    box-shadow: 0 0 50px rgba(243, 156, 18, 0.8);
-  }
-}
-
-.sun-arc-path {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-width: 3;
-}
-
-.sun-progress-path {
-  fill: none;
-  stroke: linear-gradient(90deg, #f39c12, #f1c40f);
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-
-.moon-visual {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px;
-}
-
-.moon-phase-visual {
-  font-size: 64px;
-  animation: moonFloat 4s ease-in-out infinite;
-}
-
-@keyframes moonFloat {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-.moon-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.moon-phase {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.moon-illumination {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.time-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.time-item:last-child {
-  border-bottom: none;
-}
-
-.time-icon {
-  font-size: 20px;
-}
-
-.time-info {
-  flex: 1;
-  text-align: left;
-}
-
-.time-label {
-  font-size: 12px;
-  opacity: 0.7;
-  display: block;
-}
-
-.time-value {
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.day-info {
-  margin-top: 12px;
-  font-size: 12px;
-  opacity: 0.8;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-sm);
-}
-
-@media (max-width: 768px) {
-  .sun-moon-cards {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ============================================
-   MAP CONTAINERS
-   ============================================ */
-.map-container-nasa {
-  position: relative;
-  width: 100%;
-  height: clamp(200px, 35vh, 350px);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  overflow: hidden;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  min-height: 250px;
-}
-
-.map-container-nasa::before {
-  content: '🗺️ Cargando mapa...';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 14px;
-  z-index: 1;
-}
-
-.map-container-nasa.loaded::before {
-  display: none;
-}
-
-.map-frame-nasa {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-}
-
-.map-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-  padding: 20px;
-}
-
-.map-placeholder-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-}
-
-.map-placeholder-text {
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-/* ============================================
-   EMPTY STATES
-   ============================================ */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: currentColor;
-}
-
-.empty-state-icon {
-  font-size: 80px;
-  margin-bottom: 20px;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-.empty-state-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-
-.empty-state-description {
-  font-size: 16px;
-  opacity: 0.8;
-  margin-bottom: 24px;
-  max-width: 300px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.empty-state-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 28px;
-  background: var(--nasa-blue);
-  color: white;
-  border: none;
-  border-radius: var(--radius-full);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.empty-state-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(11, 61, 145, 0.4);
-}
-
-/* ============================================
-   PULL TO REFRESH
-   ============================================ */
-.pull-to-refresh {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 10px;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-.pull-to-refresh.active {
-  pointer-events: auto;
-}
-
-.pull-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-100px);
-  transition: transform 0.3s ease;
-}
-
-.pull-to-refresh.active .pull-indicator {
-  transform: translateY(0);
-}
-
-.pull-indicator.spinning svg {
-  animation: spin 1s linear infinite;
-}
-
-.pull-text {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-/* ============================================
-   MOBILE CAROUSEL
-   ============================================ */
-@media (max-width: 768px) {
-  .hourly-forecast-nasa {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px;
-    margin: 0 -20px;
-    padding-left: 20px;
-    padding-right: 20px;
-    scrollbar-width: none;
-  }
-
-  .hourly-forecast-nasa::-webkit-scrollbar {
-    display: none;
-  }
-
-  .hourly-card-nasa {
-    flex-shrink: 0;
-    width: 90px;
-    scroll-snap-align: start;
-  }
-
-  .forecast-7days {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px;
-    margin: 0 -20px;
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .forecast-7days::-webkit-scrollbar {
-    display: none;
-  }
-
-  .day-card-nasa {
-    flex-shrink: 0;
-    width: 100px;
-    scroll-snap-align: start;
-  }
-}
-
-/* ============================================
-   SMOOTH TRANSITIONS
-   ============================================ */
-.fade-enter {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.fade-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.3s ease;
-}
-
-.fade-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fade-exit-active {
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: all 0.3s ease;
-}
-
-.nasa-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
-}
-
-/* ============================================
-   IMPROVED TYPOGRAPHY
-   ============================================ */
-.temp-value {
-  font-weight: 700;
-  letter-spacing: -2px;
-}
-
-.city-name {
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.weather-description {
-  font-weight: 500;
-}
-
-.stat-badge-value {
-  font-weight: 700;
-  font-size: 1.2em;
-}
-
-.card-title {
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-
-.detail-value {
-  font-weight: 700;
-  font-size: 1.1em;
-}
-
-.time-value {
-  font-weight: 700;
-}
-
-.astro-value {
-  font-weight: 700;
-}
-
-/* ============================================
-   IMPROVED SPACING (WHITE SPACE)
-   ============================================ */
-.nasa-card {
-  margin-bottom: 20px;
-}
-
-.card-header {
-  padding: 16px 20px;
-}
-
-.nasa-footer {
-  padding: 40px 24px;
-  margin-top: 40px;
-}
-
-.hero {
-  padding: 60px 24px;
-}
-
-.hero-title {
-  margin-bottom: 24px;
-}
-
-.hero-description {
-  margin-bottom: 32px;
-  line-height: 1.7;
-}
-
-.section-title {
-  margin-bottom: 16px;
-}
-
-.section-subtitle {
-  margin-bottom: 40px;
-}
-
-.features-grid {
-  gap: 24px;
-}
-
-.feature-card {
-  padding: 28px;
-}
-
-.quick-search {
-  padding: 80px 24px;
-}
-
-.quick-search-title {
-  margin-bottom: 16px;
-}
-
-.search-box {
-  margin-bottom: 24px;
-}
-
-.quick-cities {
-  margin-top: 20px;
-}
-
-/* ============================================
-   IMPROVED CARDS
-   ============================================ */
-.day-card-nasa {
-  padding: 16px 12px;
-  min-width: 90px;
-}
-
-.day-name-nasa {
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.day-icon-nasa {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.day-temps-nasa {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.day-temp-high {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.day-temp-low {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.hourly-card-nasa {
-  padding: 14px 10px;
-  min-width: 75px;
-  text-align: center;
-}
-
-.hourly-time {
-  font-size: 11px;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.hourly-icon {
-  font-size: 24px;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.hourly-temp {
-  font-weight: 700;
-  font-size: 14px;
-}
-
-/* ============================================
-   ANIMATED ICONS
-   ============================================ */
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.weather-icon-large {
-  animation: float 3s ease-in-out infinite;
-}
-
-.loading-spinner {
-  animation: spin-slow 2s linear infinite;
-}
-
-/* ============================================
-   IMPROVED INPUTS
-   ============================================ */
-input[type="text"]:focus {
-  outline: none;
-  border-color: var(--nasa-blue);
-  box-shadow: 0 0 0 3px rgba(11, 61, 145, 0.2);
-}
-
-.search-box-nasa input {
-  padding: 16px 20px;
-  font-size: 16px;
-}
-
-.search-btn-nasa {
-  padding: 16px 24px;
-  font-size: 15px;
-}
-
-/* ============================================
-   DARK MODE ENHANCED
-   ============================================ */
-.dark-mode .nasa-card {
-  background: #1E293B;
-  border-color: #334155;
-}
-
-.dark-mode .detail-card-nasa,
-.dark-mode .activity-card-nasa {
-  background: #0F172A;
-}
-
-.dark-mode .forecast-15day-item {
-  background: #0F172A;
-}
-
-.dark-mode .search-suggestions {
-  background: #1E293B;
-}
-
-.dark-mode .suggestion-item {
-  border-color: #334155;
-}
-
-.dark-mode .suggestion-item:hover,
-.dark-mode .suggestion-item:focus {
-  background: #334155;
-}
-
-.dark-mode .favorite-btn {
-  background: #334155;
-  color: white;
-}
-
-.dark-mode .recent-btn {
-  background: #334155;
-  color: white;
-}
-
-.dark-mode .aqi-item {
-  background: #0F172A;
-}
-
-.dark-mode .notification {
-  background: #1E293B;
-  color: white;
-}
-
-/* ============================================
-   RESPONSIVE IMPROVEMENTS
-   ============================================ */
-@media (max-width: 768px) {
-  .notification {
-    max-width: calc(100vw - 40px);
-    padding: 12px 16px;
-  }
-
-  .weather-alert {
-    flex-wrap: wrap;
-  }
-
-  .clothing-items {
-    justify-content: center;
-  }
-
-  .forecast-15day-item {
-    grid-template-columns: 60px 30px 1fr;
-    gap: 8px;
-  }
-
-  .forecast-15day-desc {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .day-card-nasa {
-    min-width: 70px;
-    padding: 12px 8px;
-  }
-
-  .hourly-card-nasa {
-    min-width: 60px;
-    padding: 10px 6px;
-  }
-
-  .activity-card-nasa {
-    padding: 16px 12px;
-  }
-}
-
-/* ============================================
-   PRINT STYLES
-   ============================================ */
-@media print {
-
-  .search-suggestions,
-  .weather-alert,
-  #clothing-recommendation,
-  #weather-alerts,
-  .chatbot-fab-nasa,
-  .chatbot-container-nasa,
-  .loading-overlay-top {
-    display: none !important;
-  }
-
-  body {
-    background: white !important;
-    color: black !important;
-  }
-
-  .nasa-card {
-    break-inside: avoid;
-    box-shadow: none;
-    border: 1px solid #ccc;
-  }
-}
-
-/* ============================================
-   CHATBOT STYLES - ZEUS IA
-   ============================================ */
+/* CHATBOT PREMIUM */
 .chatbot-fab-nasa {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  width: 60px;
-  height: 60px;
-  background: var(--gradient-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
-  color: white;
+  width: 64px;
+  height: 64px;
+  background: var(--premium-accent);
+  color: var(--premium-blue);
   border-radius: 50%;
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 28px;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  z-index: 9999;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: none;
-}
-
-.chatbot-fab-nasa:hover {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .chatbot-container-nasa {
   position: fixed;
-  bottom: 100px;
+  bottom: 110px;
   right: 30px;
-  width: 380px;
-  max-width: calc(100vw - 60px);
-  height: 500px;
-  max-height: calc(100vh - 150px);
-  background: var(--bg-white, #fff);
-  border-radius: 20px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  width: 400px;
+  height: 600px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
   display: none;
   flex-direction: column;
-  z-index: 9998;
-  overflow: hidden;
-  border: 1px solid var(--border-color, #eee);
-  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
 .chatbot-container-nasa.active {
   display: flex;
-  animation: chatbot-slide-up 0.3s ease forwards;
-}
-
-@keyframes chatbot-slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.chatbot-header-nasa {
-  padding: 15px 20px;
-  background: var(--gradient-primary, #667eea);
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
 }
 
 .chatbot-messages-nasa {
@@ -1673,160 +250,121 @@ input[type="text"]:focus {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  background: var(--bg-light, #f8f9fa);
-}
-
-.chatbot-message-nasa {
-  display: flex;
-  flex-direction: column;
-  max-width: 85%;
-}
-
-.chatbot-message-nasa.user {
-  align-self: flex-end;
-}
-
-.chatbot-message-nasa.assistant {
-  align-self: flex-start;
 }
 
 .message-bubble {
-  padding: 12px 16px;
-  border-radius: 15px;
+  padding: 12px 18px;
+  border-radius: 18px;
+  max-width: 85%;
   font-size: 14px;
-  line-height: 1.4;
-  position: relative;
+  line-height: 1.5;
 }
 
 .user .message-bubble {
-  background: var(--nasa-blue, #667eea);
-  color: white;
-  border-bottom-right-radius: 2px;
+  background: var(--premium-accent);
+  color: var(--premium-blue);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
 }
 
 .assistant .message-bubble {
-  background: white;
-  color: #333;
-  border-bottom-left-radius: 2px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.chatbot-input-nasa {
-  padding: 15px;
-  background: white;
-  display: flex;
-  gap: 10px;
-  border-top: 1px solid #eee;
-}
-
-.chatbot-input-nasa input {
-  flex: 1;
-  border: 1px solid #eee;
-  padding: 10px 15px;
-  border-radius: 25px;
-  outline: none;
-  font-size: 14px;
-}
-
-.chatbot-input-nasa button {
-  background: var(--gradient-primary, #667eea);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
 }
 
-.chatbot-input-nasa button:hover {
-  transform: scale(1.1);
-}
-
-.typing-dots {
-  display: flex;
-  gap: 4px;
-}
-
-.typing-dots span {
-  width: 6px;
-  height: 6px;
-  background: #ccc;
-  border-radius: 50%;
-  animation: typing 1s infinite alternate;
-}
-
-.typing-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes typing {
-  from {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(-4px);
-  }
-}
-
-.dark-mode .chatbot-container-nasa {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.dark-mode .assistant .message-bubble {
-  background: #334155;
-  color: white;
-}
-
-.dark-mode .chatbot-input-nasa {
-  background: #0f172a;
-  border-color: #334155;
-}
-
-.dark-mode .chatbot-input-nasa input {
-  background: #1e293b;
-  border-color: #334155;
-  color: white;
-}
-
-/* Prompt Chips - Interactividad Zeus IA */
+/* Prompt Chips */
 .prompt-chip {
-  background: rgba(11, 61, 145, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: inherit;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 12px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: var(--premium-accent);
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  font-weight: 500;
+  transition: 0.3s;
 }
 
 .prompt-chip:hover {
-  background: #0B3D91;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  background: var(--premium-accent);
+  color: var(--premium-blue);
 }
 
-.dark-mode .prompt-chip {
+/* Stats */
+.city-stats-row {
+  display: flex;
+  gap: 20px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.stat-badge {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
+  padding: 15px 25px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--glass-border);
 }
 
-.dark-mode .prompt-chip:hover {
-  background: #38bdf8;
-  color: #0f172a;
+.stat-badge-icon {
+  font-size: 20px;
+}
+
+.stat-badge-value {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.weather-icon-large {
+  font-size: 100px;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .city-main-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .temp-display {
+    font-size: 80px;
+    margin-bottom: 20px;
+  }
+
+  .city-name {
+    font-size: 32px;
+  }
+
+  .city-banner {
+    padding: 30px;
+  }
+
+  .chatbot-container-nasa {
+    width: calc(100% - 40px);
+    right: 20px;
+    height: 70vh;
+  }
+}
+
+.dark-mode .forecast-main-modern {
+  background: rgba(0, 0, 0, 0.2);
 }

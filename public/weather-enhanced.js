@@ -198,22 +198,42 @@ async function searchCurrentLocation() {
 // ============================================
 // SKELETON SCREENS
 // ============================================
-function showSkeletonLoading() {
+function showLoading() {
   const loading = document.getElementById('loading');
   if (loading) {
     loading.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
-  document.body.classList.add('skeleton-loading');
+  toggleSkeletonElements(true);
 }
 
-function hideSkeletonLoading() {
+function hideLoading() {
   const loading = document.getElementById('loading');
   if (loading) {
     loading.classList.remove('active');
     document.body.style.overflow = '';
   }
-  document.body.classList.remove('skeleton-loading');
+  toggleSkeletonElements(false);
+}
+
+function toggleSkeletonElements(show) {
+  const elements = [
+    'current-temp', 'weather-description', 'humidity', 'wind', 'feels-like', 'pressure'
+  ];
+  elements.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (show) {
+        el.setAttribute('data-original', el.textContent);
+        el.innerHTML = '<span class="skeleton-text"></span>';
+      } else {
+        const original = el.getAttribute('data-original');
+        if (original && el.innerHTML.includes('skeleton')) {
+          el.textContent = original;
+        }
+      }
+    }
+  });
 }
 
 // ============================================
