@@ -1594,8 +1594,11 @@ function updateMap(type) {
 }
 
 function changeMapType(type) {
+  const event = window.event;
   document.querySelectorAll('.map-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+  if (event && event.target) {
+    event.target.classList.add('active');
+  }
   updateMap(type);
 }
 
@@ -1607,7 +1610,7 @@ async function updateCityInfo() {
   const elevationEl = document.getElementById('city-elevation');
   const avgTempEl = document.getElementById('city-avg-temp');
 
-  if (countryEl) countryEl.textContent = currentLocationData?.country || '--';
+  if (countryEl) countryEl.textContent = currentLocationName || '--';
   if (coordsEl && currentCoords) coordsEl.textContent = `${currentCoords.lat.toFixed(2)}°, ${currentCoords.lng.toFixed(2)}°`;
   if (timezoneEl) timezoneEl.textContent = 'UTC-3';
   if (populationEl) populationEl.textContent = '--';

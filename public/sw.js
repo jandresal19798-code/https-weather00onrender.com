@@ -1,7 +1,7 @@
-const CACHE_NAME = 'zeus-meteo-v7';
-const STATIC_CACHE = 'zeus-meteo-static-v7';
-const RUNTIME_CACHE = 'zeus-meteo-runtime-v7';
-const API_CACHE = 'zeus-meteo-api-v7';
+const CACHE_NAME = 'zeus-meteo-v8';
+const STATIC_CACHE = 'zeus-meteo-static-v8';
+const RUNTIME_CACHE = 'zeus-meteo-runtime-v8';
+const API_CACHE = 'zeus-meteo-api-v8';
 
 const STATIC_URLS = [
   '/',
@@ -46,17 +46,17 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
   }
-  
+
   // Skip external requests (let browser handle them)
   if (url.origin !== self.location.origin) {
     return;
   }
-  
+
   // Route to appropriate strategy
   if (CACHE_STRATEGIES.api.test(url.pathname)) {
     event.respondWith(networkFirstWithExpiry(request));
@@ -73,7 +73,7 @@ async function cacheFirst(request) {
   if (cached) {
     return cached;
   }
-  
+
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -83,7 +83,7 @@ async function cacheFirst(request) {
     }
     return response;
   } catch (error) {
-    return new Response('Offline - Resource not cached', { 
+    return new Response('Offline - Resource not cached', {
       status: 503,
       headers: { 'Content-Type': 'text/plain' }
     });
@@ -93,41 +93,41 @@ async function cacheFirst(request) {
 // Network First with Expiry for API calls
 async function networkFirstWithExpiry(request) {
   const cacheKey = request.url;
-  
+
   // Try network first
   try {
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       // Clone response to read body and cache it
       const responseClone = networkResponse.clone();
       const data = await responseClone.json();
-      
+
       // Add timestamp
       data._cachedAt = Date.now();
-      
+
       // Store in cache
       const cache = await caches.open(API_CACHE);
       await cache.put(request, new Response(JSON.stringify(data), {
         headers: { 'Content-Type': 'application/json' }
       }));
-      
+
       // Return original response
       return networkResponse;
     }
-    
+
     // If network response not ok, try cache
     throw new Error(`HTTP ${networkResponse.status}`);
-    
+
   } catch (networkError) {
     // Network failed, try cache
     const cached = await caches.match(request);
-    
+
     if (cached) {
       try {
         const cachedData = await cached.json();
         const cachedTime = cachedData._cachedAt || 0;
-        
+
         // Check if cache is still fresh
         if (Date.now() - cachedTime < API_CACHE_DURATION) {
           // Remove internal timestamp before returning
@@ -140,12 +140,12 @@ async function networkFirstWithExpiry(request) {
         // Invalid cached data
       }
     }
-    
+
     // No valid cache, return error
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       error: 'Offline',
       message: 'No hay conexión y no hay datos en caché',
-      cached: false 
+      cached: false
     }), {
       status: 503,
       headers: { 'Content-Type': 'application/json' }
@@ -156,7 +156,7 @@ async function networkFirstWithExpiry(request) {
 // Stale While Revalidate for other requests
 async function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
-  
+
   // Start background fetch
   const fetchPromise = fetch(request).then(async networkResponse => {
     if (networkResponse.ok) {
@@ -166,22 +166,22 @@ async function staleWhileRevalidate(request) {
     }
     return networkResponse;
   }).catch(() => null);
-  
+
   // Return cached immediately if available
   if (cached) {
     // Still do the fetch in background for next time
     fetchPromise;
     return cached;
   }
-  
+
   // No cache, wait for network
   const networkResponse = await fetchPromise;
   if (networkResponse) {
     return networkResponse;
   }
-  
+
   // Both failed
-  return new Response('Offline', { 
+  return new Response('Offline', {
     status: 503,
     headers: { 'Content-Type': 'text/plain' }
   });
@@ -192,7 +192,7 @@ self.addEventListener('message', event => {
   if (event.data === 'skipWaiting') {
     self.skipWaiting();
   }
-  
+
   if (event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
       caches.keys().then(names => {
