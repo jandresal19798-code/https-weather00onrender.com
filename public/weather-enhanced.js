@@ -316,8 +316,22 @@ function handleChatKeyPress(e) {
 
 // Initializing Theme
 function initTheme() {
-  // We force dark theme for premium look
   document.body.classList.add('dark-mode');
+}
+
+// Chatbot Initialization
+function initChatbot() {
+  console.log('🤖 Zeus AI Chatbot inicializado');
+  // Aquí se podrían cargar mensajes previos del localStorage si se desea
+}
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('🚀 Zeus Service Worker activo'))
+      .catch(err => console.warn('⚠️ Fallo en SW:', err));
+  });
 }
 
 async function searchCurrentLocation() {
