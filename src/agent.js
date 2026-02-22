@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB, INUMET, PirateWeather, AEMET, Anamet, AtmoAuvergne, AtmoFrance, ECCC, VisualCrossing, StormGlass, OpenMeteoAirQuality, GeoNamesGeocoding, Weather2020, ANAMBFC } from './weatherSources.js';
+import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB, INUMET, PirateWeather, AEMET, Anamet, AtmoAuvergne, AtmoFrance, ECCC, VisualCrossing, StormGlass, OpenMeteoAirQuality, GeoNamesGeocoding, Weather2020, ANAMBFC, ArgentinaSMN, BrasilCPTEC, MeteoChile, SENAMHI, INMET } from './weatherSources.js';
 import { ReportGenerator } from './reportGenerator.js';
 
 dotenv.config();
@@ -13,8 +13,15 @@ class WeatherAgent {
   }
 
   initializeSources() {
-    // Priority sources by region
+    // Priority sources - South America
     this.sources.push(new INUMET()); // Uruguay
+    this.sources.push(new ArgentinaSMN()); // Argentina
+    this.sources.push(new BrasilCPTEC()); // Brasil
+    this.sources.push(new MeteoChile()); // Chile
+    this.sources.push(new SENAMHI()); // Peru
+    this.sources.push(new INMET()); // Brazil INMET
+    
+    // Global sources
     this.sources.push(new OpenMeteo()); // Global primary
     this.sources.push(new SevenTimer()); // NOAA based
     this.sources.push(new TomorrowIO(process.env.TOMORROW_IO_API_KEY));
@@ -22,11 +29,9 @@ class WeatherAgent {
     this.sources.push(new WeatherDB());
     this.sources.push(new MetNorway()); // Europe
     this.sources.push(new USNWS()); // USA
-    
-    // New free sources
+
+    // Additional sources
     this.sources.push(new AEMET()); // Spain
-    this.sources.push(new Anamet()); // Brazil
-    this.sources.push(new AtmoFrance()); // France air quality
     this.sources.push(new ECCC()); // Canada
     this.sources.push(new VisualCrossing(process.env.VISUAL_CROSSING_KEY));
     this.sources.push(new OpenMeteoAirQuality()); // Air quality
@@ -58,7 +63,7 @@ class WeatherAgent {
     }
 
     this.mockSource = new MockWeatherSource();
-    
+
     console.log(`✅ Zeus inicializado con ${this.sources.length} fuentes meteorológicas`);
   }
 
@@ -201,10 +206,19 @@ class WeatherAgent {
 
   getSourceWeight(source) {
     const weights = {
-      // Official/High reliability sources
-      'INUMET': 1.3,        // Uruguay official
+      // South America Official
+      'INUMET': 1.35,        // Uruguay official
+      'SENAMHI': 1.35,       // Peru official
+      'INMET': 1.35,         // Brazil official
+      'SMN Argentina (Global Model)': 1.3,
+      'CPTEC Brasil': 1.3,
+      'MeteoChile': 1.3,
+      
+      // North America
       'USNWS': 1.2,         // USA official
       'ECCC': 1.2,          // Canada official
+      
+      // Europe
       'AEMET': 1.15,        // Spain official
       
       // High accuracy APIs
@@ -215,18 +229,14 @@ class WeatherAgent {
       'StormGlass': 1.05,
       'Weather2020': 1.05,
       'PirateWeather': 1.05,
-      
+
       // Standard sources
       'OpenMeteo': 1.0,
       'MetNorway': 1.0,
-      'Anamet': 1.0,
-      'ANAM-BF': 1.0,
-      
-      // Air quality sources (used in combination)
+
+      // Air quality
       'OpenMeteoAirQuality': 0.9,
-      'AtmoFrance': 0.9,
-      'AtmoAuvergne': 0.9,
-      
+
       // Lower priority
       'WeatherDB': 0.95,
       'OpenWeatherMap': 0.9,

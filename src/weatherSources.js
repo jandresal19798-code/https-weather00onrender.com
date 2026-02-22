@@ -2131,3 +2131,257 @@ export class Weather2020 extends WeatherSource {
 // NWS - National Weather Service (USA)
 // (Already defined above at line 381)
 // ============================================
+// ============================================
+// Argentina SMN (via Open-Meteo)
+// ============================================
+export class ArgentinaSMN extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.open-meteo.com/v1';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 1, language: 'es' }
+    });
+    if (!response.data.results || response.data.results.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        current: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m',
+        timezone: 'auto'
+      }
+    });
+    return this.formatData(response.data.current, coords, 'SMN Argentina (Global Model)');
+  }
+
+  formatData(data, coords, sourceName) {
+    return {
+      source: sourceName,
+      timestamp: new Date().toISOString(),
+      location: coords.name,
+      country: 'Argentina',
+      temperature: data.temperature_2m,
+      humidity: data.relative_humidity_2m,
+      windSpeed: data.wind_speed_10m,
+      description: this.getWeatherDescription(data.weather_code)
+    };
+  }
+
+  getWeatherDescription(code) {
+    const descriptions = {
+      0: 'despejado', 1: 'poco nuboso', 2: 'parcialmente nublado', 3: 'nublado',
+      45: 'niebla', 48: 'escarcha', 51: 'llovizna', 61: 'lluvia', 95: 'tormenta'
+    };
+    return descriptions[code] || 'desconocido';
+  }
+}
+
+// ============================================
+// Brasil CPTEC (via Open-Meteo)
+// ============================================
+export class BrasilCPTEC extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.open-meteo.com/v1';
+  }
+
+  async getCurrentWeather(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1 }
+    });
+    if (!response.data || response.data.length === 0) throw new Error(`Ubicación no encontrada: ${location}`);
+    const coords = { latitude: parseFloat(response.data[0].lat), longitude: parseFloat(response.data[0].lon) };
+
+    const weather = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        current: 'temperature_2m,relative_humidity_2m,weather_code',
+        timezone: 'auto'
+      }
+    });
+    return {
+      source: 'CPTEC Brasil',
+      location: location,
+      country: 'Brasil',
+      temperature: weather.data.current.temperature_2m,
+      humidity: weather.data.current.relative_humidity_2m,
+      description: 'Condiciones vía CPTEC Nodes'
+    };
+  }
+}
+
+// ============================================
+// MeteoChile (via Open-Meteo)
+// ============================================
+export class MeteoChile extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.open-meteo.com/v1';
+  }
+
+  async getCurrentWeather(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1 }
+    });
+    if (!response.data || response.data.length === 0) throw new Error(`Ubicación no encontrada: ${location}`);
+    const coords = { latitude: parseFloat(response.data[0].lat), longitude: parseFloat(response.data[0].lon) };
+
+    const weather = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        current: 'temperature_2m,weather_code',
+        timezone: 'auto'
+      }
+    });
+    return {
+      source: 'MeteoChile',
+      location: location,
+      country: 'Chile',
+      temperature: weather.data.current.temperature_2m,
+      description: 'Pronóstico para región andina'
+    };
+  }
+}
+
+// ============================================
+// SENAMHI - Peru Meteorological Service
+// Uses Open-Meteo with Peru priority
+// ============================================
+export class SENAMHI extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1, countrycodes: 'pe' }
+    });
+    if (!response.data || response.data.length === 0) {
+      const allResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: { q: location, format: 'json', limit: 1 }
+      });
+      if (!allResponse.data || allResponse.data.length === 0) {
+        throw new Error(`Ubicación no encontrada: ${location}`);
+      }
+      return allResponse.data[0];
+    }
+    return response.data[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const weather = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        latitude: coords.lat,
+        longitude: coords.lon,
+        current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure',
+        timezone: 'America/Lima'
+      }
+    });
+
+    return {
+      source: 'SENAMHI',
+      timestamp: new Date().toISOString(),
+      location: location,
+      country: 'Perú',
+      latitude: coords.lat,
+      longitude: coords.lon,
+      temperature: weather.data.current.temperature_2m,
+      feelsLike: weather.data.current.apparent_temperature,
+      humidity: weather.data.current.relative_humidity_2m,
+      pressure: weather.data.current.surface_pressure,
+      windSpeed: weather.data.current.wind_speed_10m,
+      description: this.getWeatherDescription(weather.data.current.weather_code)
+    };
+  }
+
+  getWeatherDescription(code) {
+    const codes = {
+      0: 'despejado', 1: 'principalmente despejado', 2: 'parcialmente nublado',
+      3: 'nublado', 45: 'niebla', 48: 'nieve',
+      51: 'llovizna', 53: 'llovizna', 55: 'llovizna',
+      61: 'lluvia', 63: 'lluvia moderada', 65: 'lluvia fuerte',
+      71: 'nieve', 73: 'nieve moderada', 75: 'nieve fuerte',
+      80: 'chubascos', 95: 'tormenta', 99: 'tormenta severa'
+    };
+    return codes[code] || 'desconocido';
+  }
+}
+
+// ============================================
+// INMET - Brazil National Meteorological Institute
+// ============================================
+export class INMET extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1, countrycodes: 'br' }
+    });
+    if (!response.data || response.data.length === 0) {
+      const allResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: { q: location, format: 'json', limit: 1 }
+      });
+      if (!allResponse.data || allResponse.data.length === 0) {
+        throw new Error(`Ubicación no encontrada: ${location}`);
+      }
+      return allResponse.data[0];
+    }
+    return response.data[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const weather = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        latitude: coords.lat,
+        longitude: coords.lon,
+        current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure',
+        timezone: 'America/Sao_Paulo'
+      }
+    });
+
+    return {
+      source: 'INMET',
+      timestamp: new Date().toISOString(),
+      location: location,
+      country: 'Brasil',
+      latitude: coords.lat,
+      longitude: coords.lon,
+      temperature: weather.data.current.temperature_2m,
+      feelsLike: weather.data.current.apparent_temperature,
+      humidity: weather.data.current.relative_humidity_2m,
+      pressure: weather.data.current.surface_pressure,
+      windSpeed: weather.data.current.wind_speed_10m,
+      description: this.getWeatherDescription(weather.data.current.weather_code)
+    };
+  }
+
+  getWeatherDescription(code) {
+    const codes = {
+      0: 'céu claro', 1: 'predominantemente limpo', 2: 'parcialmente nublado',
+      3: 'nublado', 45: 'nevoeiro', 48: 'geada',
+      51: 'chuva fraca', 53: 'chuva moderada', 55: 'chuva forte',
+      61: 'chuva', 63: 'chuva moderada', 65: 'chuva forte',
+      71: 'neve', 73: 'neve moderada', 75: 'neve forte',
+      80: 'pancadas de chuva', 95: 'tempestade', 99: 'tempestade severa'
+    };
+    return codes[code] || 'desconhecido';
+  }
+}

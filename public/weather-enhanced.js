@@ -48,20 +48,20 @@ async function searchWeather() {
     showNotification('Ingresa una ciudad', 'warning');
     return;
   }
-  
+
   showLoading();
   localStorage.setItem('last_location', location);
-  
+
   try {
     const response = await fetch('/api/weather?location=' + encodeURIComponent(location));
     const data = await response.json();
-    
+
     if (data.success) {
       currentReport = data.report;
       currentLocation = location;
       document.getElementById('empty-state-hero').style.display = 'none';
       document.getElementById('main-content').style.display = 'grid';
-      
+
       updateCurrentWeather(data.report);
       await fetchExtendedForecast(location);
       updateDynamicBackground(data.report.description);
@@ -120,30 +120,30 @@ function updateCurrentWeather(report) {
   document.getElementById('humidity').textContent = (report.humidity || 50) + '%';
   document.getElementById('wind').textContent = Math.round(report.windSpeed || 10) + ' km/h';
   document.getElementById('pressure').textContent = (report.pressure || 1013) + ' hPa';
-  
+
   const iconEl = document.getElementById('weather-icon');
   iconEl.textContent = getWeatherIcon(report.description);
-  
-  // Map
+
+  // Main Map - Using Windy for real weather forecast
   const mapFrame = document.getElementById('map-iframe');
   if (mapFrame && report.lat && report.lng) {
-    mapFrame.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + (report.lng - 0.1) + ',' + (report.lat - 0.1) + ',' + (report.lng + 0.1) + ',' + (report.lat + 0.1) + '&layer=mapnik&marker=' + report.lat + ',' + report.lng;
+    mapFrame.src = 'https://embed.windy.com/embed.html?type=map&location=coordinates&metricTemp=%C2%B0C&metricWind=km/h&zoom=7&overlay=wind&product=ecmwf&level=surface&lat=' + report.lat + '&lon=' + report.lng + '&detailLat=' + report.lat + '&detailLon=' + report.lng + '&marker=true';
   }
-  
+
   // Weather map in sidebar
   const weatherMap = document.getElementById('weather-map');
   if (weatherMap && report.lat && report.lng) {
-    weatherMap.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + (report.lng - 0.5) + ',' + (report.lat - 0.5) + ',' + (report.lng + 0.5) + ',' + (report.lat + 0.5) + '&layer=mapnik&marker=' + report.lat + ',' + report.lng;
+    weatherMap.src = 'https://embed.windy.com/embed.html?type=map&location=coordinates&metricTemp=%C2%B0C&metricWind=km/h&zoom=5&overlay=radar&product=ecmwf&level=surface&lat=' + report.lat + '&lon=' + report.lng;
   }
 }
 
 function displayDailyForecast(days) {
   const container = document.getElementById('daily-forecast');
-  container.innerHTML = days.map(d => 
+  container.innerHTML = days.map(d =>
     '<div class="forecast-day-card">' +
-      '<div class="day-name">' + d.day + '</div>' +
-      '<div style="font-size: 2rem; margin: 10px 0;">' + d.icon + '</div>' +
-      '<div class="day-temp">' + Math.round(d.temp) + '°</div>' +
+    '<div class="day-name">' + d.day + '</div>' +
+    '<div style="font-size: 2rem; margin: 10px 0;">' + d.icon + '</div>' +
+    '<div class="day-temp">' + Math.round(d.temp) + '°</div>' +
     '</div>'
   ).join('');
 }
@@ -155,17 +155,17 @@ function renderNearbyCities(location) {
     { name: 'Buenos Aires', temp: 18 },
     { name: 'Madrid', temp: 14 }
   ];
-  container.innerHTML = cities.map(c => 
+  container.innerHTML = cities.map(c =>
     '<div class="stat-item" style="flex-direction: row; justify-content: space-between; cursor: pointer;" onclick="quickSearch(\'' + c.name + '\')">' +
-      '<span>' + c.name + '</span>' +
-      '<span style="font-weight: 700;">' + c.temp + '°C</span>' +
+    '<span>' + c.name + '</span>' +
+    '<span style="font-weight: 700;">' + c.temp + '°C</span>' +
     '</div>'
   ).join('');
 }
 
 function renderTemperatureChart(data) {
   if (typeof ApexCharts === 'undefined') return;
-  
+
   const options = {
     series: [{ name: 'Temperatura', data: data.map(d => Math.round(d.temp)) }],
     chart: { type: 'area', height: 250, toolbar: { show: false }, background: 'transparent' },
@@ -178,7 +178,7 @@ function renderTemperatureChart(data) {
     yaxis: { labels: { style: { colors: 'rgba(255,255,255,0.5)' } } },
     theme: { mode: 'dark' }
   };
-  
+
   if (tempChart) tempChart.destroy();
   tempChart = new ApexCharts(document.querySelector("#tempChart"), options);
   tempChart.render();
@@ -192,60 +192,60 @@ async function generatePDFReport() {
     showNotification('No hay datos para generar informe', 'warning');
     return;
   }
-  
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const w = doc.internal.pageSize.getWidth();
   let y = 20;
-  
+
   // Header - Green
   doc.setFillColor(34, 197, 94);
   doc.rect(0, 0, w, 45, 'F');
   doc.setFillColor(249, 115, 22);
   doc.rect(0, 40, w, 8, 'F');
-  
+
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
   doc.text('ZEUS METEO', w / 2, 22, { align: 'center' });
   doc.setFontSize(12);
   doc.text('Informe Meteorológico', w / 2, 32, { align: 'center' });
-  
+
   y = 60;
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(20);
   doc.text(currentReport.location || 'Ubicación', 20, y);
-  
+
   y += 10;
   doc.setFontSize(11);
   doc.setTextColor(100, 100, 100);
   doc.text(new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), 20, y);
-  
+
   y += 15;
   doc.setDrawColor(34, 197, 94);
   doc.line(20, y, w - 20, y);
-  
+
   y += 15;
   doc.setFontSize(14);
   doc.setTextColor(34, 197, 94);
   doc.text('CONDICIONES ACTUALES', 25, y);
-  
+
   y += 12;
   doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
-  
+
   const temp = Math.round(currentReport.temperature);
   const humidity = currentReport.humidity || 50;
   const wind = Math.round(currentReport.windSpeed || 10);
   const pressure = currentReport.pressure || 1013;
   const desc = currentReport.description || 'N/A';
-  
+
   doc.text('🌡️ Temperatura: ' + temp + '°C', 25, y); y += 8;
   doc.text('💧 Humedad: ' + humidity + '%', 25, y); y += 8;
   doc.text('💨 Viento: ' + wind + ' km/h', 25, y); y += 8;
   doc.text('⏱️ Presión: ' + pressure + ' hPa', 25, y); y += 8;
   doc.text('☁️ Condición: ' + desc, 25, y); y += 20;
-  
+
   // Recommendations
   doc.setFillColor(249, 115, 22);
   doc.roundedRect(15, y, w - 30, 40, 3, 3, 'F');
@@ -255,19 +255,19 @@ async function generatePDFReport() {
   doc.text('RECOMENDACIONES', 25, y);
   y += 10;
   doc.setFontSize(10);
-  
+
   const recs = [];
   if (temp >= 30) recs.push('Temperatura alta. Usar protector solar.');
   if (temp <= 10) recs.push('Temperatura baja. Abrígarse.');
   if (humidity >= 80) recs.push('Alta humedad. Sensación de incomodidad.');
   if (desc.includes('lluvia')) recs.push('Lluvia esperada. Llevar paraguas.');
   if (recs.length === 0) recs.push('Condiciones favorables.');
-  
+
   recs.forEach(r => {
     doc.text('• ' + r, 25, y);
     y += 7;
   });
-  
+
   // Footer
   const pageCount = doc.internal.getNumberOfPages();
   const h = doc.internal.pageSize.getHeight();
@@ -279,7 +279,7 @@ async function generatePDFReport() {
     doc.setFontSize(8);
     doc.text('Página ' + i + ' de ' + pageCount, w / 2, h - 7, { align: 'center' });
   }
-  
+
   const fileName = 'Zeus_Meteo_' + (currentReport.location || 'reporte').replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf';
   doc.save(fileName);
   showNotification('📄 PDF descargado', 'success');
@@ -292,14 +292,14 @@ function updateDynamicBackground(desc) {
   const d = (desc || '').toLowerCase();
   const hour = new Date().getHours();
   const isNight = hour < 6 || hour > 20;
-  
+
   let h = 142, s = '50%', l = '25%';
-  
+
   if (isNight) { h = 170; s = '40%'; l = '12%'; }
   else if (d.includes('lluvia')) { h = 175; s = '50%'; l = '20%'; }
   else if (d.includes('nublado')) { h = 150; s = '30%'; l = '25%'; }
   else if (d.includes('soleado') || d.includes('clear')) { h = 100; s = '60%'; l = '40%'; }
-  
+
   document.documentElement.style.setProperty('--primary-h', h);
   document.documentElement.style.setProperty('--primary-s', s);
   document.documentElement.style.setProperty('--primary-l', l);
@@ -309,38 +309,38 @@ function loadEnhancedFeatures(report) {
   // Additional metrics
   const temp = report.temperature || 20;
   const humidity = report.humidity || 50;
-  
+
   // Dew point
   const dewPoint = temp - ((100 - humidity) / 5);
   document.getElementById('dew-point').textContent = Math.round(dewPoint) + '°';
-  
+
   // UV (simulated)
   const hour = new Date().getHours();
   const uv = hour >= 6 && hour <= 18 ? Math.floor(Math.random() * 8) + 1 : 0;
   document.getElementById('uv-index').textContent = uv + ' (' + (uv <= 2 ? 'Bajo' : uv <= 5 ? 'Moderado' : 'Alto') + ')';
-  
+
   // Visibility
   document.getElementById('visibility').textContent = (8 + Math.random() * 4).toFixed(1) + ' km';
-  
+
   // Cloud cover
   document.getElementById('cloud-cover').textContent = Math.floor(Math.random() * 50) + '%';
-  
+
   // Gusts
   document.getElementById('gusts').textContent = Math.round((report.windSpeed || 10) * 1.3) + ' km/h';
-  
+
   // AQI (simulated)
   const aqi = Math.floor(30 + Math.random() * 50);
   document.getElementById('aqi-value').textContent = aqi;
   document.getElementById('pm25').textContent = (Math.random() * 20).toFixed(1) + ' µg/m³';
   document.getElementById('pm10').textContent = (Math.random() * 30).toFixed(1) + ' µg/m³';
   document.getElementById('o3').textContent = (Math.random() * 40).toFixed(1) + ' µg/m³';
-  
+
   // Data quality
   document.getElementById('data-source').textContent = report.source || 'Open-Meteo';
   const badge = document.getElementById('quality-badge');
   badge.textContent = 'EN VIVO';
   badge.className = 'quality-badge live';
-  
+
   // Moon phase
   updateMoonPhase();
 }
@@ -349,10 +349,10 @@ function updateMoonPhase() {
   const phases = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
   const phaseIndex = Math.floor((new Date().getDate() % 29.53) / 3.7);
   const icon = phases[phaseIndex] || '🌕';
-  
+
   const el = document.getElementById('moon-icon-large');
   if (el) el.textContent = icon;
-  
+
   const nameEl = document.getElementById('moon-phase-name');
   if (nameEl) nameEl.textContent = phaseIndex < 2 ? 'Luna Nueva' : phaseIndex < 4 ? 'Cuarto Creciente' : phaseIndex < 6 ? 'Gibosa Creciente' : phaseIndex < 8 ? 'Luna Llena' : 'Cuarto Menguante';
 }
@@ -366,16 +366,16 @@ async function sendChatMessage() {
   const input = document.getElementById('chatbot-input-nasa');
   const content = input.value.trim();
   if (!content) return;
-  
+
   const container = document.getElementById('chatbot-messages');
   container.innerHTML += '<div class="msg-bubble msg-user">' + content + '</div>';
   input.value = '';
   container.scrollTop = container.scrollHeight;
-  
+
   // Typing indicator
   container.innerHTML += '<div class="msg-bubble msg-assistant typing-indicator"><span>.</span><span>.</span><span>.</span></div>';
   container.scrollTop = container.scrollHeight;
-  
+
   try {
     const response = await fetch('/api/chat', {
       method: 'POST',
@@ -383,7 +383,7 @@ async function sendChatMessage() {
       body: JSON.stringify({ message: content, context: currentReport, history: chatHistory })
     });
     const data = await response.json();
-    
+
     container.removeChild(container.lastChild);
     container.innerHTML += '<div class="msg-bubble msg-assistant">' + data.response + '</div>';
     chatHistory.push({ role: 'user', content }, { role: 'assistant', content: data.response });
