@@ -447,18 +447,32 @@ detail-item">
   </div>
 
   <!-- Scripts -->
-  <script src="weather-enhanced.js?v=23"></script>
+  <script src="weather-enhanced.js?v=24"></script>
   <script>
-    window.addEventListener('load', () => {
-      const lastSearch = localStorage.getItem('last_location');
-      if (lastSearch) {
-        document.getElementById('location-input').value = lastSearch;
+    // Fallback functions in case JS file has issues
+    function searchWeather() {
+      const input = document.getElementById('location-input');
+      const location = input.value.trim();
+      if (!location) return;
+      window.location.href = '/forecast.html?city=' + encodeURIComponent(location);
+    }
+    
+    function searchCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          window.location.href = '/forecast.html?city=' + pos.coords.latitude + ',' + pos.coords.longitude;
+        });
       }
-    });
-
+    }
+    
     function quickSearch(city) {
       document.getElementById('location-input').value = city;
       searchWeather();
+    }
+    
+    function toggleChatbot() {
+      const container = document.getElementById('chatbot-container');
+      container.classList.toggle('active');
     }
   </script>
 </body>
