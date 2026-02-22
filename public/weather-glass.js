@@ -273,9 +273,11 @@ async function fetchExtendedForecast(location) {
     // Get daily forecast
     try {
       const response = await fetch('/api/forecast-7days?location=' + encodeURIComponent(location));
-      const data = await response.json();
-      if (data.success && data.forecast && data.forecast.length > 0) {
-        forecastData = data.forecast;
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.forecast && data.forecast.length > 0) {
+          forecastData = data.forecast;
+        }
       }
     } catch (e) {
       console.warn('Forecast API error:', e);
@@ -284,12 +286,19 @@ async function fetchExtendedForecast(location) {
     // Get hourly forecast
     try {
       const response = await fetch('/api/forecast?location=' + encodeURIComponent(location));
-      const data = await response.json();
-      if (data.success && data.hourly) {
-        hourlyData = data.hourly;
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.hourly) {
+          hourlyData = data.hourly;
+        }
       }
     } catch (e) {
       console.warn('Hourly forecast error:', e);
+    }
+    
+    // Show notification if using simulated data
+    if (!forecastData && !hourlyData) {
+      showNotification('⚠️ Servidor ocupado. Mostrando datos simulados.', 'warning');
     }
     
     // Process daily data
