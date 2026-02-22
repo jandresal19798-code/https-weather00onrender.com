@@ -78,20 +78,50 @@ async function searchWeather() {
 
 async function fetchExtendedForecast(location) {
   try {
-    const mockDaily = [];
-    const days = ['Hoy', 'Mañana', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
-    for (let i = 0; i < 7; i++) {
-      mockDaily.push({
-        day: days[i],
-        temp: currentReport.temperature + (Math.random() * 4 - 2),
-        icon: getWeatherIcon(currentReport.description),
-        high: currentReport.temperature + 3,
-        low: currentReport.temperature - 3
-      });
+    // Try to get real forecast data
+    let forecastData = null;
+    
+    try {
+      const response = await fetch('/api/forecast-7days?location=' + encodeURIComponent(location));
+      const data = await response.json();
+      if (data.success && data.forecast && data.forecast.length > 0) {
+        forecastData = data.forecast;
+      }
+    } catch (e) {
+      console.warn('Forecast API error:', e);
     }
-    currentDailyForecast = mockDaily;
-    displayDailyForecast(mockDaily);
-    renderTemperatureChart(mockDaily);
+    
+    // Use real data or generate simulated data
+    const days = ['Hoy', 'Mañana', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+    const dailyData = [];
+    
+    if (forecastData && forecastData.length > 0) {
+      for (let i = 0; i < 7; i++) {
+        const day = forecastData[i] || forecastData[0];
+        dailyData.push({
+          day: days[i],
+          temp: (day.temperatureMax + day.temperatureMin) / 2,
+          icon: getWeatherIcon(day.description || 'cloudy'),
+          high: day.temperatureMax,
+          low: day.temperatureMin
+        });
+      }
+    } else {
+      // Simulated data
+      for (let i = 0; i < 7; i++) {
+        dailyData.push({
+          day: days[i],
+          temp: currentReport.temperature + (Math.random() * 6 - 3),
+          icon: getWeatherIcon(currentReport.description),
+          high: currentReport.temperature + 3,
+          low: currentReport.temperature - 3
+        });
+      }
+    }
+    
+    currentDailyForecast = dailyData;
+    displayDailyForecast(dailyData);
+    renderTemperatureChart(dailyData);
     renderNearbyCities(location);
   } catch (e) {
     console.warn('Forecast error:', e);
@@ -124,16 +154,20 @@ function updateCurrentWeather(report) {
   const iconEl = document.getElementById('weather-icon');
   iconEl.textContent = getWeatherIcon(report.description);
 
-  // Main Map - Using Windy for real weather forecast
+  // Main Map - Using OpenStreetMap (more reliable)
   const mapFrame = document.getElementById('map-iframe');
   if (mapFrame && report.lat && report.lng) {
-    mapFrame.src = 'https://embed.windy.com/embed.html?type=map&location=coordinates&metricTemp=%C2%B0C&metricWind=km/h&zoom=7&overlay=wind&product=ecmwf&level=surface&lat=' + report.lat + '&lon=' + report.lng + '&detailLat=' + report.lat + '&detailLon=' + report.lng + '&marker=true';
+    const lat = parseFloat(report.lat);
+    const lng = parseFloat(report.lng);
+    mapFrame.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + (lng - 0.1) + ',' + (lat - 0.1) + ',' + (lng + 0.1) + ',' + (lat + 0.1) + '&layer=mapnik&marker=' + lat + ',' + lng;
   }
 
-  // Weather map in sidebar
+  // Weather map in sidebar - Using OpenStreetMap
   const weatherMap = document.getElementById('weather-map');
   if (weatherMap && report.lat && report.lng) {
-    weatherMap.src = 'https://embed.windy.com/embed.html?type=map&location=coordinates&metricTemp=%C2%B0C&metricWind=km/h&zoom=5&overlay=radar&product=ecmwf&level=surface&lat=' + report.lat + '&lon=' + report.lng;
+    const lat = parseFloat(report.lat);
+    const lng = parseFloat(report.lng);
+    weatherMap.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + (lng - 0.05) + ',' + (lat - 0.05) + ',' + (lng + 0.05) + ',' + (lat + 0.05) + '&layer=mapnik&marker=' + lat + ',' + lng;
   }
 }
 
