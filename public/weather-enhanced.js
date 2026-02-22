@@ -624,6 +624,8 @@ function addToRecentSearches(location, temp) {
 
 function renderRecentSearches() {
   const container = document.getElementById('recent-searches');
+  if (!container) return;
+  
   const recent = JSON.parse(localStorage.getItem('recent_searches') || '[]');
   
   if (recent.length === 0) {
@@ -785,16 +787,22 @@ function calculateMoonPhase(date = new Date()) {
 function updateMoonPhase() {
   const moon = calculateMoonPhase();
   
-  document.getElementById('moon-icon-large').textContent = moon.icon;
-  document.getElementById('moon-phase-name').textContent = moon.name;
-  document.getElementById('moon-illumination').textContent = `${moon.illumination}% iluminada`;
+  const moonIconEl = document.getElementById('moon-icon-large');
+  const moonPhaseEl = document.getElementById('moon-phase-name');
+  const moonIllumEl = document.getElementById('moon-illumination');
+  const moonNextEl = document.getElementById('moon-next-phase');
+  
+  if (moonIconEl) moonIconEl.textContent = moon.icon;
+  if (moonPhaseEl) moonPhaseEl.textContent = moon.name;
+  if (moonIllumEl) moonIllumEl.textContent = `${moon.illumination}% iluminada`;
   
   // Calculate next phase
-  const nextPhaseIndex = (moonPhases.indexOf(moon) + 1) % 6;
-  const nextPhase = moonPhases[nextPhaseIndex];
-  const daysUntilNext = nextPhase.daysUntil - (moon.daysUntil || 0);
-  document.getElementById('moon-next-phase').textContent = 
-    `Próxima: ${nextPhase.name} en ${Math.abs(daysUntilNext)} días`;
+  if (moonNextEl) {
+    const nextPhaseIndex = (moonPhases.indexOf(moon) + 1) % 6;
+    const nextPhase = moonPhases[nextPhaseIndex];
+    const daysUntilNext = nextPhase.daysUntil - (moon.daysUntil || 0);
+    moonNextEl.textContent = `Próxima: ${nextPhase.name} en ${Math.abs(daysUntilNext)} días`;
+  }
 }
 
 // ============================================
