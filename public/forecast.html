@@ -83,20 +83,23 @@
         </p>
 
         <!-- Main Search Box -->
-        <div class="search-container">
+        <div class="search-container" style="position: relative;">
           <div class="search-wrapper">
             <div class="search-icon">🔍</div>
             <input type="text" id="location-input" class="search-input" 
-              placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires, Tokio)"
+              placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires)"
               autocomplete="off"
+              oninput="handleSearchInput(this)"
               onkeypress="if(event.key==='Enter')searchWeather()">
             <button class="search-btn-primary" onclick="searchWeather()">
               Buscar
             </button>
-            <button class="location-btn" onclick="searchCurrentLocation()" title="Usar mi ubicación">
+            <button class="location-btn" onclick="searchCurrentLocation()" title="Mi ubicación">
               📍
             </button>
           </div>
+          <!-- Search Suggestions -->
+          <div id="search-suggestions" class="search-suggestions"></div>
         </div>
 
         <!-- Quick Cities -->
@@ -391,11 +394,16 @@ detail-item">
             </div>
           </section>
 
-          <!-- Share -->
+          <!-- Share and PDF -->
           <section class="glass-card">
-            <button class="share-btn" onclick="shareWeather()">
-              <span>📤</span> Compartir Clima
-            </button>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <button class="share-btn" onclick="shareWeather()" style="flex: 1; min-width: 150px;">
+                <span>📤</span> Compartir
+              </button>
+              <button class="pdf-btn" onclick="generatePDFReport()" style="flex: 1; min-width: 150px;">
+                <span>📄</span> Generar PDF
+              </button>
+            </div>
           </section>
 
           <!-- Map -->
@@ -439,7 +447,7 @@ detail-item">
   </div>
 
   <!-- Scripts -->
-  <script src="weather-enhanced.js?v=16"></script>
+  <script src="weather-enhanced.js?v=18"></script>
   <script>
     window.addEventListener('load', () => {
       const lastSearch = localStorage.getItem('last_location');

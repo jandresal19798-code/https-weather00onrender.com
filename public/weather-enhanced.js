@@ -1,5 +1,5 @@
 // ============================================
-// ZEUS METEO PREMIUM - ENGINE 2.0
+// ZEUS METEO PREMIUM - ENGINE 3.0
 // UI Engineering: Optimized for Premium Experience
 // ============================================
 
@@ -13,6 +13,376 @@ let currentDailyForecast = [];
 let currentLocationName = '';
 let temperatureUnit = 'C';
 let tempChart = null;
+let weatherTheme = 'default';
+
+// Weather SVG Icons
+const weatherIcons = {
+  'clear': '<svg viewBox="0 0 64 64" class="weather-icon-svg"><circle cx="32" cy="32" r="14" fill="#FFD93D"/><g stroke="#FFD93D" stroke-width="2"><line x1="32" y1="4" x2="32" y2="12"/><line x1="32" y1="52" x2="32" y2="60"/><line x1="4" y1="32" x2="12" y2="32"/><line x1="52" y1="32" x2="60" y2="32"/><line x1="11" y1="11" x2="17" y2="17"/><line x1="47" y1="47" x2="53" y2="53"/><line x1="11" y1="53" x2="17" y2="47"/><line x1="47" y1="17" x2="53" y2="11"/></g></svg>',
+  'cloudy': '<svg viewBox="0 0 64 64" class="weather-icon-svg"><path d="M46 40H18c-6.6 0-12-5.4-12-12s5.4-12 12-12c.5 0 1 0 1.5.1C20.8 12.5 24.1 10 28 10c4.6 0 8.4 3.4 9 7.8c.3-.1.7-.1 1-.1 5 0 9 4 9 9s-4 9-9 9h-1l4 4 12-12z" fill="#B8C5D6"/></svg>',
+  'rain': '<svg viewBox="0 0 64 64" class="weather-icon-svg"><path d="M46 40H18c-6.6 0-12-5.4-12-12s5.4-12 12-12c.5 0 1 0 1.5.1C20.8 12.5 24.1 10 28 10c4.6 0 8.4 3.4 9 7.8c.3-.1.7-.1 1-.1 5 0 9 4 9 9s-4 9-9 9h-1l4 4 12-12z" fill="#B8C5D6"/><g stroke="#5B9BD5" stroke-width="2" stroke-linecap="round"><line x1="20" y1="48" x2="16" y2="58"/><line x1="32" y1="48" x2="28" y2="58"/><line x1="44" y1="48" x2="40" y2="58"/></g></svg>',
+  'storm': '<svg viewBox="0 0 64 64" class="weather-icon-svg"><path d="M46 40H18c-6.6 0-12-5.4-12-12s5.4-12 12-12c.5 0 1 0 1.5.1C20.8 12.5 24.1 10 28 10c4.6 0 8.4 3.4 9 7.8c.3-.1.7-.1 1-.1 5 0 9 4 9 9s-4 9-9 9h-1l4 4 12-12z" fill="#B8C5D6"/><polygon points="26,46 32,58 38,46 32,48" fill="#FFD93D" stroke="#FFA500" stroke-width="1"/></svg>',
+  'snow': '<svg viewBox="0 0 64 64" class="weather-icon-svg"><path d="M46 40H18c-6.6 0-12-5.4-12-12s5.4-12 12-12c.5 0 1 0 1.5.1C20.8 12.5 24.1 10 28 10c4.6 0 8.4 3.4 9 7.8c.3-.1.7-.1 1-.1 5 0 9 4 9 9s-4 9-9 9h-1l4 4 12-12z" fill="#B8C5D6"/><circle cx="22" cy="52" r="2" fill="#FFF"/><circle cx="32" cy="56" r="2" fill="#FFF"/><circle cx="42" cy="52" r="2" fill="#FFF"/></svg>',
+  'fog': '<svg viewBox="0 0 64 64" class="weather-icon-svg"><path d="M8 24h48M8 32h48M8 40h48" stroke="#B8C5D6" stroke-width="3" stroke-linecap="round"/></svg>',
+  'night': '<svg viewBox="0 0 64 64" class="weather-icon-svg"><path d="M32 8a12 12 0 1 1-8 23h16a12 12 0 1 1-8-23z" fill="#F4D03F"/><circle cx="20" cy="12" r="2" fill="#FFF"/><circle cx="44" cy="16" r="1.5" fill="#FFF"/><circle cx="16" cy="20" r="1" fill="#FFF"/></svg>'
+};
+
+function getWeatherIconSVG(description) {
+  const desc = (description || '').toLowerCase();
+  if (desc.includes('clear') || desc.includes('soleado') || desc.includes('despejado')) return weatherIcons.clear;
+  if (desc.includes('rain') || desc.includes('lluvia')) return weatherIcons.rain;
+  if (desc.includes('thunder') || desc.includes('tormenta')) return weatherIcons.storm;
+  if (desc.includes('snow') || desc.includes('nieve')) return weatherIcons.snow;
+  if (desc.includes('fog') || desc.includes('niebla')) return weatherIcons.fog;
+  if (desc.includes('night') || desc.includes('noche')) return weatherIcons.night;
+  if (desc.includes('cloud') || desc.includes('nublado') || desc.includes('cloudy')) return weatherIcons.cloudy;
+  return weatherIcons.clear;
+}
+
+// ============================================
+// PDF REPORT GENERATION
+// ============================================
+async function generatePDFReport() {
+  if (!currentReport) {
+    showNotification('No hay datos para generar informe', 'warning');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let y = 20;
+  
+  // Header
+  doc.setFillColor(11, 61, 145);
+  doc.rect(0, 0, pageWidth, 40, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ZEUS METEO', pageWidth / 2, 20, { align: 'center' });
+  
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Informe Meteorológico', pageWidth / 2, 30, { align: 'center' });
+  
+  y = 55;
+  doc.setTextColor(0, 0, 0);
+  
+  // Location & Date
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text(currentReport.location || 'Ubicación', 20, y);
+  
+  y += 10;
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(new Date().toLocaleDateString('es-ES', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  }), 20, y);
+  
+  y += 15;
+  
+  // Main Weather Data
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, y, pageWidth - 20, y);
+  
+  y += 15;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Condiciones Actuales', 20, y);
+  
+  y += 12;
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  
+  const mainData = [
+    ['Temperatura:', `${Math.round(currentReport.temperature)}°C`],
+    ['Sensación térmica:', `${Math.round(currentReport.feelsLike || currentReport.temperature)}°C`],
+    ['Humedad:', `${currentReport.humidity || 50}%`],
+    ['Viento:', `${Math.round(currentReport.windSpeed || 10)} km/h`],
+    ['Presión:', `${currentReport.pressure || 1013} hPa`],
+    ['Condición:', currentReport.description || 'N/A']
+  ];
+  
+  mainData.forEach(([label, value]) => {
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, 25, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(value, 80, y);
+    y += 8;
+  });
+  
+  y += 10;
+  
+  // AI Analysis
+  if (currentReport.analysis) {
+    doc.line(20, y, pageWidth - 20, y);
+    y += 15;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Análisis del Agente IA', 20, y);
+    
+    y += 10;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const analysisLines = doc.splitTextToSize(currentReport.analysis, pageWidth - 40);
+    analysisLines.forEach(line => {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(line, 25, y);
+      y += 6;
+    });
+  }
+  
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.setTextColor(128, 128, 128);
+    doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
+    doc.text('Generado por Zeus Meteo - weather-agent-mbnt.onrender.com', pageWidth / 2, 295, { align: 'center' });
+  }
+  
+  // Save
+  const fileName = `Zeus_Meteo_${(currentReport.location || 'reporte').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+  
+  showNotification('Informe PDF generado exitosamente', 'success');
+}
+
+// ============================================
+// ENHANCED SEARCH WITH AUTOCOMPLETE
+// ============================================
+let searchSuggestions = [];
+let selectedSuggestionIndex = -1;
+
+async function handleSearchInput(input) {
+  const query = input.value.trim();
+  
+  if (query.length < 2) {
+    hideSearchSuggestions();
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+    
+    if (data.results) {
+      searchSuggestions = data.results.slice(0, 6);
+      showSearchSuggestions(searchSuggestions);
+    }
+  } catch (e) {
+    console.warn('Geocoding error:', e);
+  }
+}
+
+function showSearchSuggestions(suggestions) {
+  const container = document.getElementById('search-suggestions');
+  if (!container) return;
+  
+  container.innerHTML = suggestions.map((s, i) => `
+    <div class="suggestion-item" onclick="selectSuggestion('${s.name}, ${s.country || ''}')" 
+         style="${i === selectedSuggestionIndex ? 'background: var(--nasa-blue);' : ''}">
+      <span class="suggestion-icon">📍</span>
+      <div class="suggestion-info">
+        <span class="suggestion-name">${s.name}</span>
+        <span class="suggestion-country">${s.country || ''}</span>
+      </div>
+    </div>
+  `).join('');
+  
+  container.classList.add('active');
+}
+
+function hideSearchSuggestions() {
+  const container = document.getElementById('search-suggestions');
+  if (container) container.classList.remove('active');
+  searchSuggestions = [];
+  selectedSuggestionIndex = -1;
+}
+
+function selectSuggestion(location) {
+  document.getElementById('location-input').value = location;
+  hideSearchSuggestions();
+  searchWeather();
+}
+
+// Keyboard navigation for suggestions
+document.addEventListener('keydown', (e) => {
+  const input = document.getElementById('location-input');
+  if (!input || document.activeElement !== input) return;
+  
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, searchSuggestions.length - 1);
+    showSearchSuggestions(searchSuggestions);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+    showSearchSuggestions(searchSuggestions);
+  } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
+    e.preventDefault();
+    selectSuggestion(searchSuggestions[selectedSuggestionIndex].name + ', ' + searchSuggestions[selectedSuggestionIndex].country);
+  } else if (e.key === 'Escape') {
+    hideSearchSuggestions();
+  }
+});
+
+// ============================================
+// ENHANCED GEOLOCATION WITH FEEDBACK
+// ============================================
+async function searchCurrentLocation() {
+  if (!navigator.geolocation) {
+    showNotification('Geolocalización no soportada por tu navegador', 'error');
+    return;
+  }
+  
+  const btn = document.querySelector('.location-btn');
+  if (btn) {
+    btn.innerHTML = '<span class="location-spinner"></span>';
+  }
+  
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+      
+      try {
+        const response = await fetch(`/api/weather?location=${latitude},${longitude}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          currentReport = data.report;
+          currentLocation = data.report.location;
+          document.getElementById('empty-state-hero').style.display = 'none';
+          document.getElementById('main-content').style.display = 'grid';
+          
+          updateCurrentWeather(data.report);
+          await fetchExtendedForecast(data.report.location);
+          updateDynamicBackground(data.report.description);
+          loadEnhancedFeatures(data.report);
+        } else {
+          showNotification(data.error || 'Ubicación no encontrada', 'error');
+        }
+      } catch (e) {
+        showNotification('Error al obtener clima', 'error');
+      } finally {
+        if (btn) btn.innerHTML = '📍';
+      }
+    },
+    (error) => {
+      if (btn) btn.innerHTML = '📍';
+      
+      let message = 'Error de geolocalización';
+      if (error.code === error.PERMISSION_DENIED) {
+        message = 'Permiso de ubicación denegado. Actívalo en tu navegador.';
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        message = 'Ubicación no disponible';
+      }
+      
+      showNotification(message, 'warning');
+    },
+    { timeout: 10000, enableHighAccuracy: true }
+  );
+}
+
+// ============================================
+// DYNAMIC WEATHER THEMES
+// ============================================
+function updateDynamicBackground(desc = '') {
+  const root = document.documentElement;
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour > 20;
+  
+  let h, s, l;
+  
+  if (isNight) {
+    h = 250; s = '60%'; l = '15%';
+  } else if (desc.includes('lluvia') || desc.includes('rain')) {
+    h = 210; s = '70%'; l = '25%';
+  } else if (desc.includes('nublado') || desc.includes('cloudy')) {
+    h = 200; s = '30%'; l = '35%';
+  } else if (desc.includes('soleado') || desc.includes('clear')) {
+    h = 195; s = '80%'; l = '55%';
+  } else {
+    h = 210; s = '50%'; l = '30%';
+  }
+  
+  root.style.setProperty('--primary-h', h);
+  root.style.setProperty('--primary-s', s);
+  root.style.setProperty('--primary-l', l);
+  weatherTheme = desc;
+}
+
+// ============================================
+// CHATBOT WITH GROQ API (PRE-CONFIGURED)
+// ============================================
+let chatHistory = [];
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatbot-input-nasa');
+  const content = input.value.trim();
+  if (!content) return;
+
+  appendMessage('user', content);
+  input.value = '';
+  chatHistory.push({ role: 'user', content });
+
+  // Show typing indicator
+  const container = document.getElementById('chatbot-messages');
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'msg-bubble msg-assistant typing-indicator';
+  typingDiv.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+  container.appendChild(typingDiv);
+  container.scrollTop = container.scrollHeight;
+
+  try {
+    // First check for local commands
+    const commandResponse = await handleChatCommand(content);
+    if (commandResponse) {
+      typingDiv.remove();
+      appendMessage('assistant', commandResponse);
+      chatHistory.push({ role: 'assistant', content: commandResponse });
+      return;
+    }
+    
+    // Call Groq API via our backend
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: content, 
+        context: currentReport,
+        history: chatHistory.slice(-10)
+      })
+    });
+    
+    typingDiv.remove();
+    
+    const data = await response.json();
+    appendMessage('assistant', data.response);
+    chatHistory.push({ role: 'assistant', content: data.response });
+  } catch (e) {
+    typingDiv.remove();
+    appendMessage('assistant', 'Lo siento, mi conexión con Zeus se ha interrumpido. Intenta de nuevo.');
+  }
+}
+
+function appendMessage(role, content) {
+  const container = document.getElementById('chatbot-messages');
+  const div = document.createElement('div');
+  div.className = `msg-bubble msg-${role}`;
+  div.innerHTML = content.replace(/\n/g, '<br>');
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
 
 // ============================================
 // CORE INITIALIZATION
