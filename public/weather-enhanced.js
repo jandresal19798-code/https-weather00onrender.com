@@ -102,6 +102,39 @@ async function searchWeather() {
   }
 }
 
+function switchForecastDays(days, btn) {
+  // Update button states
+  document.querySelectorAll('.filter-tabs .prompt-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  // Show loading
+  if (currentLocation) {
+    fetch(`/api/forecast-${days}days?location=${encodeURIComponent(currentLocation)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.forecast) {
+          const forecastData = data.forecast.map((day, i) => ({
+            day: new Date(day.date).toLocaleDateString('es', { weekday: 'short' }),
+            temp: (day.temperatureMax + day.temperatureMin) / 2,
+            icon: getWeatherIcon(day.description || 'cloudy'),
+            high: day.temperatureMax,
+            low: day.temperatureMin
+          }));
+          currentDailyForecast = forecastData;
+          displayDailyForecast(forecastData);
+          renderTemperatureChart(forecastData);
+        }
+      })
+      .catch(e => console.warn('Forecast switch error:', e));
+  }
+}
+
+function filterHours(hours, btn) {
+  // Similar logic for hourly forecast
+  document.querySelectorAll('.forecast-scroll-container + .filter-tabs .prompt-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 async function fetchExtendedForecast(location) {
   try {
     const mockDaily = [];
