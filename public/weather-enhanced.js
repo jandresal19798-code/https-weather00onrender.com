@@ -839,7 +839,7 @@ function updateDynamicBackground(desc = '') {
     h = 150; s = '30%'; l = '25%';
   } else if (d.includes('soleado') || d.includes('clear') || d.includes('despejado')) {
     // Sunny: bright green/yellow
-    h = 100; s = '60%'; l = '40%;
+    h = 100; s = '60%'; l = '40%';
   } else if (d.includes('nieve') || d.includes('snow')) {
     // Snow: light blue-white
     h = 190; s = '40%'; l = '85%';
