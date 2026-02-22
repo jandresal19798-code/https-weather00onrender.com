@@ -43,7 +43,7 @@
       <div class="nav-links">
         <a href="index.html" class="nav-link">Inicio</a>
         <a href="forecast.html" class="nav-link active">Clima</a>
-        <button class="unit-toggle" onclick="toggleUnit(temperatureUnit === 'C' ? 'F' : 'C')">
+        <button class="unit-toggle" onclick="window.toggleTemperatureUnit()">
           <span class="unit-btn active" id="unit-c">°C</span>
           <span class="unit-btn" id="unit-f">°F</span>
         </button>
@@ -330,26 +330,7 @@
     </div>
   </div>
 
-  <script src="weather-glass.js?v=3"></script>
-  <script>
-    // Override toggleUnit to also update the global state
-    const originalToggleUnit = toggleUnit;
-    toggleUnit = function(unit) {
-      temperatureUnit = unit;
-      document.getElementById('unit-c').classList.toggle('active', unit === 'C');
-      document.getElementById('unit-f').classList.toggle('active', unit === 'F');
-      
-      // Update display
-      if (currentReport) {
-        const tempEl = document.getElementById('current-temp');
-        if (tempEl && currentReport.temperature) {
-          let temp = currentReport.temperature;
-          if (unit === 'F') temp = temp * 9/5 + 32;
-          tempEl.textContent = Math.round(temp);
-        }
-      }
-    };
-  </script>
+  <script src="weather-glass.js?v=4"></script>
 </body>
 
 </html>

@@ -651,9 +651,10 @@ function renderTemperatureChart(data) {
 function toggleUnit(unit) {
   temperatureUnit = unit;
   
-  // Update toggle buttons
+  // Update toggle buttons - check for C or F in the text
   document.querySelectorAll('.unit-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent === unit);
+    const btnUnit = btn.textContent.includes('C') ? 'C' : 'F';
+    btn.classList.toggle('active', btnUnit === unit);
   });
   
   // Re-render current weather if data exists
@@ -667,6 +668,12 @@ function toggleUnit(unit) {
     displayHourlyForecast(hourlyForecastData);
   }
 }
+
+// Simple toggle that switches between C and F
+window.toggleTemperatureUnit = function() {
+  const newUnit = temperatureUnit === 'C' ? 'F' : 'C';
+  toggleUnit(newUnit);
+};
 
 // ============================================
 // PDF REPORT
