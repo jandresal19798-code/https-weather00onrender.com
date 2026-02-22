@@ -238,17 +238,17 @@
         </div>
       </div>
 
-      <!-- Weather Map -->
+      <!-- Weather Map - Windy -->
       <div class="glass-card map-card" style="grid-column: span 2; grid-row: span 2;">
         <div class="map-tabs">
-          <button class="map-tab active" onclick="switchMapLayer('temperature')">🌡️ Temp</button>
+          <button class="map-tab active" onclick="switchMapLayer('wind')">💨 Viento</button>
           <button class="map-tab" onclick="switchMapLayer('rain')">🌧️ Lluvia</button>
-          <button class="map-tab" onclick="switchMapLayer('wind')">💨 Viento</button>
-          <button class="map-tab" onclick="switchMapLayer('satellite')">🛰️ Sat</button>
+          <button class="map-tab" onclick="switchMapLayer('temp')">🌡️ Temp</button>
+          <button class="map-tab" onclick="switchMapLayer('clouds')">☁️ Nubes</button>
         </div>
         <iframe id="weather-map-iframe" 
-          src="https://openweathermap.org/weathermap?basemap=map&cities=false&layer=temperature&lat=-34.9&lon=-56.15&zoom=5"
-          title="Mapa meteorológico">
+          src="https://embed.windy.com/embed2.html?lat=-34.9&lon=-56.15&zoom=6&level=surface&overlay=wind&menu=&message=true&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=-34.9&detailLon=-56.15&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange="
+          title="Mapa meteorológico Windy">
         </iframe>
       </div>
 

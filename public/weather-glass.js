@@ -676,14 +676,14 @@ window.toggleTemperatureUnit = function() {
 };
 
 // ============================================
-// WEATHER MAPS
+// WEATHER MAPS - WINDY
 // ============================================
 
 const mapLayerUrls = {
-  temperature: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=temperature',
-  rain: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=precipitation',
-  wind: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=wind',
-  satellite: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=clouds'
+  wind: 'wind',
+  rain: 'rain',
+  temp: 'temp',
+  clouds: 'clouds'
 };
 
 window.switchMapLayer = function(layer) {
@@ -699,7 +699,8 @@ window.switchMapLayer = function(layer) {
     lon = parseFloat(currentReport.lng);
   }
   
-  const url = `${mapLayerUrls[layer]}&lat=${lat}&lon=${lon}&zoom=6`;
+  const overlay = mapLayerUrls[layer] || 'wind';
+  const url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=6&level=surface&overlay=${overlay}&menu=&message=true&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lon}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=`;
   if (iframe) iframe.src = url;
 };
 
@@ -707,10 +708,11 @@ function updateWeatherMap(lat, lng) {
   const iframe = document.getElementById('weather-map-iframe');
   if (iframe) {
     const activeTab = document.querySelector('.map-tab.active');
-    const layer = activeTab ? activeTab.textContent.toLowerCase().includes('temp') ? 'temperature' : 
+    const layer = activeTab ? activeTab.textContent.toLowerCase().includes('viento') ? 'wind' : 
       activeTab.textContent.toLowerCase().includes('lluv') ? 'rain' :
-      activeTab.textContent.toLowerCase().includes('viento') ? 'wind' : 'satellite' : 'temperature';
-    iframe.src = `${mapLayerUrls[layer]}&lat=${lat}&lon=${lng}&zoom=6`;
+      activeTab.textContent.toLowerCase().includes('temp') ? 'temp' : 'clouds' : 'wind';
+    const overlay = mapLayerUrls[layer] || 'wind';
+    iframe.src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=6&level=surface&overlay=${overlay}&menu=&message=true&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=`;
   }
 }
 
