@@ -2129,57 +2129,5 @@ export class Weather2020 extends WeatherSource {
 
 // ============================================
 // NWS - National Weather Service (USA)
+// (Already defined above at line 381)
 // ============================================
-export class USNWS extends WeatherSource {
-  constructor() {
-    super();
-    this.baseUrl = 'https://api.weather.gov';
-  }
-
-  async getCoordinates(location) {
-    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
-      params: { q: location, format: 'json', limit: 1, countrycodes: 'us' }
-    });
-    if (!response.data || response.data.length === 0) {
-      const allResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
-        params: { q: location, format: 'json', limit: 1 }
-      });
-      if (!allResponse.data || allResponse.data.length === 0) {
-        throw new Error(`Ubicación no encontrada: ${location}`);
-      }
-      return { lat: parseFloat(allResponse.data[0].lat), lon: parseFloat(allResponse.data[0].lon) };
-    }
-    return { lat: parseFloat(response.data[0].lat), lon: parseFloat(response.data[0].lon) };
-  }
-
-  async getCurrentWeather(location) {
-    const coords = await this.getCoordinates(location);
-    const pointsResponse = await axios.get(`${this.baseUrl}/points/${coords.lat},${coords.lon}`);
-    const forecastUrl = pointsResponse.data.properties.forecast;
-    const stationsUrl = pointsResponse.data.properties.observationStations;
-    
-    const [forecastResponse, stationsResponse] = await Promise.all([
-      axios.get(forecastUrl),
-      axios.get(stationsUrl)
-    ]);
-    
-    const station = stationsResponse.data.features[0];
-    const obsResponse = await axios.get(`${this.baseUrl}/stations/${station.properties.stationIdentifier}/observations/latest`);
-    
-    return this.formatData(obsResponse.data.properties, location);
-  }
-
-  formatData(data, location) {
-    return {
-      source: 'USNWS',
-      timestamp: data.timestamp,
-      location: location,
-      temperature: data.temperature?.value ? Math.round(data.temperature.value * 9/5 + 32) : 20,
-      humidity: data.relativeHumidity?.value || 50,
-      pressure: data.barometricPressure?.value ? Math.round(data.barometricPressure.value / 100) : 1013,
-      windSpeed: data.windSpeed?.value ? Math.round(data.windSpeed.value * 2.237) : 10,
-      description: data.textDescription || 'desconocido',
-      forecast: data.forecast
-    };
-  }
-}
