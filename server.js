@@ -444,40 +444,83 @@ app.get('/api/cache/stats', (req, res) => {
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, history, location, currentWeather } = req.body;
+    const { message, history, context } = req.body;
+    
+    // Build location and weather context
+    const location = context?.location || 'No especificada';
+    const weather = context ? 
+      `${context.temperature}°C, ${context.description}, humedad ${context.humidity}%` : 
+      'No disponibles';
 
-    // Configura GROQ_API_KEY en las variables de entorno de Render
-    if (process.env.GROQ_API_KEY) {
+    // Check for GROQ_API_KEY
+    const apiKey = process.env.GROQ_API_KEY;
+    
+    if (apiKey && apiKey !== 'tu_api_key_aqui') {
       const axios = (await import('axios')).default;
       const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
         model: 'llama-3.3-70b-versatile',
         messages: [
           {
             role: 'system',
-            content: `Eres Zeus IA, un asistente meteorológico experto. 
-            Ubicación: ${location || 'Desconocida'}
-            Datos actuales: ${currentWeather || 'No disponibles'}
-            Responde de forma concisa, amigable y en español. Usa emojis.`
+            content: `Eres Zeus IA, un asistente meteorológico experto de Zeus Meteo.
+            Ubicación actual: ${location}
+            Clima actual: ${weather}
+            Responde de forma concisa, amigable y en español. Usa emojis relevantes.`
           },
-          ...(history || []).map(msg => ({
+          ...(history || []).slice(-10).map(msg => ({
             role: msg.role === 'user' ? 'user' : 'assistant',
             content: msg.content
           })),
           { role: 'user', content: message }
-        ]
+        ],
+        temperature: 0.7,
+        max_tokens: 500
       }, {
-        headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
-        timeout: 10000
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        timeout: 15000
       });
 
-      return res.json({ reply: response.data.choices[0].message.content });
+      return res.json({ response: response.data.choices[0].message.content });
     }
 
-    res.status(404).json({ error: 'IA no configurada' });
+    // Fallback: Smart response without API
+    const fallbackResponse = generateSmartResponse(message, location, weather);
+    return res.json({ response: fallbackResponse });
+    
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Chat error:', error.message);
+    // Return fallback on error too
+    const fallbackResponse = generateSmartResponse(req.body.message, 'ubicación', 'clima actual');
+    res.json({ response: fallbackResponse });
   }
 });
+
+// Smart fallback responses without AI
+function generateSmartResponse(message, location, weather) {
+  const msg = message.toLowerCase();
+  
+  if (msg.includes('hola') || msg.includes('hi') || msg.includes('buenos')) {
+    return `¡Hola! 👋 Soy Zeus IA, tu asistente meteorológico. ¿Quieres saber el clima en ${location}?`;
+  }
+  
+  if (msg.includes('clima') || msg.includes('tiempo') || msg.includes('temperatura')) {
+    return `El clima actual en ${location} es: ${weather}. ¿Quieres más detalles?`;
+  }
+  
+  if (msg.includes('llover') || msg.includes('lluvia') || msg.includes('llov')) {
+    return `Para saber si lloverá, necesito verificar el pronóstico. ¿Buscas el clima en alguna ciudad específica?`;
+  }
+  
+  if (msg.includes('calor') || msg.includes('caluroso')) {
+    return `¡Sí! Actualmente hace ${weather}. Recuerda hidratarte y usar protector solar 🧴`;
+  }
+  
+  if (msg.includes('frío') || msg.includes('frio') || msg.includes('helada')) {
+    return `Brr! Hace frío 🥶. La temperatura actual es ${weather}. Abrígate bien!`;
+  }
+  
+  return `Entiendo tu consulta sobre ${msg.slice(0, 30)}... El clima en ${location} es ${weather}. ¿Hay algo específico que quieras saber?`;
+}
 
 app.get('/', (req, res) => {
   res.sendFile('index.html', { root: 'public' });

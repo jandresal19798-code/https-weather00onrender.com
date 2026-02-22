@@ -1209,3 +1209,251 @@ body.high-contrast .temp-large {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
 }
+
+/* ============================================
+   RESPONSIVE STYLES - MOBILE FIXES
+   ============================================ */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .sidebar-nasa {
+    order: -1;
+  }
+}
+
+/* Mobile landscape and below */
+@media (max-width: 768px) {
+  /* Navigation */
+  .landing-nav {
+    padding: 0.75rem 1rem;
+  }
+  
+  .nav-logo .logo-text {
+    font-size: 1rem;
+  }
+  
+  .nav-links {
+    gap: 0.5rem;
+  }
+  
+  /* Hero section */
+  .hero-weather {
+    padding: 1.5rem !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem !important;
+  }
+  
+  .hero-description {
+    font-size: 0.95rem !important;
+  }
+  
+  /* Search */
+  .search-wrapper {
+    flex-wrap: wrap;
+    padding: 0.5rem;
+  }
+  
+  .search-input {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .search-btn-primary {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  .location-btn {
+    position: absolute;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  /* City banner */
+  .city-banner-content {
+    padding: 1rem;
+  }
+  
+  .city-main-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .city-weather-main {
+    justify-content: center;
+  }
+  
+  .temp-large {
+    font-size: 3.5rem !important;
+  }
+  
+  .weather-icon-large {
+    font-size: 3rem !important;
+  }
+  
+  .city-stats-row {
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  
+  .stat-badge {
+    min-width: 80px;
+    padding: 0.75rem;
+  }
+  
+  .stat-badge-value {
+    font-size: 1rem;
+  }
+  
+  .stat-badge-label {
+    font-size: 0.65rem;
+  }
+  
+  /* Forecast sections */
+  .glass-card {
+    padding: 1rem;
+  }
+  
+  .glass-card h2 {
+    font-size: 1rem !important;
+  }
+  
+  .forecast-scroll-container {
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+  
+  .forecast-day-card {
+    min-width: 70px;
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .day-name {
+    font-size: 0.7rem;
+  }
+  
+  .day-temp {
+    font-size: 1rem;
+  }
+  
+  /* Charts */
+  .chart-container {
+    height: 200px !important;
+  }
+  
+  /* Metrics grid */
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .metric-card {
+    padding: 0.75rem;
+  }
+  
+  .metric-value {
+    font-size: 1rem;
+  }
+  
+  /* AQI */
+  .aqi-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .aqi-value {
+    font-size: 3rem !important;
+  }
+  
+  /* Sun/Moon cards */
+  .sun-moon-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Chatbot */
+  .chatbot-premium-container {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .chatbot-trigger {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .chatbot-window {
+    width: calc(100vw - 2rem);
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+  
+  .chatbot-messages {
+    height: 250px;
+  }
+  
+  /* Quick cities */
+  .quick-cities-section {
+    display: none;
+  }
+  
+  /* Map */
+  .map-card iframe {
+    height: 180px !important;
+  }
+  
+  /* Data quality */
+  .data-quality {
+    flex-wrap: wrap;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 400px) {
+  .hero-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .city-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .temp-large {
+    font-size: 3rem !important;
+  }
+  
+  .prompt-chip {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .filter-tabs {
+    flex-wrap: wrap;
+  }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .chatbot-window {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .chatbot-messages {
+    height: 150px;
+  }
+}
