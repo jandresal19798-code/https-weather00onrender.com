@@ -163,6 +163,9 @@ async function generatePDFReport() {
 let searchSuggestions = [];
 let selectedSuggestionIndex = -1;
 
+// Search debounce timer
+let searchDebounceTimer = null;
+
 async function handleSearchInput(input) {
   const query = input.value.trim();
   
@@ -171,17 +174,25 @@ async function handleSearchInput(input) {
     return;
   }
   
-  try {
-    const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
-    const data = await response.json();
-    
-    if (data.results) {
-      searchSuggestions = data.results.slice(0, 6);
-      showSearchSuggestions(searchSuggestions);
-    }
-  } catch (e) {
-    console.warn('Geocoding error:', e);
+  // Clear previous timer
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
   }
+  
+  // Debounce: wait 300ms after typing stops
+  searchDebounceTimer = setTimeout(async () => {
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        searchSuggestions = data.slice(0, 6);
+        showSearchSuggestions(searchSuggestions);
+      }
+    } catch (e) {
+      console.warn('Search error:', e);
+    }
+  }, 300);
 }
 
 function showSearchSuggestions(suggestions) {
