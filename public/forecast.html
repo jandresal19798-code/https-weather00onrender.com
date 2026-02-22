@@ -332,10 +332,9 @@
 
   <script src="weather-glass.js"></script>
   <script>
-    // Initialize temperature unit toggle
-    let temperatureUnit = 'C';
-    
-    function toggleUnit(unit) {
+    // Override toggleUnit to also update the global state
+    const originalToggleUnit = toggleUnit;
+    toggleUnit = function(unit) {
       temperatureUnit = unit;
       document.getElementById('unit-c').classList.toggle('active', unit === 'C');
       document.getElementById('unit-f').classList.toggle('active', unit === 'F');
@@ -349,7 +348,7 @@
           tempEl.textContent = Math.round(temp);
         }
       }
-    }
+    };
   </script>
 </body>
 
