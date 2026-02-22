@@ -1,37 +1,38 @@
 /* ============================================
-   ZEUS METEO - MATRIX STYLE (Black/Green/Yellow)
+   ZEUS METEO - CURIOSPHERE STYLE
+   Black/Cyan/Purple Color Palette
    ============================================ */
 
 :root {
-  /* Matrix Green Palette */
-  --matrix-green: #00ff41;
-  --matrix-green-dark: #00cc33;
-  --matrix-green-light: #4dff7a;
-  --matrix-yellow: #ffff00;
-  --matrix-yellow-dark: #cccc00;
-  --matrix-black: #0a0a0a;
-  --matrix-dark: #0d0d0d;
-  --matrix-gray: #1a1a1a;
+  /* CurioSphere Color Palette */
+  --primary-cyan: #06b6d4;
+  --primary-cyan-light: #22d3ee;
+  --primary-cyan-dark: #0891b2;
+  --primary-purple: #a855f7;
+  --primary-purple-light: #c084fc;
+  --primary-black: #000000;
+  --primary-dark: #0a0a0a;
+  --primary-gray: #171717;
   
-  --glass-bg: rgba(0, 255, 65, 0.05);
-  --glass-bg-hover: rgba(0, 255, 65, 0.1);
-  --glass-border: rgba(0, 255, 65, 0.15);
-  --glass-shadow: 0 8px 32px rgba(0, 255, 65, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg-hover: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   
   --text-primary: #ffffff;
-  --text-secondary: rgba(0, 255, 65, 0.8);
-  --text-muted: rgba(0, 255, 65, 0.5);
-  --text-white: #ffffff;
-  --text-yellow: #ffff00;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --text-cyan: #22d3ee;
+  --text-purple: #c084fc;
   
-  --accent-warm: #ffff00;
-  --accent-cold: #00ccff;
-  --accent-storm: #ff00ff;
-  --accent-rain: #00ffff;
-  --accent-green: #00ff41;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #a855f7;
+  --accent-green: #22c55e;
+  --accent-yellow: #facc15;
+  --accent-red: #ef4444;
   
-  --gradient-start: #0d0d0d;
-  --gradient-end: #1a1a1a;
+  --gradient-start: #000000;
+  --gradient-end: #171717;
   
   --radius-sm: 12px;
   --radius-md: 16px;
@@ -54,13 +55,13 @@
 
 body {
   font-family: var(--font-main);
-  background: linear-gradient(180deg, var(--matrix-black) 0%, var(--matrix-dark) 50%, var(--matrix-gray) 100%);
+  background: linear-gradient(180deg, #000000 0%, #0a0a0a 50%, #171717 100%);
   min-height: 100vh;
   color: var(--text-primary);
   overflow-x: hidden;
 }
 
-/* Matrix Background Pattern */
+/* CurioSphere Background Pattern */
 body::before {
   content: '';
   position: fixed;
@@ -69,15 +70,15 @@ body::before {
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 20% 80%, rgba(0, 255, 65, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 0, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(0, 255, 65, 0.02) 0%, transparent 30%),
+    radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.05) 0%, transparent 30%),
     repeating-linear-gradient(
       0deg,
       transparent,
-      transparent 2px,
-      rgba(0, 255, 65, 0.01) 2px,
-      rgba(0, 255, 65, 0.01) 4px
+      transparent 100px,
+      rgba(255, 255, 255, 0.01) 100px,
+      rgba(255, 255, 255, 0.01) 101px
     );
   pointer-events: none;
   z-index: 0;
@@ -504,24 +505,24 @@ body::before {
 }
 
 .progress-fill.humidity {
-  background: linear-gradient(90deg, var(--matrix-green), var(--matrix-green-light));
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  background: linear-gradient(90deg, var(--primary-cyan), var(--primary-cyan-light));
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
 }
 
 .progress-fill.uv-low {
-  background: linear-gradient(90deg, var(--matrix-green), #00cc33);
+  background: linear-gradient(90deg, #22c55e, #16a34a);
 }
 
 .progress-fill.uv-moderate {
-  background: linear-gradient(90deg, var(--matrix-yellow), #cccc00);
+  background: linear-gradient(90deg, var(--accent-yellow), #ca8a04);
 }
 
 .progress-fill.uv-high {
-  background: linear-gradient(90deg, #ff8800, #ff4400);
+  background: linear-gradient(90deg, #f97316, #ea580c);
 }
 
 .progress-fill.uv-very-high {
-  background: linear-gradient(90deg, #ff0000, #cc0000);
+  background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
 /* Wind Compass */
@@ -882,14 +883,14 @@ body::before {
   font-size: 1.25rem;
 }
 
-/* Loading Overlay - Matrix Style */
+/* Loading Overlay - CurioSphere Style */
 .loading-overlay-modern {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%);
+  background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
   display: none;
   justify-content: center;
   align-items: center;
@@ -903,24 +904,24 @@ body::before {
 .loading-spinner-modern {
   width: 60px;
   height: 60px;
-  border: 3px solid rgba(0, 255, 65, 0.2);
-  border-top-color: #00ff41;
-  border-right-color: #ffff00;
+  border: 3px solid rgba(6, 182, 212, 0.2);
+  border-top-color: #06b6d4;
+  border-right-color: #a855f7;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite, matrix-pulse 2s ease-in-out infinite;
+  animation: spin 0.8s linear infinite, cyan-pulse 2s ease-in-out infinite;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-@keyframes matrix-pulse {
+@keyframes cyan-pulse {
   0%, 100% { 
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
     filter: brightness(1);
   }
   50% { 
-    box-shadow: 0 0 40px rgba(0, 255, 65, 0.8), 0 0 60px rgba(255, 255, 0, 0.3);
+    box-shadow: 0 0 40px rgba(6, 182, 212, 0.8), 0 0 60px rgba(168, 85, 247, 0.3);
     filter: brightness(1.2);
   }
 }
@@ -1262,19 +1263,13 @@ kbd {
 .fact-content {
   margin-top: 1rem;
   padding: 1rem;
-  background: rgba(0, 255, 65, 0.05);
+  background: rgba(6, 182, 212, 0.05);
   border-radius: var(--radius-md);
-  border-left: 3px solid var(--matrix-green);
+  border-left: 3px solid var(--primary-cyan);
 }
 
-.fact-content p {
-  font-size: 0.9rem;
-  line-height5;
-  color: var(--text-secondary);
-}
-
-/* Meteorology Links */
-: 1..links-list {
+/* Weather Links */
+.links-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -1286,7 +1281,7 @@ kbd {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: rgba(0, 255, 65, 0.08);
+  background: rgba(6, 182, 212, 0.08);
   border: 1px solid var(--glass-border);
   border-radius: 50px;
   color: var(--text-primary);
@@ -1296,25 +1291,32 @@ kbd {
 }
 
 .weather-link:hover {
-  background: rgba(0, 255, 65, 0.15);
-  border-color: var(--matrix-green);
+  background: rgba(6, 182, 212, 0.15);
+  border-color: var(--primary-cyan);
   transform: translateY(-2px);
 }
 
-/* Search button matrix style */
+/* Search button - CurioSphere style */
 .search-btn-primary {
-  background: linear-gradient(135deg, var(--matrix-green) 0%, var(--matrix-green-dark) 100%);
+  background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-cyan-dark) 100%);
   color: #000;
   border: none;
   font-weight: 700;
 }
 
 .search-btn-primary:hover {
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
 }
 
-/* Unit toggle matrix style */
+/* Unit toggle - CurioSphere style */
 .unit-btn.active {
-  background: var(--matrix-green);
+  background: var(--primary-cyan);
   color: #000;
+}
+
+/* Map tab active */
+.map-tab.active {
+  color: var(--primary-cyan);
+  border-bottom-color: var(--primary-cyan);
+  background: rgba(6, 182, 212, 0.1);
 }
