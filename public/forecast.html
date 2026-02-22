@@ -253,11 +253,17 @@
         </div>
       </div>
 
-      <!-- Map Card -->
-      <div class="glass-card map-card">
-        <iframe id="map-iframe" 
-          src="https://www.openstreetmap.org/export/embed.html?bbox=-56.2,-34.9,-56.1,-34.8&layer=mapnik&marker=-34.9,-56.15"
-          title="Mapa de ubicación">
+      <!-- Map Card with Layers -->
+      <div class="glass-card map-card" style="grid-column: span 2; grid-row: span 2;">
+        <div class="map-tabs">
+          <button class="map-tab active" onclick="switchMapLayer('temperature')">🌡️ Temperatura</button>
+          <button class="map-tab" onclick="switchMapLayer('rain')">🌧️ Lluvia</button>
+          <button class="map-tab" onclick="switchMapLayer('wind')">💨 Viento</button>
+          <button class="map-tab" onclick="switchMapLayer('satellite')">🛰️ Satélite</button>
+        </div>
+        <iframe id="weather-map-iframe" 
+          src="https://openweathermap.org/weathermap?basemap=map&cities=false&layer=temperature&lat=-34.9&lon=-56.15&zoom=8"
+          title="Mapa meteorológico">
         </iframe>
       </div>
 
@@ -304,6 +310,33 @@
           <button class="city-pill" onclick="toggleChatbot()" style="width: 100%; justify-content: center;">
             <i class="fas fa-robot"></i> Chat con Zeus
           </button>
+        </div>
+      </div>
+
+      <!-- Weather Facts Card -->
+      <div class="glass-card rec-card" style="grid-column: span 2;">
+        <div class="card-header">
+          <i class="fas fa-lightbulb"></i>
+          <span>Curiosidades Meteorológicas</span>
+        </div>
+        <div class="fact-content" id="weather-fact">
+          <p>🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.</p>
+        </div>
+      </div>
+
+      <!-- Meteorology Links -->
+      <div class="glass-card rec-card" style="grid-column: span 4;">
+        <div class="card-header">
+          <i class="fas fa-link"></i>
+          <span>Enlaces de Meteorología</span>
+        </div>
+        <div class="links-list">
+          <a href="https://www.inumet.gub.uy" target="_blank" class="weather-link">🇺🇾 INUMET (Uruguay)</a>
+          <a href="https://www.smn.gob.ar" target="_blank" class="weather-link">🇦🇷 SMN (Argentina)</a>
+          <a href="https://www.gob.mx/smn" target="_blank" class="weather-link">🇲🇽 SMN (México)</a>
+          <a href="https://openweathermap.org" target="_blank" class="weather-link">🌐 OpenWeatherMap</a>
+          <a href="https://www.ventusky.com" target="_blank" class="weather-link">🗺️ Ventusky</a>
+          <a href="https://www.windy.com" target="_blank" class="weather-link">🌪️ Windy</a>
         </div>
       </div>
 

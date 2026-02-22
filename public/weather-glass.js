@@ -676,6 +676,73 @@ window.toggleTemperatureUnit = function() {
 };
 
 // ============================================
+// WEATHER MAPS
+// ============================================
+
+const mapLayerUrls = {
+  temperature: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=temperature',
+  rain: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=precipitation',
+  wind: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=wind',
+  satellite: 'https://openweathermap.org/weathermap?basemap=map&cities=false&layer=clouds'
+};
+
+window.switchMapLayer = function(layer) {
+  const iframe = document.getElementById('weather-map-iframe');
+  const tabs = document.querySelectorAll('.map-tab');
+  
+  tabs.forEach(tab => tab.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  let lat = -34.9, lon = -56.15;
+  if (currentReport?.lat && currentReport?.lng) {
+    lat = parseFloat(currentReport.lat);
+    lon = parseFloat(currentReport.lng);
+  }
+  
+  const url = `${mapLayerUrls[layer]}&lat=${lat}&lon=${lon}&zoom=6`;
+  if (iframe) iframe.src = url;
+};
+
+function updateWeatherMap(lat, lng) {
+  const iframe = document.getElementById('weather-map-iframe');
+  if (iframe) {
+    const activeTab = document.querySelector('.map-tab.active');
+    const layer = activeTab ? activeTab.textContent.toLowerCase().includes('temp') ? 'temperature' : 
+      activeTab.textContent.toLowerCase().includes('lluv') ? 'rain' :
+      activeTab.textContent.toLowerCase().includes('viento') ? 'wind' : 'satellite' : 'temperature';
+    iframe.src = `${mapLayerUrls[layer]}&lat=${lat}&lon=${lng}&zoom=6`;
+  }
+}
+
+// ============================================
+// WEATHER FACTS
+// ============================================
+
+const weatherFacts = [
+  "🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.",
+  "❄️ Los copos de nieve nunca son exactamente iguales.",
+  "🌪️ Los tornados pueden alcanzar velocidades de más de 400 km/h.",
+  "🌧️ El lugar más lluvioso del mundo es Mawsynram, India.",
+  "🔥 La temperatura más alta registrada fue 56.7°C en Furnace Creek, California.",
+  "🧊 La temperatura más baja registrada fue -89.2°C en Vostok, Antártida.",
+  "⚡ Cada segundo caen aproximadamente 100 rayos en la Tierra.",
+  "🌈 Los arcoíris son círculos completos, pero normalmente solo vemos la mitad.",
+  "🌬️ El viento más fuerte registrado fue 408 km/h en el Monte Washington.",
+  "☁️ El cumulonimbo puede alcanzar más de 12 km de altura."
+];
+
+function showRandomFact() {
+  const factEl = document.getElementById('weather-fact');
+  if (factEl) {
+    const randomFact = weatherFacts[Math.floor(Math.random() * weatherFacts.length)];
+    factEl.innerHTML = `<p>${randomFact}</p>`;
+  }
+}
+
+// Show a new fact every 30 seconds
+setInterval(showRandomFact, 30000);
+
+// ============================================
 // PDF REPORT
 // ============================================
 
@@ -690,10 +757,10 @@ async function generatePDFReport() {
   const w = doc.internal.pageSize.getWidth();
   let y = 20;
 
-  // Header - Blue gradient
-  doc.setFillColor(59, 130, 246);
+  // Header - Matrix Green gradient
+  doc.setFillColor(0, 100, 0);
   doc.rect(0, 0, w, 45, 'F');
-  doc.setFillColor(99, 102, 241);
+  doc.setFillColor(0, 255, 65);
   doc.rect(0, 40, w, 8, 'F');
 
   doc.setTextColor(255, 255, 255);
@@ -701,70 +768,109 @@ async function generatePDFReport() {
   doc.setFont('helvetica', 'bold');
   doc.text('ZEUS METEO', w / 2, 22, { align: 'center' });
   doc.setFontSize(12);
-  doc.text('Informe Meteorológico', w / 2, 32, { align: 'center' });
+  doc.text('Informe Meteorológico Profesional', w / 2, 32, { align: 'center' });
 
   y = 60;
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(20);
   doc.text(currentReport.location || 'Ubicación', 20, y);
 
-  y += 10;
+  y += 8;
   doc.setFontSize(11);
   doc.setTextColor(100, 100, 100);
   doc.text(new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), 20, y);
+  doc.text('🕐 ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }), 120, y);
 
   y += 15;
-  doc.setDrawColor(59, 130, 246);
+  doc.setDrawColor(0, 180, 0);
+  doc.setLineWidth(0.5);
   doc.line(20, y, w - 20, y);
 
+  // Current conditions box
   y += 15;
-  doc.setFontSize(14);
-  doc.setTextColor(59, 130, 246);
-  doc.text('CONDICIONES ACTUALES', 25, y);
-
+  doc.setFillColor(240, 255, 240);
+  doc.roundedRect(15, y, w - 30, 50, 3, 3, 'F');
   y += 12;
-  doc.setFontSize(11);
+  
+  doc.setFontSize(14);
+  doc.setTextColor(0, 100, 0);
+  doc.text('CONDICIONES ACTUALES', 25, y);
+  y += 10;
+  
+  doc.setFontSize(22);
   doc.setTextColor(0, 0, 0);
-
-  const temp = Math.round(currentReport.temperature);
+ Math.round(currentReport.temperature);
+   const temp = doc.text(temp + '°C', 25, y + 10);
+  
+  doc.setFontSize(12);
+  doc.setTextColor(80, 80, 80);
+  doc.text(currentReport.description || 'N/A', 60, y + 10);
+  
+  y += 25;
+  doc.setFontSize(10);
   const humidity = currentReport.humidity || 50;
   const wind = Math.round(currentReport.windSpeed || 10);
   const pressure = currentReport.pressure || 1013;
-  const desc = currentReport.description || 'N/A';
+  
+  doc.text('💧 Humedad: ' + humidity + '%', 25, y);
+  doc.text('💨 Viento: ' + wind + ' km/h', 90, y);
+  doc.text('⏱️ Presión: ' + pressure + ' hPa', 150, y);
 
-  doc.text('🌡️ Temperatura: ' + temp + '°C', 25, y); y += 8;
-  doc.text('💧 Humedad: ' + humidity + '%', 25, y); y += 8;
-  doc.text('💨 Viento: ' + wind + ' km/h', 25, y); y += 8;
-  doc.text('⏱️ Presión: ' + pressure + ' hPa', 25, y); y += 8;
-  doc.text('☁️ Condición: ' + desc, 25, y); y += 20;
-
-  // Forecast summary
+  // 5-Day Forecast
+  y += 35;
   if (currentDailyForecast.length > 0) {
-    doc.setFillColor(99, 102, 241);
-    doc.roundedRect(15, y, w - 30, 35, 3, 3, 'F');
-    y += 10;
+    doc.setFillColor(0, 100, 0);
+    doc.roundedRect(15, y, w - 30, 12, 2, 2, 'F');
+    y += 9;
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(12);
-    doc.text('PRONÓSTICO 7 DÍAS', 25, y);
-    y += 10;
-    doc.setFontSize(10);
+    doc.setFontSize(11);
+    doc.text('PRONÓSTICO 5 DÍAS', 20, y);
     
-    const forecastText = currentDailyForecast.map(d => 
-      `${d.day}: ${Math.round(d.high)}°/${Math.round(d.low)}°`
-    ).join(' | ');
-    doc.text(forecastText, 25, y);
-    y += 25;
+    y += 15;
+    const forecastDays = currentDailyForecast.slice(0, 5);
+    
+    forecastDays.forEach((day, i) => {
+      const x = 20 + (i * 38);
+      doc.setFillColor(245, 255, 245);
+      doc.roundedRect(x, y, 35, 35, 2, 2, 'F');
+      
+      doc.setTextColor(0, 80, 0);
+      doc.setFontSize(9);
+      doc.text(day.day.substring(0, 6), x + 17, y + 8, { align: 'center' });
+      
+      doc.setFontSize(14);
+      doc.text(day.icon || '☁️', x + 17, y + 20, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text(Math.round(day.high) + '°', x + 25, y + 30, { align: 'center' });
+      doc.setTextColor(100, 100, 100);
+      doc.text(Math.round(day.low) + '°', x + 10, y + 30, { align: 'center' });
+    });
+    y += 45;
   }
+
+  // Additional info
+  y += 10;
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text('☀️ Amanecer: ' + (document.getElementById('sunrise-time')?.textContent || '--:--'), 20, y);
+  doc.text('🌙 Atardecer: ' + (document.getElementById('sunset-time')?.textContent || '--:--'), 80, y);
+  
+  y += 8;
+  doc.text('📍 Lat: ' + (currentReport.lat || '--') + ' | Lon: ' + (currentReport.lng || '--'), 20, y);
+  doc.text('🏢 Fuente: ' + (currentReport.source || 'Open-Meteo'), 20, y + 8);
 
   // Footer
   const pageCount = doc.internal.getNumberOfPages();
   const h = doc.internal.pageSize.getHeight();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.setFillColor(59, 130, 246);
+    doc.setFillColor(0, 100, 0);
     doc.rect(0, h - 15, w, 15, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(8);
+    doc.text('Zeus Meteo - Informe generado el ' + new Date().toLocaleDateString(), 20, h - 7);
     doc.text('Página ' + i + ' de ' + pageCount, w / 2, h - 7, { align: 'center' });
   }
 
