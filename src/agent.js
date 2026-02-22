@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB, INUMET, PirateWeather } from './weatherSources.js';
+import { OpenWeatherMap, WeatherAPI, OpenMeteo, MetNorway, USNWS, WttrIn, MockWeatherSource, SevenTimer, TomorrowIO, WeatherDB, INUMET, PirateWeather, AEMET, Anamet, AtmoAuvergne, AtmoFrance, ECCC, VisualCrossing, StormGlass, OpenMeteoAirQuality, GeoNamesGeocoding, Weather2020, ANAMBFC } from './weatherSources.js';
 import { ReportGenerator } from './reportGenerator.js';
 
 dotenv.config();
@@ -13,15 +13,25 @@ class WeatherAgent {
   }
 
   initializeSources() {
-    this.sources.push(new INUMET());
-    this.sources.push(new OpenMeteo());
-    this.sources.push(new SevenTimer());
+    // Priority sources by region
+    this.sources.push(new INUMET()); // Uruguay
+    this.sources.push(new OpenMeteo()); // Global primary
+    this.sources.push(new SevenTimer()); // NOAA based
     this.sources.push(new TomorrowIO(process.env.TOMORROW_IO_API_KEY));
     this.sources.push(new WttrIn());
     this.sources.push(new WeatherDB());
-    this.sources.push(new MetNorway());
-    this.sources.push(new USNWS());
+    this.sources.push(new MetNorway()); // Europe
+    this.sources.push(new USNWS()); // USA
+    
+    // New free sources
+    this.sources.push(new AEMET()); // Spain
+    this.sources.push(new Anamet()); // Brazil
+    this.sources.push(new AtmoFrance()); // France air quality
+    this.sources.push(new ECCC()); // Canada
+    this.sources.push(new VisualCrossing(process.env.VISUAL_CROSSING_KEY));
+    this.sources.push(new OpenMeteoAirQuality()); // Air quality
 
+    // Optional API key sources
     if (process.env.PIRATE_WEATHER_API_KEY && process.env.PIRATE_WEATHER_API_KEY !== 'tu_api_key_aqui') {
       this.sources.push(new PirateWeather(process.env.PIRATE_WEATHER_API_KEY));
       console.log('✅ Pirate Weather API configurada');
@@ -35,7 +45,21 @@ class WeatherAgent {
       this.sources.push(new WeatherAPI(process.env.WEATHERAPI_KEY));
     }
 
+    if (process.env.STORM_GLASS_KEY && process.env.STORM_GLASS_KEY !== 'tu_api_key_aqui') {
+      this.sources.push(new StormGlass(process.env.STORM_GLASS_KEY));
+    }
+
+    if (process.env.WEATHER2020_KEY && process.env.WEATHER2020_KEY !== 'tu_api_key_aqui') {
+      this.sources.push(new Weather2020(process.env.WEATHER2020_KEY));
+    }
+
+    if (process.env.AEMET_API_KEY && process.env.AEMET_API_KEY !== 'tu_api_key_aqui') {
+      this.sources.push(new AEMET());
+    }
+
     this.mockSource = new MockWeatherSource();
+    
+    console.log(`✅ Zeus inicializado con ${this.sources.length} fuentes meteorológicas`);
   }
 
   initializeAIModels() {
@@ -177,17 +201,37 @@ class WeatherAgent {
 
   getSourceWeight(source) {
     const weights = {
-      'INUMET': 1.3,
-      'USNWS': 1.2,
+      // Official/High reliability sources
+      'INUMET': 1.3,        // Uruguay official
+      'USNWS': 1.2,         // USA official
+      'ECCC': 1.2,          // Canada official
+      'AEMET': 1.15,        // Spain official
+      
+      // High accuracy APIs
       'Tomorrow.io': 1.15,
       '7Timer': 1.1,
       'WttrIn': 1.1,
+      'VisualCrossing': 1.05,
+      'StormGlass': 1.05,
+      'Weather2020': 1.05,
       'PirateWeather': 1.05,
+      
+      // Standard sources
       'OpenMeteo': 1.0,
       'MetNorway': 1.0,
+      'Anamet': 1.0,
+      'ANAM-BF': 1.0,
+      
+      // Air quality sources (used in combination)
+      'OpenMeteoAirQuality': 0.9,
+      'AtmoFrance': 0.9,
+      'AtmoAuvergne': 0.9,
+      
+      // Lower priority
       'WeatherDB': 0.95,
       'OpenWeatherMap': 0.9,
-      'WeatherAPI': 0.85
+      'WeatherAPI': 0.85,
+      'GeoNames': 0.7
     };
     return weights[source] || 1.0;
   }

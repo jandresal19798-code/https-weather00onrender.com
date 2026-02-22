@@ -9,21 +9,33 @@
 
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230f172a' width='512' height='512' rx='128'/><path d='M256 128 L128 384 L384 384 Z' fill='%2338bdf8'/></svg>">
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%234285f4'/><stop offset='100%25' stop-color='%231a73e8'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
 
-  <title>Zeus Meteo Premium</title>
+  <title>Zeus Meteo - Pronóstico Premium</title>
 
   <!-- Design System & Components -->
-  <link rel="stylesheet" href="weather-enhanced.css?v=14">
-
+  <link rel="stylesheet" href="weather-enhanced.css?v=15">
+  <link rel="stylesheet" href="landing.css">
+  
   <!-- Dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <div class="ambient-bg" id="ambient-root"></div>
+  <!-- Animated Background -->
+  <div class="animated-bg">
+    <div class="gradient-overlay"></div>
+    <div class="particles">
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+      <span class="particle"></span>
+    </div>
+  </div>
 
   <!-- Loading Overlay -->
   <div class="loading-overlay-modern" id="loading">
@@ -34,234 +46,365 @@
     </div>
   </div>
 
-  <!-- Header Navigation -->
-  <header class="forecast-header-modern">
-    <div class="logo-title-modern">ZEUS METEO</div>
-    <nav class="header-nav">
-      <button class="btn-premium btn-location" onclick="searchCurrentLocation()" title="Mi Ubicación">
-        <i class="fas fa-location-arrow"></i>
-      </button>
-    </nav>
-  </header>
+  <!-- Navigation -->
+  <nav class="landing-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">ZEUS METEO</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="forecast.html" class="nav-link active">Pronóstico</a>
+        <button class="nav-link theme-toggle" onclick="toggleHighContrast()" aria-label="Alto contraste">
+          <span class="theme-icon">◐</span>
+        </button>
+      </div>
+    </div>
+  </nav>
 
   <main class="forecast-main-modern">
-    <!-- Search Section -->
+    <!-- Search Section - Empty State -->
     <div class="hero-weather glass-card" id="empty-state-hero" style="grid-column: 1 / -1;">
-      <div class="weather-meta">
-        <h1 class="city-title">Explora el clima</h1>
-        <p class="weather-desc">Ingresa tu ubicación para comenzar el análisis inteligente</p>
+      <div class="hero-content" style="max-width: 600px;">
+        <div class="hero-badge">
+          <span class="badge-icon">✨</span>
+          <span class="badge-text">Análisis Inteligente</span>
+        </div>
+        
+        <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">
+          Descubre el Clima
+          <span class="title-highlight">en Tiempo Real</span>
+        </h1>
+        
+        <p class="hero-description" style="font-size: 1.1rem; margin-bottom: 2rem;">
+          Pronósticos precisos potenciados por inteligencia artificial. 
+          Datos de múltiples fuentes meteorológicas confiables.
+        </p>
 
-        <div class="search-box-modern">
-          <input type="text" id="location-input" class="search-input-modern"
-            placeholder="Ej: Montevideo, Madrid, Nueva York..." onkeypress="if(event.key==='Enter')searchWeather()">
-          <div class="search-actions">
-            <button class="btn-premium btn-search" onclick="searchWeather()">Analizar</button>
+        <!-- Main Search Box -->
+        <div class="search-container">
+          <div class="search-wrapper">
+            <div class="search-icon">🔍</div>
+            <input type="text" id="location-input" class="search-input" 
+              placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires, Tokio)"
+              autocomplete="off"
+              onkeypress="if(event.key==='Enter')searchWeather()">
+            <button class="search-btn-primary" onclick="searchWeather()">
+              Buscar
+            </button>
+            <button class="location-btn" onclick="searchCurrentLocation()" title="Usar mi ubicación">
+              📍
+            </button>
           </div>
         </div>
 
-        <div class="quick-cities" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button class="prompt-chip" onclick="quickSearch('Montevideo')">Montevideo</button>
-          <button class="prompt-chip" onclick="quickSearch('Madrid')">Madrid</button>
-          <button class="prompt-chip" onclick="quickSearch('New York')">Nueva York</button>
+        <!-- Quick Cities -->
+        <div class="quick-cities-section">
+          <span class="section-label">Ciudades populares:</span>
+          <div class="cities-pills">
+            <button class="city-pill" onclick="quickSearch('Montevideo')">
+              <span class="pill-flag">🇺🇾</span>
+              <span>Montevideo</span>
+            </button>
+            <button class="city-pill" onclick="quickSearch('Madrid')">
+              <span class="pill-flag">🇪🇸</span>
+              <span>Madrid</span>
+            </button>
+            <button class="city-pill" onclick="quickSearch('Buenos Aires')">
+              <span class="pill-flag">🇦🇷</span>
+              <span>Buenos Aires</span>
+            </button>
+            <button class="city-pill" onclick="quickSearch('Nueva York')">
+              <span class="pill-flag">🇺🇸</span>
+              <span>Nueva York</span>
+            </button>
+            <button class="city-pill" onclick="quickSearch('Londres')">
+              <span class="pill-flag">🇬🇧</span>
+              <span>Londres</span>
+            </button>
+            <button class="city-pill" onclick="quickSearch('Tokio')">
+              <span class="pill-flag">🇯🇵</span>
+              <span>Tokio</span>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="weather-visual" style="text-align: right;">
-        <span style="font-size: 10rem; opacity: 0.2;">🌍</span>
+      
+      <!-- Weather Preview -->
+      <div class="hero-preview">
+        <div class="weather-preview-card">
+          <div class="preview-header">
+            <span class="preview-location">📍 Montevideo, Uruguay</span>
+            <span class="preview-time">Ahora</span>
+          </div>
+          <div class="preview-main">
+            <div class="preview-temp">
+              <span class="temp-value">24°</span>
+              <span class="temp-unit">C</span>
+            </div>
+            <div class="preview-condition">
+              <span class="condition-icon">☀️</span>
+              <span class="condition-text">Despejado</span>
+            </div>
+          </div>
+          <div class="preview-details">
+            <div class=" <span class="detail-icon">💧</span>
+detail-item">
+                           <span class="detail-value">45%</span>
+              <span class="detail-label">Humedad</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">💨</span>
+              <span class="detail-value">12</span>
+              <span class="detail-label">km/h</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">👁️</span>
+              <span class="detail-value">10</span>
+              <span class="detail-label">km</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="floating-weather-icons">
+          <span class="float-icon sun">☀️</span>
+          <span class="float-icon cloud">☁️</span>
+          <span class="float-icon rain">🌧️</span>
+          <span class="float-icon snow">❄️</span>
+        </div>
       </div>
     </div>
 
     <!-- Main Display (Dynamic Content) -->
-    <div id="main-content"
-      style="display: none; grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 380px; gap: 2rem;">
+    <div id="main-content" style="display: none; grid-column: 1 / -1;">
 
-      <section class="glass-card hero-weather" id="city-banner-modern" style="grid-column: 1 / -1;">
-        <div class="weather-meta">
-          <h1 class="city-name" id="city-name">Ubicación</h1>
-          <p class="city-condition" id="weather-description">Análisis en curso...</p>
-          <div class="stats-grid-premium">
-            <div class="stat-item">
-              <span class="stat-label">Humedad</span>
-              <span class="stat-value" id="humidity">--%</span>
+      <!-- City Banner Premium -->
+      <section class="glass-card city-banner" id="city-banner-modern">
+        <div class="city-banner-content">
+          <div class="city-main-info">
+            <div class="city-weather-main">
+              <span class="weather-icon-large" id="weather-icon" style="font-size: 5rem;">☀️</span>
+              <div class="temp-large" style="font-size: 6rem;">
+                <span id="current-temp">--</span>
+                <span class="unit" style="font-size: 2rem;">°C</span>
+              </div>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">Viento</span>
-              <span class="stat-value" id="wind">-- km/h</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Presión</span>
-              <span class="stat-value" id="pressure">-- hPa</span>
+            <div class="city-details">
+              <h1 class="city-name" id="city-name">Ubicación</h1>
+              <p class="city-condition" id="weather-description">Análisis en curso...</p>
+              <p class="city-date" id="current-date">Cargando fecha...</p>
             </div>
           </div>
-        </div>
-        <div class="city-weather-main" style="text-align: right;">
-          <div class="temp-large">
-            <span id="current-temp">--</span>
-            <span class="unit">°C</span>
+          <div class="city-stats-row">
+            <div class="stat-badge">
+              <span class="stat-badge-icon">💧</span>
+              <span class="stat-badge-value" id="humidity">--%</span>
+              <span class="stat-badge-label">Humedad</span>
+            </div>
+            <div class="stat-badge">
+              <span class="stat-badge-icon">💨</span>
+              <span class="stat-badge-value" id="wind">-- km/h</span>
+              <span class="stat-badge-label">Viento</span>
+            </div>
+            <div class="stat-badge">
+              <span class="stat-badge-icon">🌡️</span>
+              <span class="stat-badge-value" id="pressure">-- hPa</span>
+              <span class="stat-badge-label">Presión</span>
+            </div>
+            <div class="stat-badge">
+              <span class="stat-badge-icon">🌡️</span>
+              <span class="stat-badge-value" id="feels-like">--°</span>
+              <span class="stat-badge-label">Sensación</span>
+            </div>
           </div>
-          <span class="weather-icon-large" id="weather-icon"
-            style="font-size: 6rem; display: block; margin-top: 20px;">☀️</span>
         </div>
       </section>
 
-      <!-- Predictions Column -->
-      <div class="forecast-left">
-        <section class="glass-card">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
-            <h2 style="font-size: 1.5rem;">📅 Pronóstico Extendido</h2>
-            <div class="filter-tabs" style="display: flex; gap: 8px;">
-              <button class="prompt-chip active" onclick="switchForecastDays(7, this)">7 Días</button>
-              <button class="prompt-chip" onclick="switchForecastDays(15, this)">15 Días</button>
-            </div>
-          </div>
-          <div class="forecast-scroll-container" id="daily-forecast"></div>
-        </section>
-
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.5rem; margin-bottom: 2rem;">📈 Tendencia de Temperatura</h2>
-          <div id="tempChart" class="chart-container"></div>
-        </section>
-      </div>
-
-      <!-- Analysis Column -->
-      <div class="forecast-right">
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">🧠 Análisis del Agente</h2>
-          <div id="ai-recommendation" style="font-size: 1rem; line-height: 1.6; opacity: 0.9;">
-            Analizando variables meteorológicas...
-          </div>
-        </section>
-
-        <!-- Weather Alerts Section -->
-        <section class="glass-card" id="weather-alerts" style="margin-top: 2rem; display: none;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">⚠️ Alertas Meteorológicas</h2>
-          <div id="alerts-container"></div>
-        </section>
-
-        <!-- Air Quality Section -->
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">💨 Calidad del Aire</h2>
-          <div class="aqi-container" id="aqi-display">
-            <div class="aqi-main">
-              <span class="aqi-value" id="aqi-value">--</span>
-              <span class="aqi-label">AQI</span>
-            </div>
-            <div class="aqi-details">
-              <div class="aqi-detail-item">
-                <span class="aqi-detail-label">PM2.5</span>
-                <span class="aqi-detail-value" id="pm25">--</span>
-              </div>
-              <div class="aqi-detail-item">
-                <span class="aqi-detail-label">PM10</span>
-                <span class="aqi-detail-value" id="pm10">--</span>
-              </div>
-              <div class="aqi-detail-item">
-                <span class="aqi-detail-label">O₃</span>
-                <span class="aqi-detail-value" id="o3">--</span>
+      <!-- Forecast Grid -->
+      <div class="content-grid" style="display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+        
+        <!-- Left Column - Forecast -->
+        <div class="main-content-nasa" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          
+          <!-- 7/15 Day Forecast -->
+          <section class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2 style="font-size: 1.25rem; font-weight: 700;">📅 Pronóstico Extendido</h2>
+              <div class="filter-tabs" style="display: flex; gap: 8px;">
+                <button class="prompt-chip active" onclick="switchForecastDays(7, this)">7 Días</button>
+                <button class="prompt-chip" onclick="switchForecastDays(15, this)">15 Días</button>
               </div>
             </div>
-          </div>
-        </section>
+            <div class="forecast-scroll-container" id="daily-forecast"></div>
+          </section>
 
-        <!-- Additional Metrics -->
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">📊 Métricas Adicionales</h2>
-          <div class="metrics-grid" id="additional-metrics">
-            <div class="metric-card">
-              <span class="metric-icon">🌡️</span>
-              <span class="metric-label">Sensación</span>
-              <span class="metric-value" id="feels-like">--°</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-icon">💧</span>
-              <span class="metric-label">Punto de Rocío</span>
-              <span class="metric-value" id="dew-point">--°</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-icon">☀️</span>
-              <span class="metric-label">Índice UV</span>
-              <span class="metric-value" id="uv-index">--</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-icon">👁️</span>
-              <span class="metric-label">Visibilidad</span>
-              <span class="metric-value" id="visibility">-- km</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-icon">☁️</span>
-              <span class="metric-label">Nubosidad</span>
-              <span class="metric-value" id="cloud-cover">--%</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-icon">🌬️</span>
-              <span class="metric-label">Ráfagas</span>
-              <span class="metric-value" id="gusts">-- km/h</span>
-            </div>
-          </div>
-        </section>
+          <!-- Temperature Chart -->
+          <section class="glass-card">
+            <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">📈 Tendencia de Temperatura</h2>
+            <div id="tempChart" class="chart-container"></div>
+          </section>
 
-        <!-- Data Quality Indicator -->
-        <section class="glass-card" style="margin-top: 2rem;">
-          <div class="data-quality" id="data-quality">
-            <span class="quality-icon">📡</span>
-            <span class="quality-text">Fuente: <span id="data-source">Cargando...</span></span>
-            <span class="quality-badge" id="quality-badge">Verificando</span>
-          </div>
-        </section>
-
-        <!-- Recent Searches -->
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">🔍 Búsquedas Recientes</h2>
-          <div class="recent-searches" id="recent-searches"></div>
-        </section>
-
-        <!-- Share Button -->
-        <section class="glass-card" style="margin-top: 2rem;">
-          <button class="share-btn" onclick="shareWeather()">
-            <span>📤</span> Compartir Clima
-          </button>
-        </section>
-
-        <!-- Moon Phase Widget -->
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">🌙 Fase Lunar</h2>
-          <div class="moon-widget" id="moon-widget">
-            <div class="moon-visual-large">
-              <span class="moon-icon-large" id="moon-icon-large">🌕</span>
+          <!-- Hourly Forecast -->
+          <section class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h2 style="font-size: 1.25rem;">⏰ Pronóstico por Hora</h2>
+              <div class="filter-tabs" style="display: flex; gap: 8px;">
+                <button class="prompt-chip active" onclick="filterHours(12, this)">12h</button>
+                <button class="prompt-chip" onclick="filterHours(24, this)">24h</button>
+              </div>
             </div>
-            <div class="moon-details">
-              <div class="moon-phase-name" id="moon-phase-name">Luna Llena</div>
-              <div class="moon-illumination-detail" id="moon-illumination">100% iluminada</div>
-              <div class="moon-next-phase" id="moon-next-phase">Próxima: Cuarto Menguante en 7 días</div>
+            <div class="forecast-scroll-container" id="hourly-forecast"></div>
+          </section>
+
+          <!-- Weather Alerts -->
+          <section class="glass-card" id="weather-alerts" style="display: none;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">⚠️ Alertas Meteorológicas</h2>
+            <div id="alerts-container"></div>
+          </section>
+
+          <!-- Air Quality -->
+          <section class="glass-card">
+            <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">💨 Calidad del Aire</h2>
+            <div class="aqi-container" id="aqi-display">
+              <div class="aqi-main">
+                <span class="aqi-value" id="aqi-value">--</span>
+                <span class="aqi-label">AQI</span>
+              </div>
+              <div class="aqi-details">
+                <div class="aqi-detail-item">
+                  <span class="aqi-detail-label">PM2.5</span>
+                  <span class="aqi-detail-value" id="pm25">--</span>
+                </div>
+                <div class="aqi-detail-item">
+                  <span class="aqi-detail-label">PM10</span>
+                  <span class="aqi-detail-value" id="pm10">--</span>
+                </div>
+                <div class="aqi-detail-item">
+                  <span class="aqi-detail-label">O₃</span>
+                  <span class="aqi-detail-value" id="o3">--</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
-        <!-- Compare Cities -->
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">🌍 Comparar Ciudades</h2>
-          <div class="compare-cities" id="compare-cities">
-            <div class="compare-input-group">
-              <input type="text" id="compare-city-input" class="search-input-modern" 
-                placeholder="Agregar ciudad para comparar..."
-                onkeypress="if(event.key==='Enter')compareCity()">
-              <button class="btn-premium" onclick="compareCity()" style="padding: 0.5rem 1rem;">
-                <span>+</span>
-              </button>
+        <!-- Right Column - Details -->
+        <div class="sidebar-nasa" style="display: flex; flex-direction: column; gap: 1rem;">
+          
+          <!-- AI Analysis -->
+          <section class="glass-card">
+            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">🧠 Análisis del Agente</h2>
+            <div id="ai-recommendation" style="font-size: 0.95rem; line-height: 1.6; opacity: 0.9;">
+              Analizando variables meteorológicas...
             </div>
-            <div class="compare-results" id="compare-results"></div>
-          </div>
-        </section>
+          </section>
 
-        <section class="glass-card" style="margin-top: 2rem;">
-          <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">🏙️ Ciudades Cercanas</h2>
-          <div id="nearby-cities" style="display: flex; flex-direction: column; gap: 10px;"></div>
-        </section>
+          <!-- Additional Metrics -->
+          <section class="glass-card">
+            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">📊 Métricas Adicionales</h2>
+            <div class="metrics-grid" id="additional-metrics">
+              <div class="metric-card">
+                <span class="metric-icon">💧</span>
+                <span class="metric-label">Punto de Rocío</span>
+                <span class="metric-value" id="dew-point">--°</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-icon">☀️</span>
+                <span class="metric-label">Índice UV</span>
+                <span class="metric-value" id="uv-index">--</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-icon">👁️</span>
+                <span class="metric-label">Visibilidad</span>
+                <span class="metric-value" id="visibility">-- km</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-icon">☁️</span>
+                <span class="metric-label">Nubosidad</span>
+                <span class="metric-value" id="cloud-cover">--%</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-icon">🌬️</span>
+                <span class="metric-label">Ráfagas</span>
+                <span class="metric-value" id="gusts">-- km/h</span>
+              </div>
+            </div>
+          </section>
 
-        <section class="glass-card map-card" style="margin-top: 2rem; padding: 10px;">
-          <div id="map-frame" style="width: 100%; height: 250px; border-radius: 16px; overflow: hidden;">
-            <iframe id="map-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
-          </div>
-        </section>
+          <!-- Sun & Moon -->
+          <section class="glass-card">
+            <div class="sun-moon-cards">
+              <div class="sun-card">
+                <div class="sun-visual" style="width: 50px; height: 50px; flex-shrink: 0;">
+                  <span style="font-size: 2.5rem;">🌅</span>
+                </div>
+                <div class="sun-times">
+                  <div class="time-item">
+                    <span class="time-label">Amanecer</span>
+                    <span class="time-value" id="sunrise">--:--</span>
+                  </div>
+                  <div class="time-item">
+                    <span class="time-label">Atardecer</span>
+                    <span class="time-value" id="sunset">--:--</span>
+                  </div>
+                </div>
+              </div>
+              <div class="moon-card">
+                <div class="moon-visual">
+                  <span class="moon-phase-visual" id="moon-icon-large" style="font-size: 3rem;">🌕</span>
+                </div>
+                <div class="moon-info">
+                  <span class="moon-phase" id="moon-phase-name">Luna Llena</span>
+                  <span class="moon-illumination" id="moon-illumination">100%</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Data Quality -->
+          <section class="glass-card">
+            <div class="data-quality" id="data-quality">
+              <span class="quality-icon">📡</span>
+              <span class="quality-text">Fuente: <span id="data-source">Cargando...</span></span>
+              <span class="quality-badge" id="quality-badge">Verificando</span>
+            </div>
+          </section>
+
+          <!-- Recent Searches -->
+          <section class="glass-card">
+            <h2 style="font-size: 1.1rem; margin-bottom: 0.75rem;">🔍 Búsquedas Recientes</h2>
+            <div class="recent-searches" id="recent-searches"></div>
+          </section>
+
+          <!-- Compare Cities -->
+          <section class="glass-card">
+            <h2 style="font-size: 1.1rem; margin-bottom: 0.75rem;">🌍 Comparar</h2>
+            <div class="compare-cities" id="compare-cities">
+              <div class="compare-input-group">
+                <input type="text" id="compare-city-input" placeholder="Ciudad..."
+                  style="flex: 1; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 0.875rem;"
+                  onkeypress="if(event.key==='Enter')compareCity()">
+                <button class="btn-premium" onclick="compareCity()" style="padding: 0.5rem 1rem; background: var(--premium-accent); border: none; border-radius: 8px; color: #fff; cursor: pointer;">+</button>
+              </div>
+              <div class="compare-results" id="compare-results"></div>
+            </div>
+          </section>
+
+          <!-- Share -->
+          <section class="glass-card">
+            <button class="share-btn" onclick="shareWeather()">
+              <span>📤</span> Compartir Clima
+            </button>
+          </section>
+
+          <!-- Map -->
+          <section class="glass-card map-card" style="padding: 8px;">
+            <div style="width: 100%; height: 200px; border-radius: 12px; overflow: hidden;">
+              <iframe id="map-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   </main>
@@ -277,8 +420,7 @@
           <span style="font-weight: 800; color: var(--premium-accent);">ZEUS IA</span>
           <div style="font-size: 10px; opacity: 0.5;">SISTEMA ACTIVO</div>
         </div>
-        <button onclick="toggleChatbot()"
-          style="background: transparent; border: none; color: #fff; cursor: pointer; font-size: 1.2rem;">✕</button>
+        <button onclick="toggleChatbot()" style="background: transparent; border: none; color: #fff; cursor: pointer; font-size: 1.2rem;">✕</button>
       </div>
       <div class="chatbot-messages" id="chatbot-messages">
         <div class="msg-bubble msg-assistant">
@@ -289,21 +431,20 @@
         <input type="text" id="chatbot-input-nasa" class="chat-input-modern" placeholder="Pregúntame algo..."
           onkeypress="handleChatKeyPress(event)">
         <button class="btn-premium" onclick="sendChatMessage()"
-          style="width: 45px; height: 45px; background: var(--premium-accent);"><i
-            class="fas fa-paper-plane"></i></button>
+          style="width: 45px; height: 45px; background: var(--premium-accent); border: none; border-radius: 50%; color: #fff; cursor: pointer;">
+          <i class="fas fa-paper-plane"></i>
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
-  <script src="weather-enhanced.js?v=14"></script>
+  <script src="weather-enhanced.js?v=15"></script>
   <script>
-    // Initial setup for empty state
     window.addEventListener('load', () => {
       const lastSearch = localStorage.getItem('last_location');
       if (lastSearch) {
         document.getElementById('location-input').value = lastSearch;
-        // auto search if needed
       }
     });
 

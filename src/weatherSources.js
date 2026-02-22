@@ -1557,3 +1557,629 @@ export class PirateWeather extends WeatherSource {
     };
   }
 }
+
+// ============================================
+// AEMET - Agencia Estatal de Meteorología (España)
+// API pública gratuita sin ключ
+// ============================================
+export class AEMET extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://opendata.aemet.es/api';
+    this.apiKey = process.env.AEMET_API_KEY || '';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.baseUrl}/geocoding/search`, {
+      params: { texto: location, numen: 1 }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/observacion/convencional/datos/estacion/${coords.indicativo}`, {
+      params: { api_key: this.apiKey }
+    });
+    const data = response.data[0];
+    return this.formatData(data, coords);
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'AEMET',
+      timestamp: data.fecha,
+      location: location.municipio || location.nombre,
+      temperature: parseFloat(data.temperatura),
+      humidity: parseInt(data.humedad),
+      pressure: parseInt(data.presion),
+      windSpeed: parseFloat(data.viento),
+      description: this.getDescription(data.estadoSky),
+      clouds: this.getCloudCover(data.nubosidad)
+    };
+  }
+
+  getDescription(code) {
+    const codes = {
+      '11': 'despejado', '12': 'poco nuboso', '13': 'intervalos nubosos',
+      '14': 'nuboso', '15': 'muy nuboso', '16': 'cubierto',
+      '17': 'niebla', '18': 'lluvia', '19': 'chubascos'
+    };
+    return codes[code] || 'despejado';
+  }
+
+  getCloudCover(nubosidad) {
+    if (!nubosidad) return 0;
+    return Math.min(100, parseInt(nubosidad) || 0);
+  }
+}
+
+// ============================================
+// ANAM-BF - Burkina Faso Meteorology
+// ============================================
+export class ANAMBFC extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.meteo.bf/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://api.meteo.bf/v1/location', {
+      params: { q: location }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/current`, {
+      params: { lat: coords.latitude, lon: coords.longitude }
+    });
+    return this.formatData(response.data, location);
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'ANAM-BF',
+      timestamp: new Date().toISOString(),
+      location: location,
+      temperature: data.temperature,
+      humidity: data.humidity,
+      pressure: data.pressure,
+      windSpeed: data.wind_speed,
+      description: data.weather?.description || 'desconocido',
+      clouds: data.clouds?.all || 0
+    };
+  }
+}
+
+// ============================================
+// ANAMET - Brazil Meteorology
+// ============================================
+export class Anamet extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.anamet.gov.br';
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/observations`, {
+      params: { lat: coords.lat, lon: coords.lon }
+    });
+    return this.formatData(response.data, location);
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1 }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return { lat: parseFloat(response.data[0].lat), lon: parseFloat(response.data[0].lon) };
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'Anamet',
+      timestamp: new Date().toISOString(),
+      location: location,
+      temperature: data.temperature,
+      humidity: data.relative_humidity,
+      pressure: data.pressure,
+      windSpeed: data.wind_speed,
+      description: data.weather || 'desconocido'
+    };
+  }
+}
+
+// ============================================
+// ATMO Auvergne - France Air Quality
+// ============================================
+export class AtmoAuvergne extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://services.atmo-auvergne.fr/api/v1';
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/indices`, {
+      params: { lat: coords.lat, lon: coords.lon }
+    });
+    return this.formatDataAirQuality(response.data, location);
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1 }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return { lat: parseFloat(response.data[0].lat), lon: parseFloat(response.data[0].lon) };
+  }
+
+  formatDataAirQuality(data, location) {
+    return {
+      source: 'AtmoAuvergne',
+      timestamp: new Date().toISOString(),
+      location: location,
+      aqi: data?.overall_aqi || 50,
+      pm25: data?.pm25 || 0,
+      pm10: data?.pm10 || 0,
+      o3: data?.o3 || 0,
+      no2: data?.no2 || 0,
+      description: this.getAQILevel(data?.overall_aqi || 50)
+    };
+  }
+
+  getAQILevel(aqi) {
+    if (aqi <= 50) return 'Bueno';
+    if (aqi <= 100) return 'Moderado';
+    if (aqi <= 150) return 'Dañino para sensibles';
+    if (aqi <= 200) return 'Dañino';
+    return 'Muy dañino';
+  }
+}
+
+// ============================================
+// ATMO France - Air Quality France
+// ============================================
+export class AtmoFrance extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.atmo-france.org/api/v1';
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/air_quality/observations`, {
+      params: { latitude: coords.lat, longitude: coords.lon }
+    });
+    return this.formatDataAirQuality(response.data, location);
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1 }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return { lat: parseFloat(response.data[0].lat), lon: parseFloat(response.data[0].lon) };
+  }
+
+  formatDataAirQuality(data, location) {
+    const current = data?.current || {};
+    return {
+      source: 'AtmoFrance',
+      timestamp: new Date().toISOString(),
+      location: location,
+      aqi: current?.aqi || 50,
+      pm25: current?.pm2_5 || 0,
+      pm10: current?.pm10 || 0,
+      o3: current?.o3 || 0,
+      no2: current?.no2 || 0,
+      so2: current?.so2 || 0,
+      description: this.getAQILevel(current?.aqi || 50)
+    };
+  }
+
+  getAQILevel(aqi) {
+    if (aqi <= 50) return 'Bueno';
+    if (aqi <= 100) return 'Moderado';
+    if (aqi <= 150) return 'Dañino para sensibles';
+    if (aqi <= 200) return 'Dañino';
+    if (aqi <= 300) return 'Muy dañino';
+    return 'Peligroso';
+  }
+}
+
+// ============================================
+// ECCC - Environment and Climate Change Canada
+// ============================================
+export class ECCC extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.weather.gc.ca';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.baseUrl}/geomet/v1/sugs/weatherIndices/search`, {
+      params: { q: location, localityType: 'city' }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/observations/current`, {
+      params: { climateId: coords.climateId, format: 'json' }
+    });
+    return this.formatData(response.data[0], location);
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'ECCC',
+      timestamp: data.timestamp,
+      location: location,
+      temperature: data.temperature,
+      humidity: data.relativeHumidity,
+      pressure: data.pressure,
+      windSpeed: data.windSpeed,
+      description: this.getConditionDescription(data.weather),
+      visibility: data.visibility
+    };
+  }
+
+  getConditionDescription(code) {
+    const conditions = {
+      'Clear': 'despejado', 'PartlyCloudy': 'parcialmente nublado',
+      'Cloudy': 'nublado', 'Rain': 'lluvia',
+      'Snow': 'nieve', 'Thunderstorm': 'tormenta'
+    };
+    return conditions[code] || 'desconocido';
+  }
+}
+
+// ============================================
+// Visual Crossing - Free Weather API
+// ============================================
+export class VisualCrossing extends WeatherSource {
+  constructor(apiKey = '') {
+    super();
+    this.apiKey = apiKey || process.env.VISUAL_CROSSING_KEY || '';
+    this.baseUrl = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/weather';
+  }
+
+  async getCurrentWeather(location) {
+    const response = await axios.get(`${this.baseUrl}/weatherforecast`, {
+      params: {
+        unitGroup: 'metric',
+        location: location,
+        key: this.apiKey,
+        contentType: 'json'
+      }
+    });
+    return this.formatData(response.data.currentConditions, location);
+  }
+
+  async getForecast(location, days = 7) {
+    const response = await axios.get(`${this.baseUrl}/weatherforecast`, {
+      params: {
+        unitGroup: 'metric',
+        location: location,
+        key: this.apiKey,
+        contentType: 'json',
+        forecastDays: days
+      }
+    });
+    return response.data.days.map(day => this.formatForecast(day));
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'VisualCrossing',
+      timestamp: data.datetimeStr,
+      location: location,
+      temperature: data.temp,
+      feelsLike: data.feelslike,
+      humidity: data.humidity,
+      pressure: data.pressure,
+      windSpeed: data.windspeed,
+      description: data.conditions,
+      visibility: data.visibility,
+      uvIndex: data.uvindex
+    };
+  }
+
+  formatForecast(day) {
+    return {
+      source: 'VisualCrossing',
+      date: day.datetime,
+      temperatureMax: day.tempmax,
+      temperatureMin: day.tempmin,
+      description: day.conditions,
+      precipitation: day.precip || 0,
+      precipitationProbability: day.precipprob || 0,
+      uvIndex: day.uvindex || 0,
+      windSpeed: day.windspeed
+    };
+  }
+}
+
+// ============================================
+// Storm Glass - Marine & Weather API (Free tier)
+// ============================================
+export class StormGlass extends WeatherSource {
+  constructor(apiKey = '') {
+    super();
+    this.apiKey = apiKey || process.env.STORM_GLASS_KEY || '';
+    this.baseUrl = 'https://api.stormglass.io/v2';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1 }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return { lat: parseFloat(response.data[0].lat), lon: parseFloat(response.data[0].lon) };
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/weather/point`, {
+      params: {
+        lat: coords.lat,
+        lng: coords.lon,
+        params: 'airTemperature,humidity,pressure,windSpeed,windDirection,cloudCover,visibility'
+      },
+      headers: { Authorization: this.apiKey }
+    });
+    const data = response.data.hours[0];
+    return this.formatData(data, location);
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'StormGlass',
+      timestamp: data.time,
+      location: location,
+      temperature: data.airTemperature?.sg || data.airTemperature,
+      humidity: data.humidity?.sg || data.humidity,
+      pressure: data.pressure?.sg || data.pressure,
+      windSpeed: data.windSpeed?.sg || data.windSpeed,
+      description: this.getDescription(data.cloudCover?.sg || data.cloudCover),
+      visibility: data.visibility?.sg || data.visibility
+    };
+  }
+
+  getDescription(cloudCover) {
+    if (!cloudCover) return 'despejado';
+    if (cloudCover < 25) return 'poco nuboso';
+    if (cloudCover < 50) return 'parcialmente nublado';
+    if (cloudCover < 75) return 'nublado';
+    return 'muy nuboso';
+  }
+}
+
+// ============================================
+// Open-Meteo Air Quality
+// ============================================
+export class OpenMeteoAirQuality extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://air-quality-api.open-meteo.com/v1';
+    this.geoUrl = 'https://geocoding-api.open-meteo.com/v1';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.geoUrl}/search`, {
+      params: { name: location, count: 1 }
+    });
+    if (!response.data.results) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.results[0];
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/air-quality`, {
+      params: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        current: 'us_aqi,pm10,pm2_5,ozone,nitrogen_dioxide,sulphur_dioxide,dust,uv_index'
+      }
+    });
+    return this.formatData(response.data.current, coords.name);
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'OpenMeteoAirQuality',
+      timestamp: new Date().toISOString(),
+      location: location,
+      aqi: data.us_aqi || 50,
+      pm25: data.pm2_5 || 0,
+      pm10: data.pm10 || 0,
+      o3: data.ozone || 0,
+      no2: data.nitrogen_dioxide || 0,
+      so2: data.sulphur_dioxide || 0,
+      dust: data.dust || 0,
+      uvIndex: data.uv_index || 0,
+      description: this.getAQILevel(data.us_aqi || 50)
+    };
+  }
+
+  getAQILevel(aqi) {
+    if (aqi <= 50) return 'Bueno';
+    if (aqi <= 100) return 'Moderado';
+    if (aqi <= 150) return 'Dañino para sensibles';
+    if (aqi <= 200) return 'Dañino';
+    if (aqi <= 300) return 'Muy dañino';
+    return 'Peligroso';
+  }
+}
+
+// ============================================
+// GeoNames - Geocoding Service
+// ============================================
+export class GeoNamesGeocoding extends WeatherSource {
+  constructor(username = '') {
+    super();
+    this.username = username || process.env.GEONAMES_USER || 'demo';
+    this.baseUrl = 'http://api.geonames.org';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get(`${this.baseUrl}/searchJSON`, {
+      params: {
+        q: location,
+        maxRows: 1,
+        username: this.username,
+        style: 'FULL'
+      }
+    });
+    if (!response.data.geonames || response.data.geonames.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return response.data.geonames[0];
+  }
+
+  async getCurrentWeather(location) {
+    const geoData = await this.getCoordinates(location);
+    return {
+      source: 'GeoNames',
+      timestamp: new Date().toISOString(),
+      location: geoData.name,
+      latitude: geoData.lat,
+      longitude: geoData.lng,
+      country: geoData.countryName,
+      adminName: geoData.adminName1,
+      population: geoData.population,
+      timezone: geoData.timezone,
+      description: 'Datos geográficos de GeoNames'
+    };
+  }
+}
+
+// ============================================
+// Weather2020 - Free Weather API
+// ============================================
+export class Weather2020 extends WeatherSource {
+  constructor(apiKey = '') {
+    super();
+    this.apiKey = apiKey || process.env.WEATHER2020_KEY || '';
+    this.baseUrl = 'https://api.weather2020.com/v1';
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        lat: coords.lat,
+        lon: coords.lng,
+        apikey: this.apiKey
+      }
+    });
+    return this.formatData(response.data, location);
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1 }
+    });
+    if (!response.data || response.data.length === 0) {
+      throw new Error(`Ubicación no encontrada: ${location}`);
+    }
+    return { lat: parseFloat(response.data[0].lat), lng: parseFloat(response.data[0].lon) };
+  }
+
+  formatData(data, location) {
+    const current = data?.current || {};
+    return {
+      source: 'Weather2020',
+      timestamp: new Date().toISOString(),
+      location: location,
+      temperature: current.temperature,
+      feelsLike: current.feelsLike,
+      humidity: current.humidity,
+      pressure: current.pressure,
+      windSpeed: current.windSpeed,
+      description: current.summary || 'desconocido',
+      uvIndex: current.uvIndex
+    };
+  }
+}
+
+// ============================================
+// NWS - National Weather Service (USA)
+// ============================================
+export class USNWS extends WeatherSource {
+  constructor() {
+    super();
+    this.baseUrl = 'https://api.weather.gov';
+  }
+
+  async getCoordinates(location) {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: location, format: 'json', limit: 1, countrycodes: 'us' }
+    });
+    if (!response.data || response.data.length === 0) {
+      const allResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
+        params: { q: location, format: 'json', limit: 1 }
+      });
+      if (!allResponse.data || allResponse.data.length === 0) {
+        throw new Error(`Ubicación no encontrada: ${location}`);
+      }
+      return { lat: parseFloat(allResponse.data[0].lat), lon: parseFloat(allResponse.data[0].lon) };
+    }
+    return { lat: parseFloat(response.data[0].lat), lon: parseFloat(response.data[0].lon) };
+  }
+
+  async getCurrentWeather(location) {
+    const coords = await this.getCoordinates(location);
+    const pointsResponse = await axios.get(`${this.baseUrl}/points/${coords.lat},${coords.lon}`);
+    const forecastUrl = pointsResponse.data.properties.forecast;
+    const stationsUrl = pointsResponse.data.properties.observationStations;
+    
+    const [forecastResponse, stationsResponse] = await Promise.all([
+      axios.get(forecastUrl),
+      axios.get(stationsUrl)
+    ]);
+    
+    const station = stationsResponse.data.features[0];
+    const obsResponse = await axios.get(`${this.baseUrl}/stations/${station.properties.stationIdentifier}/observations/latest`);
+    
+    return this.formatData(obsResponse.data.properties, location);
+  }
+
+  formatData(data, location) {
+    return {
+      source: 'USNWS',
+      timestamp: data.timestamp,
+      location: location,
+      temperature: data.temperature?.value ? Math.round(data.temperature.value * 9/5 + 32) : 20,
+      humidity: data.relativeHumidity?.value || 50,
+      pressure: data.barometricPressure?.value ? Math.round(data.barometricPressure.value / 100) : 1013,
+      windSpeed: data.windSpeed?.value ? Math.round(data.windSpeed.value * 2.237) : 10,
+      description: data.textDescription || 'desconocido',
+      forecast: data.forecast
+    };
+  }
+}
