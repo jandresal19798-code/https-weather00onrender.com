@@ -1,24 +1,37 @@
 /* ============================================
-   ZEUS METEO - GLASSMORPHISM BENTO GRID DESIGN
+   ZEUS METEO - MATRIX STYLE (Black/Green/Yellow)
    ============================================ */
 
 :root {
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-bg-hover: rgba(255, 255, 255, 0.15);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  /* Matrix Green Palette */
+  --matrix-green: #00ff41;
+  --matrix-green-dark: #00cc33;
+  --matrix-green-light: #4dff7a;
+  --matrix-yellow: #ffff00;
+  --matrix-yellow-dark: #cccc00;
+  --matrix-black: #0a0a0a;
+  --matrix-dark: #0d0d0d;
+  --matrix-gray: #1a1a1a;
+  
+  --glass-bg: rgba(0, 255, 65, 0.05);
+  --glass-bg-hover: rgba(0, 255, 65, 0.1);
+  --glass-border: rgba(0, 255, 65, 0.15);
+  --glass-shadow: 0 8px 32px rgba(0, 255, 65, 0.05);
   
   --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-muted: rgba(255, 255, 255, 0.5);
+  --text-secondary: rgba(0, 255, 65, 0.8);
+  --text-muted: rgba(0, 255, 65, 0.5);
+  --text-white: #ffffff;
+  --text-yellow: #ffff00;
   
-  --accent-warm: #fbbf24;
-  --accent-cold: #38bdf8;
-  --accent-storm: #a78bfa;
-  --accent-rain: #60a5fa;
+  --accent-warm: #ffff00;
+  --accent-cold: #00ccff;
+  --accent-storm: #ff00ff;
+  --accent-rain: #00ffff;
+  --accent-green: #00ff41;
   
-  --gradient-start: #3b82f6;
-  --gradient-end: #6366f1;
+  --gradient-start: #0d0d0d;
+  --gradient-end: #1a1a1a;
   
   --radius-sm: 12px;
   --radius-md: 16px;
@@ -41,13 +54,13 @@
 
 body {
   font-family: var(--font-main);
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(180deg, var(--matrix-black) 0%, var(--matrix-dark) 50%, var(--matrix-gray) 100%);
   min-height: 100vh;
   color: var(--text-primary);
   overflow-x: hidden;
 }
 
-/* Background Pattern */
+/* Matrix Background Pattern */
 body::before {
   content: '';
   position: fixed;
@@ -56,9 +69,16 @@ body::before {
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(255,255,255,0.05) 0%, transparent 30%);
+    radial-gradient(circle at 20% 80%, rgba(0, 255, 65, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 0, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(0, 255, 65, 0.02) 0%, transparent 30%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 65, 0.01) 2px,
+      rgba(0, 255, 65, 0.01) 4px
+    );
   pointer-events: none;
   z-index: 0;
 }
@@ -484,24 +504,24 @@ body::before {
 }
 
 .progress-fill.humidity {
-  background: linear-gradient(90deg, #60a5fa, #38bdf8);
-  box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+  background: linear-gradient(90deg, var(--matrix-green), var(--matrix-green-light));
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
 }
 
 .progress-fill.uv-low {
-  background: linear-gradient(90deg, #4ade80, #22c55e);
+  background: linear-gradient(90deg, var(--matrix-green), #00cc33);
 }
 
 .progress-fill.uv-moderate {
-  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  background: linear-gradient(90deg, var(--matrix-yellow), #cccc00);
 }
 
 .progress-fill.uv-high {
-  background: linear-gradient(90deg, #f97316, #ef4444);
+  background: linear-gradient(90deg, #ff8800, #ff4400);
 }
 
 .progress-fill.uv-very-high {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
+  background: linear-gradient(90deg, #ff0000, #cc0000);
 }
 
 /* Wind Compass */
@@ -831,14 +851,14 @@ body::before {
   font-size: 1.25rem;
 }
 
-/* Loading Overlay */
+/* Loading Overlay - Matrix Style */
 .loading-overlay-modern {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%);
   display: none;
   justify-content: center;
   align-items: center;
@@ -850,16 +870,28 @@ body::before {
 }
 
 .loading-spinner-modern {
-  width: 50px;
-  height: 50px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  width: 60px;
+  height: 60px;
+  border: 3px solid rgba(0, 255, 65, 0.2);
+  border-top-color: #00ff41;
+  border-right-color: #ffff00;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite, matrix-pulse 2s ease-in-out infinite;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes matrix-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    filter: brightness(1);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(0, 255, 65, 0.8), 0 0 60px rgba(255, 255, 0, 0.3);
+    filter: brightness(1.2);
+  }
 }
 
 /* Skeleton Loading */

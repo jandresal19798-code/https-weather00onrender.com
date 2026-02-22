@@ -395,10 +395,10 @@ function updateWeatherCards(report) {
   const wind = report.windSpeed || 10;
   const pressure = report.pressure || 1013;
   
-  // Humidity
+  // Humidity - no decimals
   const humidityEl = document.getElementById('humidity-value');
   const humidityBar = document.getElementById('humidity-bar');
-  if (humidityEl) humidityEl.textContent = humidity + '%';
+  if (humidityEl) humidityEl.textContent = Math.round(humidity) + '%';
   if (humidityBar) humidityBar.style.width = humidity + '%';
   
   // Wind
@@ -424,8 +424,8 @@ function updateWeatherCards(report) {
     uvBadge.className = `uv-badge ${uv <= 2 ? 'low' : uv <= 5 ? 'moderate' : uv <= 7 ? 'high' : uv <= 10 ? 'very-high' : 'extreme'}`;
   }
   
-  // Visibility
-  const visibility = (8 + Math.random() * 4).toFixed(1);
+  // Visibility - no decimals
+  const visibility = Math.round(8 + Math.random() * 4);
   const visEl = document.getElementById('visibility-value');
   if (visEl) visEl.innerHTML = `${visibility} <small class="card-unit">km</small>`;
   
@@ -779,6 +779,48 @@ async function generatePDFReport() {
 
 let chatHistory = [];
 
+const weatherResponses = {
+  'default': [
+    "Los datos meteorológicos indican condiciones {condition}. ¿Hay algo específico que quieras saber?",
+    "Berdasarkan data, suhu saat ini sekitar {temp}°C. Ada yang ingin ditanyakan?",
+    "El clima actual muestra {condition}. Puedo darte más detalles si me preguntas."
+  ],
+  'caluroso': [
+    "¡Hace calor! Remember to stay hydrated and use sunscreen. 🧴",
+    "Calor extremo hoy. Avoid outdoor activities during peak hours."
+  ],
+  'frio': [
+    "¡Está frío! Brrr... 🧥 Recomiendo abrigarse bien.",
+    "Cold weather ahead. Don't forget your warm clothes! ❄️"
+  ],
+  'lluvia': [
+    "🌧️ Se espera lluvia. No olvides tu paraguas!",
+    "Rain expected. Bring an umbrella just in case! ☔"
+  ],
+  'soleado': [
+    "☀️ Día soleado perfecto para actividades al aire libre!",
+    "Sunny day! Perfect for going outside. Don't forget sunglasses! 🕶️"
+  ]
+};
+
+function getOfflineResponse(message) {
+  const msg = message.toLowerCase();
+  let condition = 'normal';
+  
+  if (currentReport) {
+    const temp = currentReport.temperature;
+    const desc = (currentReport.description || '').toLowerCase();
+    
+    if (temp >= 30) condition = 'caluroso';
+    else if (temp <= 10) condition = 'frio';
+    else if (desc.includes('lluvia') || desc.includes('rain')) condition = 'lluvia';
+    else if (desc.includes('sol') || desc.includes('clear')) condition = 'soleado';
+  }
+  
+  const responses = weatherResponses[condition] || weatherResponses['default'];
+  return responses[Math.floor(Math.random() * responses.length)].replace('{condition}', currentReport?.description || 'variable').replace('{temp}', Math.round(currentReport?.temperature || 20));
+}
+
 async function sendChatMessage() {
   const input = document.getElementById('chatbot-input');
   if (!input) return;
@@ -802,6 +844,9 @@ async function sendChatMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: content, context: currentReport, history: chatHistory })
     });
+    
+    if (!response.ok) throw new Error('API unavailable');
+    
     const data = await response.json();
 
     container.removeChild(container.lastChild);
@@ -810,7 +855,8 @@ async function sendChatMessage() {
     container.scrollTop = container.scrollHeight;
   } catch (e) {
     container.removeChild(container.lastChild);
-    container.innerHTML += '<div class="msg-bubble msg-assistant">Lo siento, error de conexión.</div>';
+    const offlineResponse = getOfflineResponse(content);
+    container.innerHTML += '<div class="msg-bubble msg-assistant">' + offlineResponse + '</div>';
   }
 }
 
