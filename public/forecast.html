@@ -4,19 +4,346 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <meta name="theme-color" content="#3b82f6">
-  <meta name="description" content="Zeus Meteo - Pronóstico meteorológico premium con Glassmorphism">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="description" content="Zeus Meteo - Pronóstico meteorológico Matrix Style">
 
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%233b82f6'/><stop offset='100%25' stop-color='%236366f1'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23FFD93D'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='white'/></svg>">
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2300ff41'/><stop offset='100%25' stop-color='%23ffff00'/></linearGradient></defs><rect fill='url(%23g)' width='512' height='512' rx='128'/><circle cx='200' cy='200' r='70' fill='%23ffffff'/><path d='M175 315 Q200 275 225 315 Q250 355 200 380 Q150 355 175 315' fill='%2300ff41'/></svg>">
 
   <title>Zeus Meteo - Tu Clima en Tiempo Real</title>
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="weather-glass.css?v=6">
-  ...
-  <script src="weather-glass.js?v=6"></script>
-</body>
+  <link rel="stylesheet" href="weather-glass.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
 
+<body>
+  <div class="loading-overlay-modern" id="loading">
+    <div class="loading-content-modern">
+      <div class="loading-spinner-modern"></div>
+      <h2 style="font-family: 'Outfit', sans-serif; letter-spacing: 4px; font-weight: 800; margin-top: 1rem; color: #00ff41;">ZEUS METEO</h2>
+      <p id="loading-message" style="opacity: 0.7; margin-top: 0.5rem; color: #00ff41;">Cargando datos meteorológicos...</p>
+    </div>
+  </div>
+
+  <nav class="landing-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">ZEUS METEO</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="forecast.html" class="nav-link active">Clima</a>
+        <button class="unit-toggle" onclick="window.toggleTemperatureUnit()">
+          <span class="unit-btn active" id="unit-c">°C</span>
+          <span class="unit-btn" id="unit-f">°F</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="forecast-main-modern">
+    <div class="hero-weather glass-card" id="empty-state-hero">
+      <div class="hero-content" style="max-width: 600px; margin: 0 auto; text-align: center;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: #00ff41;">
+          Descubre el Clima
+          <span style="display: block; color: #ffff00;">en Tiempo Real</span>
+        </h1>
+        
+        <p style="opacity: 0.7; margin-bottom: 2rem; color: #00ff41;">
+          Pronósticos precisos de múltiples fuentes meteorológicas confiables.
+        </p>
+
+        <div class="search-container" style="margin: 0 auto;">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="location-input" class="search-input" 
+              placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires)"
+              autocomplete="off"
+              oninput="handleSearchInput(this)"
+              onkeypress="if(event.key==='Enter')searchWeather()">
+            <button class="search-btn-primary" onclick="searchWeather()">Buscar</button>
+            <button class="location-btn" onclick="searchCurrentLocation()" title="Mi ubicación">📍</button>
+          </div>
+          <div id="search-suggestions" class="search-suggestions"></div>
+        </div>
+
+        <p style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.75rem; color: #00ff41;">
+          Presiona <kbd>Ctrl</kbd> + <kbd>K</kbd> para buscar
+        </p>
+
+        <div class="quick-cities-section" style="justify-content: center;">
+          <span class="section-label">Ciudades populares:</span>
+          <div class="cities-pills" style="justify-content: center;">
+            <button class="city-pill" onclick="quickSearch('Montevideo')">
+              <span class="pill-flag">🇺🇾</span> Montevideo
+            </button>
+            <button class="city-pill" onclick="quickSearch('Madrid')">
+              <span class="pill-flag">🇪🇸</span> Madrid
+            </button>
+            <button class="city-pill" onclick="quickSearch('Buenos Aires')">
+              <span class="pill-flag">🇦🇷</span> Buenos Aires
+            </button>
+            <button class="city-pill" onclick="quickSearch('Nueva York')">
+              <span class="pill-flag">🇺🇸</span> Nueva York
+            </button>
+          </div>
+        </div>
+
+        <div class="recent-cities glass-card" style="margin-top: 2rem; padding: 1rem;">
+          <span class="section-label">Ciudades Recientes:</span>
+          <div class="recent-list" id="recent-cities-list">
+            <div class="empty-state" style="padding: 1rem;">
+              <p>No hay ciudades recientes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content" id="main-content">
+      <!-- Hero Card -->
+      <div class="glass-card hero-card" style="position: relative;">
+        <div class="weather-main">
+          <div class="location-info">
+            <h2 id="city-name">Montevideo</h2>
+            <p class="date" id="current-date">Cargando...</p>
+          </div>
+          <div class="weather-icon" id="weather-icon">☀️</div>
+        </div>
+        <div class="temperature-display">
+          <div class="temp" id="current-temp">--</div>
+          <p class="feels-like" id="weather-description">Cargando...</p>
+        </div>
+      </div>
+
+      <!-- Humidity -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-droplet"></i>
+          <span>Humedad</span>
+        </div>
+        <div class="card-value" id="humidity-value">--<small class="card-unit">%</small></div>
+        <div class="progress-bar">
+          <div class="progress-fill humidity" id="humidity-bar" style="width: 50%;"></div>
+        </div>
+      </div>
+
+      <!-- Wind -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-wind"></i>
+          <span>Viento</span>
+        </div>
+        <div class="wind-compass">
+          <i class="fas fa-location-arrow compass-icon" id="compass-icon"></i>
+          <div class="wind-speed" id="wind-value">--<small class="card-unit">km/h</small></div>
+          <div class="wind-direction" id="wind-direction">--</div>
+        </div>
+      </div>
+
+      <!-- UV -->
+      <div class="glass-card weather-card uv-card">
+        <div class="card-header">
+          <i class="fas fa-sun"></i>
+          <span>Índice UV</span>
+        </div>
+        <div class="card-value" id="uv-value">--</div>
+        <div class="uv-level">
+          <span class="uv-badge moderate" id="uv-badge">--</span>
+        </div>
+      </div>
+
+      <!-- Pressure -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-gauge-high"></i>
+          <span>Presión</span>
+        </div>
+        <div class="card-value" id="pressure-value">--<small class="card-unit">hPa</small></div>
+      </div>
+
+      <!-- Visibility -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-eye"></i>
+          <span>Visibilidad</span>
+        </div>
+        <div class="card-value" id="visibility-value">--<small class="card-unit">km</small></div>
+      </div>
+
+      <!-- Sunrise/Sunset -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-sunrise"></i>
+          <span>Sol</span>
+        </div>
+        <div class="sun-chart">
+          <div class="sun-arc">
+            <div class="arc-path"></div>
+            <div class="sun-position" id="sun-position" style="left: 30%;"></div>
+          </div>
+          <div class="sun-times">
+            <span>
+              <span class="time" id="sunrise-time">--:--</span>
+              <span class="label">Amanecer</span>
+            </span>
+            <span>
+              <span class="time" id="sunset-time">--:--</span>
+              <span class="label">Atardecer</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dew Point -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-temperature-low"></i>
+          <span>Punto de Rocío</span>
+        </div>
+        <div class="card-value" id="dew-value">--<small class="card-unit">°</small></div>
+      </div>
+
+      <!-- Moon -->
+      <div class="glass-card weather-card moon-card">
+        <div class="card-header">
+          <i class="fas fa-moon"></i>
+          <span>Luna</span>
+        </div>
+        <div class="moon-icon" id="moon-icon">🌕</div>
+        <div class="moon-phase" id="moon-phase">Luna Llena</div>
+        <div class="moon-illumination" id="moon-illumination">100% iluminada</div>
+      </div>
+
+      <!-- AQI -->
+      <div class="glass-card weather-card aqi-card">
+        <div class="card-header">
+          <i class="fas fa-wind"></i>
+          <span>Calidad del Aire</span>
+        </div>
+        <div class="aqi-value" id="aqi-value">--</div>
+        <div class="aqi-status" id="aqi-status">--</div>
+        <div class="aqi-scale">
+          <div class="aqi-good"></div>
+          <div class="aqi-moderate"></div>
+          <div class="aqi-unhealthy-sensitive"></div>
+          <div class="aqi-unhealthy"></div>
+          <div class="aqi-very-unhealthy"></div>
+        </div>
+      </div>
+
+      <!-- Weather Map -->
+      <div class="glass-card map-card" style="grid-column: span 2; grid-row: span 2;">
+        <div class="map-tabs">
+          <button class="map-tab active" onclick="switchMapLayer('temperature')">🌡️ Temp</button>
+          <button class="map-tab" onclick="switchMapLayer('rain')">🌧️ Lluvia</button>
+          <button class="map-tab" onclick="switchMapLayer('wind')">💨 Viento</button>
+          <button class="map-tab" onclick="switchMapLayer('satellite')">🛰️ Sat</button>
+        </div>
+        <iframe id="weather-map-iframe" 
+          src="https://openweathermap.org/weathermap?basemap=map&cities=false&layer=temperature&lat=-34.9&lon=-56.15&zoom=5"
+          title="Mapa meteorológico">
+        </iframe>
+      </div>
+
+      <!-- Chart -->
+      <div class="glass-card chart-card">
+        <div class="card-header">
+          <i class="fas fa-chart-line"></i>
+          <span>Tendencia de Temperatura</span>
+        </div>
+        <div class="chart-container" id="temperature-chart"></div>
+      </div>
+
+      <!-- Hourly -->
+      <div class="hourly-scroll glass-card" id="hourly-forecast" style="grid-column: span 4; padding: 1rem; overflow-x: auto; display: flex; gap: 0.75rem;">
+      </div>
+
+      <!-- 7-Day -->
+      <div class="forecast-scroll glass-card" id="daily-forecast" style="grid-column: span 4; padding: 1rem;">
+      </div>
+
+      <!-- Recommendations -->
+      <div class="glass-card rec-card" style="grid-column: span 2;">
+        <div class="card-header">
+          <i class="fas fa-shirt"></i>
+          <span>Recomendaciones</span>
+        </div>
+        <div class="rec-items" id="recommendations-list">
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="glass-card weather-card" style="grid-column: span 2;">
+        <div class="card-header">
+          <i class="fas fa-actions"></i>
+          <span>Acciones</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+          <button class="search-btn-primary" onclick="generatePDFReport()" style="width: 100%;">
+            <i class="fas fa-file-pdf"></i> Descargar PDF
+          </button>
+          <button class="city-pill" onclick="toggleChatbot()" style="width: 100%; justify-content: center;">
+            <i class="fas fa-robot"></i> Chat con Zeus
+          </button>
+        </div>
+      </div>
+
+      <!-- Weather Facts -->
+      <div class="glass-card rec-card" style="grid-column: span 2;">
+        <div class="card-header">
+          <i class="fas fa-lightbulb"></i>
+          <span>Curiosidades</span>
+        </div>
+        <div class="fact-content" id="weather-fact">
+          <p>🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.</p>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="glass-card rec-card" style="grid-column: span 4;">
+        <div class="card-header">
+          <i class="fas fa-link"></i>
+          <span>Enlaces Meteorología</span>
+        </div>
+        <div class="links-list">
+          <a href="https://www.inumet.gub.uy" target="_blank" class="weather-link">🇺🇾 INUMET</a>
+          <a href="https://www.smn.gob.ar" target="_blank" class="weather-link">🇦🇷 SMN</a>
+          <a href="https://openweathermap.org" target="_blank" class="weather-link">🌐 OpenWeather</a>
+          <a href="https://www.ventusky.com" target="_blank" class="weather-link">🗺️ Ventusky</a>
+          <a href="https://www.windy.com" target="_blank" class="weather-link">🌪️ Windy</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Chatbot -->
+  <div class="chatbot-container glass-card" id="chatbot-container" style="display: none;">
+    <div class="chatbot-header">
+      <span><i class="fas fa-robot"></i> Zeus</span>
+      <button onclick="toggleChatbot()" style="background: none; border: none; color: white; cursor: pointer;">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="chatbot-messages" id="chatbot-messages">
+      <div class="msg-bubble msg-assistant">
+        ¡Hola! Soy Zeus. Pregúntame sobre el clima 🌤️
+      </div>
+    </div>
+    <div class="chatbot-input">
+      <input type="text" id="chatbot-input" placeholder="Escribe..." 
+        onkeypress="if(event.key==='Enter')sendChatMessage()">
+      <button onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <script src="weather-glass.js?v=7"></script>
+</body>
 </html>
