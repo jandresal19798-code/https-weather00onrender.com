@@ -433,9 +433,13 @@ function toggleChatbot() {
   container.classList.toggle('active');
 }
 
+function toggleHighContrast() {
+  document.body.classList.toggle('high-contrast');
+}
+
+// =================================IZATION
 // ============================================
-// INITIALIZATION
-// ============================================
+// INITIAL===========
 document.addEventListener('DOMContentLoaded', () => {
   // Check for city parameter
   const params = new URLSearchParams(window.location.search);
