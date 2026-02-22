@@ -212,6 +212,41 @@ function generateMockForecast(location, days = 7) {
   });
 }
 
+// Hourly forecast endpoint
+app.get('/api/forecast', async (req, res) => {
+  try {
+    const { location } = req.query;
+
+    if (!location) {
+      return res.status(400).json({ error: 'Ubicación requerida' });
+    }
+
+    const cacheKey = getCacheKey('/api/forecast', { location });
+    const cached = getCached(cacheKey);
+
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const { OpenMeteo } = await import('./src/weatherSources.js');
+    const openMeteo = new OpenMeteo();
+    const hourlyData = await openMeteo.getHourlyForecast(location);
+
+    const response = {
+      success: true,
+      location,
+      hourly: hourlyData,
+      source: 'Open-Meteo'
+    };
+
+    setCache(cacheKey, response);
+    res.json(response);
+  } catch (error) {
+    console.error('Forecast error:', error);
+    res.status(503).json({ error: 'Servicio no disponible', success: false });
+  }
+});
+
 app.get('/api/forecast-15days', async (req, res) => {
   try {
     const { location } = req.query;

@@ -219,6 +219,27 @@ export class OpenMeteo extends WeatherSource {
     }));
   }
 
+  async getHourlyForecast(location) {
+    const coords = await this.getCoordinates(location);
+    const response = await axios.get(`${this.baseUrl}/forecast`, {
+      params: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        hourly: 'temperature_2m,weather_code,precipitation_probability,wind_speed_10m',
+        timezone: 'auto',
+        forecast_hours: 24
+      }
+    });
+
+    return response.data.hourly.time.map((time, index) => ({
+      time: time,
+      temp: response.data.hourly.temperature_2m[index],
+      icon: this.getWeatherDescription(response.data.hourly.weather_code[index]),
+      precip: response.data.hourly.precipitation_probability[index] || 0,
+      wind: response.data.hourly.wind_speed_10m[index]
+    }));
+  }
+
   formatData(data, location) {
     return {
       source: 'OpenMeteo',
