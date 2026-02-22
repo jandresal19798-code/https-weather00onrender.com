@@ -295,11 +295,11 @@ detail-item">
         <!-- Right Column - Details -->
         <div class="sidebar-nasa" style="display: flex; flex-direction: column; gap: 1rem;">
           
-          <!-- AI Analysis -->
+          <!-- Weather Map -->
           <section class="glass-card">
-            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">🧠 Análisis del Agente</h2>
-            <div id="ai-recommendation" style="font-size: 0.95rem; line-height: 1.6; opacity: 0.9;">
-              Analizando variables meteorológicas...
+            <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">🗺️ Mapa del Clima</h2>
+            <div class="weather-map-container" id="weather-map-container">
+              <iframe id="weather-map" style="width: 100%; height: 200px; border: none; border-radius: 12px;" allowfullscreen loading="lazy"></iframe>
             </div>
           </section>
 
@@ -447,7 +447,7 @@ detail-item">
   </div>
 
   <!-- Scripts -->
-  <script src="weather-enhanced.js?v=20"></script>
+  <script src="weather-enhanced.js?v=22"></script>
   <script>
     window.addEventListener('load', () => {
       const lastSearch = localStorage.getItem('last_location');

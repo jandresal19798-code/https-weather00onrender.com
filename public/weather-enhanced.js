@@ -39,7 +39,7 @@ function getWeatherIconSVG(description) {
 }
 
 // ============================================
-// PDF REPORT GENERATION
+// PDF REPORT GENERATION - COMPREHENSIVE
 // ============================================
 async function generatePDFReport() {
   if (!currentReport) {
@@ -51,91 +51,205 @@ async function generatePDFReport() {
   const doc = new jsPDF();
   
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   let y = 20;
   
-  // Header
-  doc.setFillColor(11, 61, 145);
-  doc.rect(0, 0, pageWidth, 40, 'F');
+  // Modern color palette
+  const colors = {
+    primary: [34, 197, 94],    // Green
+    secondary: [234, 179, 8],    // Yellow/Gold
+    accent: [249, 115, 22],      // Orange
+    dark: [15, 23, 42],          // Dark slate
+    light: [248, 250, 252]       // Light
+  };
+  
+  // Header with gradient effect
+  doc.setFillColor(...colors.primary);
+  doc.rect(0, 0, pageWidth, 45, 'F');
+  
+  doc.setFillColor(...colors.accent);
+  doc.rect(0, 40, pageWidth, 8, 'F');
   
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
+  doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
-  doc.text('ZEUS METEO', pageWidth / 2, 20, { align: 'center' });
+  doc.text('ZEUS METEO', pageWidth / 2, 22, { align: 'center' });
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Informe Meteorológico', pageWidth / 2, 30, { align: 'center' });
+  doc.text('Informe Meteorológico Completo', pageWidth / 2, 32, { align: 'center' });
   
-  y = 55;
+  y = 60;
   doc.setTextColor(0, 0, 0);
   
-  // Location & Date
-  doc.setFontSize(18);
+  // Location & Date Section
+  doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
   doc.text(currentReport.location || 'Ubicación', 20, y);
   
-  y += 10;
+  y += 8;
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  doc.text(new Date().toLocaleDateString('es-ES', { 
+  const dateStr = new Date().toLocaleDateString('es-ES', { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
-    day: 'numeric' 
-  }), 20, y);
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  doc.setTextColor(100, 100, 100);
+  doc.text(dateStr, 20, y);
   
   y += 15;
-  
-  // Main Weather Data
-  doc.setDrawColor(200, 200, 200);
+  doc.setDrawColor(...colors.primary);
+  doc.setLineWidth(0.5);
   doc.line(20, y, pageWidth - 20, y);
   
   y += 15;
+  
+  // Main Weather Data Card
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(15, y - 5, pageWidth - 30, 85, 3, 3, 'F');
+  
+  y += 5;
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('Condiciones Actuales', 20, y);
+  doc.setTextColor(...colors.primary);
+  doc.text('CONDICIONES ACTUALES', 25, y);
   
   y += 12;
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   
-  const mainData = [
-    ['Temperatura:', `${Math.round(currentReport.temperature)}°C`],
-    ['Sensación térmica:', `${Math.round(currentReport.feelsLike || currentReport.temperature)}°C`],
-    ['Humedad:', `${currentReport.humidity || 50}%`],
-    ['Viento:', `${Math.round(currentReport.windSpeed || 10)} km/h`],
-    ['Presión:', `${currentReport.pressure || 1013} hPa`],
-    ['Condición:', currentReport.description || 'N/A']
-  ];
+  const temp = Math.round(currentReport.temperature);
+  const feelsLike = Math.round(currentReport.feelsLike || currentReport.temperature);
+  const humidity = currentReport.humidity || 50;
+  const wind = Math.round(currentReport.windSpeed || 10);
+  const pressure = currentReport.pressure || 1013;
+  const description = currentReport.description || 'N/A';
   
-  mainData.forEach(([label, value]) => {
-    doc.setFont('helvetica', 'normal');
-    doc.text(label, 25, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text(value, 80, y);
-    y += 8;
-  });
+  // Row 1
+  doc.setTextColor(0, 0, 0);
+  doc.text('🌡️ Temperatura:', 25, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${temp}°C`, 70, y);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.text('💧 Humedad:', 110, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${humidity}%`, 145, y);
   
   y += 10;
   
-  // AI Analysis
-  if (currentReport.analysis) {
-    doc.line(20, y, pageWidth - 20, y);
-    y += 15;
+  // Row 2
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(0, 0, 0);
+  doc.text('🌡️ Sensación:', 25, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${feelsLike}°C`, 70, y);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.text('💨 Viento:', 110, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${wind} km/h`, 145, y);
+  
+  y += 10;
+  
+  // Row 3
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(0, 0, 0);
+  doc.text('⏱️ Presión:', 25, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${pressure} hPa`, 70, y);
+  
+  doc.setFont('helvetica', 'normal');
+  doc.text('☁️ Condición:', 110, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text(description.charAt(0).toUpperCase() + description.slice(1), 145, y);
+  
+  y += 25;
+  
+  // Additional Metrics
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(15, y - 5, pageWidth - 30, 70, 3, 3, 'F');
+  
+  y += 5;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...colors.secondary);
+  doc.text('MÉTRICAS ADICIONALES', 25, y);
+  
+  y += 12;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  
+  const dewPoint = document.getElementById('dew-point')?.textContent || '--';
+  const uvIndex = document.getElementById('uv-index')?.textContent || '--';
+  const visibility = document.getElementById('visibility')?.textContent || '--';
+  const cloudCover = document.getElementById('cloud-cover')?.textContent || '--';
+  const gusts = document.getElementById('gusts')?.textContent || '--';
+  const aqi = document.getElementById('aqi-value')?.textContent || '--';
+  
+  doc.text(`Punto de Rocío: ${dewPoint}`, 25, y);
+  doc.text(`Índice UV: ${uvIndex}`, 110, y);
+  
+  y += 8;
+  doc.text(`Visibilidad: ${visibility}`, 25, y);
+  doc.text(`Nubosidad: ${cloudCover}`, 110, y);
+  
+  y += 8;
+  doc.text(`Ráfagas: ${gusts}`, 25, y);
+  doc.text(`Calidad del Aire (AQI): ${aqi}`, 110, y);
+  
+  y += 25;
+  
+  // Recommendations Section
+  doc.setFillColor(...colors.accent);
+  doc.roundedRect(15, y - 5, pageWidth - 30, 60, 3, 3, 'F');
+  
+  y += 5;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('RECOMENDACIONES', 25, y);
+  
+  y += 10;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  
+  const recommendations = generateRecommendations(temp, humidity, wind, description);
+  recommendations.forEach(rec => {
+    doc.text(`• ${rec}`, 25, y);
+    y += 7;
+  });
+  
+  y += 15;
+  
+  // Forecast if available
+  if (currentDailyForecast && currentDailyForecast.length > 0) {
+    if (y > pageHeight - 60) {
+      doc.addPage();
+      y = 20;
+    }
+    
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(15, y - 5, pageWidth - 30, 50, 3, 3, 'F');
+    
+    y += 5;
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('Análisis del Agente IA', 20, y);
+    doc.setTextColor(...colors.primary);
+    doc.text('PRONÓSTICO PRÓXIMOS DÍAS', 25, y);
     
     y += 10;
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    const analysisLines = doc.splitTextToSize(currentReport.analysis, pageWidth - 40);
-    analysisLines.forEach(line => {
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(line, 25, y);
+    doc.setTextColor(0, 0, 0);
+    
+    currentDailyForecast.slice(0, 5).forEach((day, i) => {
+      const dayName = typeof day.day === 'string' ? day.day : `Día ${i + 1}`;
+      doc.text(`${dayName}: ${Math.round(day.temp || day.high || 20)}° - ${day.icon || '☁️'}`, 25, y);
       y += 6;
     });
   }
@@ -144,17 +258,79 @@ async function generatePDFReport() {
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.setFontSize(9);
-    doc.setTextColor(128, 128, 128);
-    doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
-    doc.text('Generado por Zeus Meteo - weather-agent-mbnt.onrender.com', pageWidth / 2, 295, { align: 'center' });
+    doc.setFillColor(...colors.primary);
+    doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
+    
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 7, { align: 'center' });
+    doc.text('Zeus Meteo - weather-agent-mbnt.onrender.com', pageWidth / 2, pageHeight - 3, { align: 'center' });
   }
   
   // Save
   const fileName = `Zeus_Meteo_${(currentReport.location || 'reporte').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fileName);
   
-  showNotification('Informe PDF generado exitosamente', 'success');
+  showNotification('📄 Informe PDF descargado exitosamente', 'success');
+}
+
+function generateRecommendations(temp, humidity, wind, description) {
+  const recs = [];
+  const desc = description.toLowerCase();
+  
+  if (temp >= 35) {
+    recs.push('Extremar precaución por ola de calor. Hidratarse frecuentemente.');
+    recs.push('Evitar exposición solar directa entre 12-17h.');
+  } else if (temp >= 30) {
+    recs.push('Temperatura alta. Usar protector solar FPS 30+.');
+    recs.push('Ropa ligera y colores claros recomendados.');
+  } else if (temp >= 25) {
+    recs.push('Clima agradable. Perfecto para actividades al aire libre.');
+  } else if (temp <= 5) {
+    recs.push('Temperatura muy baja. Abrígarse adecuadamente.');
+    recs.push('Precaución con tuberías y plantas sensibles al frío.');
+  } else if (temp <= 15) {
+    recs.push('Llevar chaqueta o abrigo, especialmente en la mañana y noche.');
+  }
+  
+  if (humidity >= 80) {
+    recs.push('Alta humedad. Sensación de incomodidad posible.');
+  } else if (humidity < 30) {
+    recs.push('Baja humedad. Hidratarse y usar crema hidratante.');
+  }
+  
+  if (wind >= 50) {
+    recs.push('Vientos fuertes. Precaución al conducir vehículos altos.');
+  }
+  
+  if (desc.includes('lluvia') || desc.includes('rain')) {
+    recs.push('Lluvia esperada. Llevar paraguas o impermeable.');
+    recs.push('Conducir con precaución por roadways mojados.');
+  }
+  
+  if (desc.includes('tormenta') || desc.includes('thunder')) {
+    recs.push('Tormenta eléctrica. Buscar refugio interior.');
+    recs.push('Evitar actividades al aire libre.');
+  }
+  
+  if (recs.length === 0) {
+    recs.push('Condiciones climáticas favorables.');
+    recs.push('Disfruta del día con normalidad.');
+  }
+  
+  return recs.slice(0, 5);
+}
+
+// ============================================
+// WEATHER MAP
+// ============================================
+function updateWeatherMap(lat, lng) {
+  const mapFrame = document.getElementById('weather-map');
+  if (!mapFrame || !lat || !lng) return;
+  
+  // Use OpenStreetMap with weather layer
+  const zoom = 10;
+  mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.5},${lat - 0.5},${lng + 0.5},${lat + 0.5}&layer=mapnik&marker=${lat},${lng}`;
 }
 
 // ============================================
@@ -567,16 +743,16 @@ function updateCurrentWeather(report) {
   const iconEl = document.getElementById('weather-icon');
   iconEl.textContent = getWeatherIcon(report.description);
 
-  // Update Map
+  // Update main map (top section)
   const mapFrame = document.getElementById('map-iframe');
   if (mapFrame && report.lat && report.lng && !isNaN(report.lat) && !isNaN(report.lng)) {
     const lat = parseFloat(report.lat);
     const lng = parseFloat(report.lng);
-    mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.1},${lat - 0.1},${lng + 0.1},${lat + 0.1}&layer=mapnik`;
+    mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.1},${lat - 0.1},${lng + 0.1},${lat + 0.1}&layer=mapnik&marker=${lat},${lng}`;
+    
+    // Also update weather map in sidebar
+    updateWeatherMap(lat, lng);
   }
-
-  // AI Analysis in Panel
-  renderAIAnalysis(report);
 }
 
 function displayDailyForecast(days) {
@@ -645,14 +821,36 @@ function renderTemperatureChart(data) {
 // UTILITIES & POLISH
 // ============================================
 function updateDynamicBackground(desc = '') {
-  const root = document.getElementById('ambient-root');
-  const h = desc.includes('Nublado') || desc.includes('lluv') ? 220 : 200;
-  const s = desc.includes(' Nublado') ? '30%' : '80%';
-  const l = desc.includes('Nublado') ? '30%' : '50%';
-
-  document.documentElement.style.setProperty('--primary-h', h);
-  document.documentElement.style.setProperty('--primary-s', s);
-  document.documentElement.style.setProperty('--primary-l', l);
+  const root = document.documentElement;
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour > 20;
+  const d = (desc || '').toLowerCase();
+  
+  let h, s, l;
+  
+  if (isNight) {
+    // Night: dark green/teal
+    h = 170; s = '40%'; l = '12%';
+  } else if (d.includes('lluvia') || d.includes('rain') || d.includes('tormenta')) {
+    // Rainy: darker teal/green
+    h = 175; s = '50%'; l = '20%';
+  } else if (d.includes('nublado') || d.includes('cloudy')) {
+    // Cloudy: neutral green-gray
+    h = 150; s = '30%'; l = '25%';
+  } else if (d.includes('soleado') || d.includes('clear') || d.includes('despejado')) {
+    // Sunny: bright green/yellow
+    h = 100; s = '60%'; l = '40%;
+  } else if (d.includes('nieve') || d.includes('snow')) {
+    // Snow: light blue-white
+    h = 190; s = '40%'; l = '85%';
+  } else {
+    // Default: green
+    h = 142; s = '50%'; l = '25%';
+  }
+  
+  root.style.setProperty('--primary-h', h);
+  root.style.setProperty('--primary-s', s);
+  root.style.setProperty('--primary-l', l);
 }
 
 function typewriterEffect(element, text) {

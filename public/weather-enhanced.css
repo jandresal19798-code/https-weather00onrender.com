@@ -1,19 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  /* -- Design Tokens -- */
-  --primary-h: 215;
-  --primary-s: 80%;
-  --primary-l: 50%;
+  /* -- Modern Color Palette (Green/Yellow/Orange) -- */
+  --primary-h: 142;      /* Green */
+  --primary-s: 71%;
+  --primary-l: 45%;
 
-  --accent-h: 195;
-  --accent-s: 90%;
-  --accent-l: 45%;
+  --accent-h: 38;        /* Orange/Gold */
+  --accent-s: 95%;
+  --accent-l: 55%;
 
-  --bg-dark: hsl(222, 47%, 11%);
-  --bg-card: hsla(222, 47%, 11%, 0.7);
-  --glass-border: hsla(215, 20%, 65%, 0.15);
-  --glass-shine: hsla(215, 20%, 100%, 0.05);
+  --secondary-h: 48;     /* Yellow */
+  --secondary-s: 90%;
+  --secondary-l: 55%;
+
+  /* Background colors */
+  --bg-dark: hsl(142, 30%, 12%);
+  --bg-card: hsla(142, 25%, 15%, 0.75);
+  --glass-border: hsla(142, 20%, 65%, 0.15);
+  --glass-shine: hsla(38, 90%, 60%, 0.08);
+
+  /* Premium accent colors */
+  --premium-green: #22c55e;
+  --premium-yellow: #eab308;
+  --premium-orange: #f97316;
+  --premium-teal: #14b8a6;
+
+  /* Legacy support */
+  --nasa-blue: var(--premium-green);
+  --nasa-blue-light: #4ade80;
+  --nasa-blue-dark: #166534;
 
   --font-main: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -22,7 +38,7 @@
   --radius-lg: 24px;
   --radius-md: 16px;
 
-  --shadow-premium: 0 20px 50px -12px hsla(222, 47%, 4%, 0.5);
+  --shadow-premium: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
   --shadow-inner: inset 0 1px 1px 0 hsla(0, 0%, 100%, 0.1);
 
   --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
