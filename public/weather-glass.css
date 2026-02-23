@@ -432,6 +432,13 @@ body::before {
   animation: pulse 2s infinite;
 }
 
+.hero-card .weather-icon .weather-icon-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 20px rgba(6, 182, 212, 0.3));
+}
+
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }

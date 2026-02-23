@@ -54,6 +54,46 @@ function getWeatherIcon(desc) {
   return '☀️';
 }
 
+function getWeatherImage(desc) {
+  const d = (desc || '').toLowerCase();
+  const hour = new Date().getHours();
+  const isNight = hour < 6 || hour > 20;
+  
+  const baseUrl = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg';
+  
+  if (d.includes('thunder') || d.includes('tormenta')) {
+    return `${baseUrl}/thunderstorms-day-rain.svg`;
+  }
+  if (d.includes('rain') || d.includes('lluvia')) {
+    if (d.includes('light') || d.includes('ligera')) return `${baseUrl}/rain.svg`;
+    if (d.includes('heavy') || d.includes('fuerte')) return `${baseUrl}/rain.svg`;
+    return `${baseUrl}/rain.svg`;
+  }
+  if (d.includes('drizzle') || d.includes('llovizna')) {
+    return `${baseUrl}/drizzle.svg`;
+  }
+  if (d.includes('snow') || d.includes('nieve')) {
+    return `${baseUrl}/snow.svg`;
+  }
+  if (d.includes('fog') || d.includes('niebla') || d.includes('mist')) {
+    return isNight ? `${baseUrl}/fog-night.svg` : `${baseUrl}/fog.svg`;
+  }
+  if (d.includes('nublado') || d.includes('overcast') || d.includes('cloudy')) {
+    return `${baseUrl}/cloudy.svg`;
+  }
+  if (d.includes('partly') || d.includes('parcialmente')) {
+    return isNight ? `${baseUrl}/partly-cloudy-night.svg` : `${baseUrl}/partly-cloudy-day.svg`;
+  }
+  if (d.includes('clear') || d.includes('despejado') || d.includes('soleado')) {
+    return isNight ? `${baseUrl}/clear-night.svg` : `${baseUrl}/clear-day.svg`;
+  }
+  if (d.includes('wind') || d.includes('viento')) {
+    return `${baseUrl}/wind.svg`;
+  }
+  
+  return isNight ? `${baseUrl}/clear-night.svg` : `${baseUrl}/clear-day.svg`;
+}
+
 function formatTime(date) {
   return new Date(date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }
@@ -469,7 +509,10 @@ function updateMainWeather(report) {
   if (cityEl) cityEl.textContent = report.location;
   if (tempEl) tempEl.textContent = convertTemp(report.temperature);
   if (descEl) descEl.textContent = report.description;
-  if (iconEl) iconEl.textContent = getWeatherIcon(report.description);
+  if (iconEl) {
+    const iconUrl = getWeatherImage(report.description);
+    iconEl.innerHTML = `<img src="${iconUrl}" alt="${report.description}" class="weather-icon-img" onerror="this.style.display='none';this.parentElement.textContent='${getWeatherIcon(report.description)}'">`;
+  }
   
   // Update date
   const dateEl = document.getElementById('current-date');

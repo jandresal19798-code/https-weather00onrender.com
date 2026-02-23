@@ -353,6 +353,11 @@
     font-size: 32px !important;
   }
   
+  .hero-card .weather-icon .weather-icon-img {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  
   .hero-card .location-info h2 {
     font-size: 18px !important;
   }
