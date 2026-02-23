@@ -192,8 +192,39 @@ async function searchWeather() {
   // Save to recent cities
   saveRecentCity(location);
 
+  // Retry function for 503 errors
+  const fetchWithRetry = async (url, maxRetries = 2) => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const response = await fetch(url);
+        if (response.status === 503) {
+          if (i < maxRetries - 1) {
+            showNotification('Servidor despertando... reintentando', 'warning');
+            await new Promise(r => setTimeout(r, 2000));
+            continue;
+          }
+        }
+        return response;
+      } catch (e) {
+        if (i === maxRetries - 1) throw e;
+        await new Promise(r => setTimeout(r, 1500));
+      }
+    }
+  };
+
   try {
-    const response = await fetch('/api/weather?location=' + encodeURIComponent(location));
+    const response = await fetchWithRetry('/api/weather?location=' + encodeURIComponent(location));
+    
+    if (!response) {
+      throw new Error('No response');
+    }
+    
+    if (response.status === 503) {
+      showNotification('Servidor en mantenimiento. Intenta en 30 segundos.', 'error');
+      hideLoading();
+      return;
+    }
+    
     const data = await response.json();
 
     if (data.success) {
@@ -214,7 +245,7 @@ async function searchWeather() {
     }
   } catch (error) {
     console.error('Weather error:', error);
-    showNotification('Error al conectar con Zeus', 'error');
+    showNotification('Error de conexión. El servidor está despertando, espera unos segundos e intenta de nuevo.', 'error');
   } finally {
     hideLoading();
   }
@@ -270,35 +301,30 @@ async function fetchExtendedForecast(location) {
     let forecastData = null;
     let hourlyData = null;
     
-    // Get daily forecast
+    // Get daily forecast (with silent failure for 503)
     try {
       const response = await fetch('/api/forecast-7days?location=' + encodeURIComponent(location));
-      if (response.ok) {
+      if (response.ok && response.status !== 503) {
         const data = await response.json();
         if (data.success && data.forecast && data.forecast.length > 0) {
           forecastData = data.forecast;
         }
       }
     } catch (e) {
-      console.warn('Forecast API error:', e);
+      // Silent fail - will use simulated data
     }
     
-    // Get hourly forecast
+    // Get hourly forecast (with silent failure for 503)
     try {
       const response = await fetch('/api/forecast?location=' + encodeURIComponent(location));
-      if (response.ok) {
+      if (response.ok && response.status !== 503) {
         const data = await response.json();
         if (data.success && data.hourly) {
           hourlyData = data.hourly;
         }
       }
     } catch (e) {
-      console.warn('Hourly forecast error:', e);
-    }
-    
-    // Always process - even if APIs fail, use simulated data
-    if (!forecastData && !hourlyData) {
-      console.log('Using simulated forecast data');
+      // Silent fail - will use simulated data
     }
     
     // Process daily data
@@ -363,7 +389,7 @@ async function fetchExtendedForecast(location) {
     renderTemperatureChart(dailyData);
     
   } catch (e) {
-    console.warn('Forecast error:', e);
+    // Silent fail
   }
 }
 
