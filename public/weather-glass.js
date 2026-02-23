@@ -810,8 +810,8 @@ async function generatePDFReport() {
   
   doc.setFontSize(22);
   doc.setTextColor(0, 0, 0);
- Math.round(currentReport.temperature);
-   const temp = doc.text(temp + '°C', 25, y + 10);
+  const temp = Math.round(currentReport.temperature);
+  doc.text(temp + '°C', 25, y + 10);
   
   doc.setFontSize(12);
   doc.setTextColor(80, 80, 80);
