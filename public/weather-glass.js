@@ -779,7 +779,7 @@ function showRandomFact() {
 setInterval(showRandomFact, 30000);
 
 // ============================================
-// PDF REPORT - PROFESSIONAL
+// PDF REPORT - PROFESSIONAL (NO EMOJIS)
 // ============================================
 
 async function generatePDFReport() {
@@ -787,6 +787,172 @@ async function generatePDFReport() {
     showNotification('No hay datos para generar informe', 'warning');
     return;
   }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const w = doc.internal.pageSize.getWidth();
+  let y = 20;
+
+  // Colors
+  const cyan = [6, 182, 212];
+  const purple = [168, 85, 247];
+  const dark = [30, 30, 30];
+  const gray = [100, 100, 100];
+  const lightGray = [248, 250, 252];
+  
+  // Header
+  doc.setFillColor(...cyan);
+  doc.rect(0, 0, w, 35, 'F');
+  doc.setFillColor(...purple);
+  doc.rect(0, 30, w, 8, 'F');
+  
+  // Logo text
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ZEUS METEO', 20, 22);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Informe Meteorologico Profesional', w - 20, 22, { align: 'right' });
+
+  // Location
+  y = 55;
+  doc.setTextColor(...dark);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text(currentReport.location || 'Ubicacion', 20, y);
+  
+  y += 10;
+  doc.setTextColor(...gray);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  doc.text(dateStr + ' | ' + timeStr, 20, y);
+
+  // Divider
+  y += 10;
+  doc.setDrawColor(...cyan);
+  doc.setLineWidth(0.5);
+  doc.line(20, y, w - 20, y);
+
+  // Main Weather Card
+  y += 15;
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(15, y, w - 30, 50, 3, 3, 'F');
+  
+  // Temperature
+  const temp = Math.round(currentReport.temperature);
+  doc.setTextColor(...cyan);
+  doc.setFontSize(48);
+  doc.setFont('helvetica', 'bold');
+  doc.text(temp + ' C', 25, y + 30);
+  
+  // Description
+  doc.setTextColor(...dark);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'normal');
+  const desc = currentReport.description || 'Despejado';
+  doc.text(desc.charAt(0).toUpperCase() + desc.slice(1), 25, y + 42);
+
+  // Weather Details
+  y += 60;
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(15, y, w - 30, 30, 3, 3, 'F');
+  
+  const humidity = currentReport.humidity || 50;
+  const wind = Math.round(currentReport.windSpeed || 10);
+  const pressure = currentReport.pressure || 1013;
+  
+  const details = [
+    ['Humedad', humidity + '%'],
+    ['Viento', wind + ' km/h'],
+    ['Presion', pressure + ' hPa']
+  ];
+  
+  details.forEach((detail, i) => {
+    const x = 25 + (i * 60);
+    doc.setTextColor(...gray);
+    doc.setFontSize(8);
+    doc.text(detail[0], x, y + 10);
+    doc.setTextColor(...dark);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(detail[1], x, y + 22);
+    doc.setFont('helvetica', 'normal');
+  });
+
+  // 5-Day Forecast
+  y += 45;
+  doc.setFillColor(...cyan);
+  doc.roundedRect(15, y, w - 30, 12, 2, 2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PRONOSTICO 5 DIAS', 20, y + 8);
+  
+  y += 18;
+  if (currentDailyForecast.length > 0) {
+    const forecastDays = currentDailyForecast.slice(0, 5);
+    
+    forecastDays.forEach((day, i) => {
+      const x = 20 + (i * 38);
+      doc.setFillColor(...lightGray);
+      doc.roundedRect(x, y, 35, 35, 2, 2, 'F');
+      
+      // Day name
+      doc.setTextColor(...gray);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(day.day.substring(0, 3), x + 17, y + 10, { align: 'center' });
+      
+      // High/Low temps
+      doc.setFontSize(10);
+      doc.setTextColor(...cyan);
+      doc.setFont('helvetica', 'bold');
+      doc.text(Math.round(day.high) + '', x + 17, y + 22, { align: 'center' });
+      doc.setTextColor(...gray);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text(Math.round(day.low) + '', x + 17, y + 30, { align: 'center' });
+    });
+    y += 42;
+  }
+
+  // Sun times
+  y += 10;
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(15, y, w - 30, 25, 2, 2, 'F');
+  
+  const sunrise = document.getElementById('sunrise-time')?.textContent || '--:--';
+  const sunset = document.getElementById('sunset-time')?.textContent || '--:--';
+  
+  doc.setTextColor(...gray);
+  doc.setFontSize(9);
+  doc.text('Amanecer: ' + sunrise, 25, y + 10);
+  doc.text('Atardecer: ' + sunset, 25, y + 20);
+  
+  // Source
+  doc.setTextColor(...gray);
+  doc.setFontSize(8);
+  doc.text('Fuente: ' + (currentReport.source || 'Open-Meteo'), w - 25, y + 10, { align: 'right' });
+  doc.text('Lat: ' + (currentReport.lat || '--') + ', Lon: ' + (currentReport.lng || '--'), w - 25, y + 20, { align: 'right' });
+
+  // Footer
+  y += 35;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, y, w - 20, y);
+  
+  y += 10;
+  doc.setTextColor(...gray);
+  doc.setFontSize(8);
+  doc.text('Generado por Zeus Meteo | ' + now.toLocaleDateString(), 20, y);
+
+  const fileName = 'Zeus_Meteo_' + (currentReport.location || 'reporte').replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf';
+  doc.save(fileName);
+  showNotification('PDF descargado correctamente', 'success');
+}
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();

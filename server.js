@@ -481,6 +481,10 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { message, history, context } = req.body;
     
+    if (!message) {
+      return res.status(400).json({ error: 'Mensaje requerido' });
+    }
+    
     // Build location and weather context
     const location = context?.location || 'No especificada';
     const weather = context ? 
@@ -489,43 +493,50 @@ app.post('/api/chat', async (req, res) => {
 
     // Check for GROQ_API_KEY
     const apiKey = process.env.GROQ_API_KEY;
+    console.log('Chat request - GROQ_API_KEY configured:', !!apiKey);
     
-    if (apiKey && apiKey !== 'tu_api_key_aqui') {
-      const axios = (await import('axios')).default;
-      const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          {
-            role: 'system',
-            content: `Eres Zeus IA, un asistente meteorológico experto de Zeus Meteo.
-            Ubicación actual: ${location}
-            Clima actual: ${weather}
-            Responde de forma concisa, amigable y en español. Usa emojis relevantes.`
-          },
-          ...(history || []).slice(-10).map(msg => ({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content
-          })),
-          { role: 'user', content: message }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      }, {
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        timeout: 15000
-      });
+    if (apiKey && apiKey !== 'tu_api_key_aqui' && apiKey.length > 10) {
+      try {
+        const axios = (await import('axios')).default;
+        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+          model: 'llama-3.1-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: `Eres Zeus IA, un asistente meteorologico experto de Zeus Meteo.
+              Ubicacion actual: ${location}
+              Clima actual: ${weather}
+              Responde de forma concisa, amigable y en espanol.`
+            },
+            ...(history || []).slice(-6).map(msg => ({
+              role: msg.role === 'user' ? 'user' : 'assistant',
+              content: msg.content
+            })),
+            { role: 'user', content: message }
+          ],
+          temperature: 0.7,
+          max_tokens: 300
+        }, {
+          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          timeout: 20000
+        });
 
-      return res.json({ response: response.data.choices[0].message.content });
+        console.log('Groq response received');
+        return res.json({ response: response.data.choices[0].message.content });
+      } catch (groqError) {
+        console.error('Groq API error:', groqError.response?.data || groqError.message);
+        // Fall through to fallback
+      }
     }
 
     // Fallback: Smart response without API
+    console.log('Using fallback response');
     const fallbackResponse = generateSmartResponse(message, location, weather);
     return res.json({ response: fallbackResponse });
     
   } catch (error) {
     console.error('Chat error:', error.message);
-    // Return fallback on error too
-    const fallbackResponse = generateSmartResponse(req.body.message, 'ubicación', 'clima actual');
+    const fallbackResponse = generateSmartResponse(req.body?.message || 'hola', 'ubicacion', 'clima actual');
     res.json({ response: fallbackResponse });
   }
 });
@@ -534,27 +545,63 @@ app.post('/api/chat', async (req, res) => {
 function generateSmartResponse(message, location, weather) {
   const msg = message.toLowerCase();
   
-  if (msg.includes('hola') || msg.includes('hi') || msg.includes('buenos')) {
-    return `¡Hola! 👋 Soy Zeus IA, tu asistente meteorológico. ¿Quieres saber el clima en ${location}?`;
+  if (msg.includes('hola') || msg.includes('hi') || msg.includes('buenos') || msg.includes('buenas')) {
+    return `¡Hola! 👋 Soy Zeus IA, tu asistente meteorologico de Zeus Meteo. Preguntame sobre el clima, temperatura, lluvia o cualquier duda meteorologica.`;
   }
   
-  if (msg.includes('clima') || msg.includes('tiempo') || msg.includes('temperatura')) {
-    return `El clima actual en ${location} es: ${weather}. ¿Quieres más detalles?`;
+  if (msg.includes('clima') || msg.includes('tiempo') || msg.includes('temperatura') || msg.includes('cuanto')) {
+    return `📍 El clima actual en ${location} es: ${weather}. ¿Quieres saber el pronostico para los proximos dias?`;
   }
   
-  if (msg.includes('llover') || msg.includes('lluvia') || msg.includes('llov')) {
-    return `Para saber si lloverá, necesito verificar el pronóstico. ¿Buscas el clima en alguna ciudad específica?`;
+  if (msg.includes('llover') || msg.includes('lluvia') || msg.includes('llovizna') || msg.includes('paraguas')) {
+    return `🌧️ Para saber si llovera, consulta la seccion de pronostico. Si hay nubes oscuras y humedad alta, es probable que llueva. ¿Buscas el clima en alguna ciudad especifica?`;
   }
   
-  if (msg.includes('calor') || msg.includes('caluroso')) {
-    return `¡Sí! Actualmente hace ${weather}. Recuerda hidratarte y usar protector solar 🧴`;
+  if (msg.includes('calor') || msg.includes('caluroso') || msg.includes('frio') || msg.includes('helado')) {
+    return `🌡️ Actualmente en ${location}: ${weather}. Recuerda hidratarte si hace calor, o abrigarte si hace frio!`;
   }
   
-  if (msg.includes('frío') || msg.includes('frio') || msg.includes('helada')) {
-    return `Brr! Hace frío 🥶. La temperatura actual es ${weather}. Abrígate bien!`;
+  if (msg.includes('viento') || msg.includes('ventoso') || msg.includes('aire')) {
+    return `💨 El viento es importante para la sensacion termica. En ${location} el clima es: ${weather}. Los vientos fuertes pueden hacer que se sienta mas frio.`;
   }
   
-  return `Entiendo tu consulta sobre ${msg.slice(0, 30)}... El clima en ${location} es ${weather}. ¿Hay algo específico que quieras saber?`;
+  if (msg.includes('humedad') || msg.includes('seco')) {
+    return `💧 La humedad afecta como percibimos la temperatura. Clima actual en ${location}: ${weather}. Alta humedad = sensacion de mas calor.`;
+  }
+  
+  if (msg.includes('rayo') || msg.includes('tormenta') || msg.includes('trueno')) {
+    return `⛈️ Si hay tormenta electrica, mantente bajo techo y alejado de arboles y metales. Cada segundo caen unos 100 rayos en el mundo!`;
+  }
+  
+  if (msg.includes('nieve') || msg.includes('nevando')) {
+    return `❄️ La nieve se forma cuando la temperatura es menor a 0°C y hay suficiente humedad. Clima actual: ${weather}`;
+  }
+  
+  if (msg.includes('arcoiris') || msg.includes('arco iris')) {
+    return `🌈 Los arcoiris se forman cuando la luz del sol atraviesa gotas de lluvia. Necesitas sol detras de ti y lluvia enfrente para verlo!`;
+  }
+  
+  if (msg.includes('presion') || msg.includes('barometro')) {
+    return `⏱️ La presion atmosferica indica cambios del clima. Presion alta = buen tiempo. Presion baja = posible lluvia. Clima actual: ${weather}`;
+  }
+  
+  if (msg.includes('amanecer') || msg.includes('atardecer') || msg.includes('sol')) {
+    return `☀️ Los horarios de amanecer y atardecer cambian segun la estacion y ubicacion. Consulta la seccion principal para ver los horarios exactos.`;
+  }
+  
+  if (msg.includes('luna') || msg.includes('fase lunar')) {
+    return `🌙 La Luna tarda 29.5 dias en completar sus fases. La luna llena es la mas brillante. Consulta el widget lunar en la app!`;
+  }
+  
+  if (msg.includes('gracias') || msg.includes('thanks') || msg.includes('genial')) {
+    return `¡De nada! 😊 Estoy aqui para ayudarte con cualquier consulta meteorologica. ¡Que tengas un excelente dia!`;
+  }
+  
+  if (msg.includes('adios') || msg.includes('bye') || msg.includes('chau')) {
+    return `¡Hasta luego! 👋 Vuelve cuando quieras consultar el clima. ¡Cuidate!`;
+  }
+  
+  return `🤔 Entiendo tu pregunta. El clima actual en ${location} es: ${weather}. Puedo ayudarte con informacion sobre temperatura, lluvia, viento, humedad y mas. ¿Que te gustaria saber?`;
 }
 
 app.get('/', (req, res) => {
