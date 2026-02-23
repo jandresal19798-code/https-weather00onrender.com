@@ -245,7 +245,7 @@ class WeatherAgent {
       
       // High accuracy APIs
       'Tomorrow.io': 1.15,
-      '7Timer': 1.1,
+      '7Timer': 0.7,  // Lower weight - returns max forecast temp, not current
       'WttrIn': 1.1,
       'VisualCrossing': 1.05,
       'StormGlass': 1.05,

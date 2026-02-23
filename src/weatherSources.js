@@ -1061,19 +1061,27 @@ export class SevenTimer extends WeatherSource {
   }
 
   formatData(data, location) {
+    const maxTemp = data.temp2m?.max || 20;
+    const minTemp = data.temp2m?.min || 15;
+    const estimatedCurrent = (maxTemp + minTemp) / 2;
+    const hour = new Date().getHours();
+    const dayProgress = hour / 24;
+    const currentEstimate = minTemp + (maxTemp - minTemp) * Math.sin(dayProgress * Math.PI);
+    
     return {
       source: '7Timer',
       timestamp: new Date().toISOString(),
       location: location,
-      temperature: data.temp2m?.max || 20,
-      feelsLike: data.temp2m?.max || 20,
+      temperature: Math.round(currentEstimate * 10) / 10,
+      feelsLike: Math.round(currentEstimate * 10) / 10,
       humidity: data.rh2m ? parseInt(data.rh2m) : 50,
       pressure: 1013,
       windSpeed: data.wind10m?.max || 5,
       windDirection: 180,
-      description: this.getWeatherDescription(data.weather),
+      description: this.getWeatherDescription(data.weather) + ' (estimado)',
       visibility: 10,
-      clouds: this.getClouds(data.weather)
+      clouds: this.getClouds(data.weather),
+      _isEstimated: true
     };
   }
 
