@@ -14,6 +14,7 @@
   <title>Zeus Meteo - Tu Clima en Tiempo Real</title>
 
   <link rel="stylesheet" href="weather-glass.css?v=26">
+  <link rel="stylesheet" href="mobile-fix.css?v=1">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -49,21 +50,21 @@
 
   <main class="forecast-main-modern">
     <div class="hero-weather glass-card" id="empty-state-hero">
-      <div class="hero-content" style="max-width: 600px; margin: 0 auto; text-align: center;">
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: #ffffff;">
+      <div class="hero-content">
+        <h1 class="hero-title">
           Descubre el Clima
-          <span style="display: block; background: linear-gradient(90deg, #06b6d4, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">en Tiempo Real</span>
+          <span class="hero-subtitle">en Tiempo Real</span>
         </h1>
         
-        <p style="opacity: 0.7; margin-bottom: 2rem; color: #00ff41;">
+        <p class="hero-description">
           Pronósticos precisos de múltiples fuentes meteorológicas confiables.
         </p>
 
-        <div class="search-container" style="margin: 0 auto;">
+        <div class="search-container">
           <div class="search-wrapper">
             <span class="search-icon">🔍</span>
             <input type="text" id="location-input" class="search-input" 
-              placeholder="Busca tu ciudad... (ej: Madrid, Buenos Aires)"
+              placeholder="Busca tu ciudad..."
               autocomplete="off"
               oninput="handleSearchInput(this)"
               onkeypress="if(event.key==='Enter')searchWeather()">
@@ -73,13 +74,13 @@
           <div id="search-suggestions" class="search-suggestions"></div>
         </div>
 
-        <p style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.75rem; color: #00ff41;">
+        <p class="search-hint">
           Presiona <kbd>Ctrl</kbd> + <kbd>K</kbd> para buscar
         </p>
 
-        <div class="quick-cities-section" style="justify-content: center;">
+        <div class="quick-cities-section">
           <span class="section-label">Ciudades populares:</span>
-          <div class="cities-pills" style="justify-content: center;">
+          <div class="cities-pills">
             <button class="city-pill" onclick="quickSearch('Montevideo')">
               <span class="pill-flag">🇺🇾</span> Montevideo
             </button>
@@ -95,10 +96,10 @@
           </div>
         </div>
 
-        <div class="recent-cities glass-card" style="margin-top: 2rem; padding: 1rem;">
+        <div class="recent-cities glass-card">
           <span class="section-label">Ciudades Recientes:</span>
           <div class="recent-list" id="recent-cities-list">
-            <div class="empty-state" style="padding: 1rem;">
+            <div class="empty-state">
               <p>No hay ciudades recientes</p>
             </div>
           </div>
@@ -108,7 +109,7 @@
 
     <div class="main-content" id="main-content">
       <!-- Hero Card -->
-      <div class="glass-card hero-card" style="position: relative;">
+      <div class="glass-card hero-card">
         <div class="weather-main">
           <div class="location-info">
             <h2 id="city-name">Montevideo</h2>
