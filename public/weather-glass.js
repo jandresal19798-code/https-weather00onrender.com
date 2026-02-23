@@ -726,20 +726,45 @@ function updateWeatherMap(lat, lng) {
 }
 
 // ============================================
-// WEATHER FACTS
+// WEATHER FACTS & RECOMMENDATIONS
 // ============================================
 
 const weatherFacts = [
+  // Extreme weather
   "🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.",
-  "❄️ Los copos de nieve nunca son exactamente iguales.",
+  "🔥 La temperatura más alta registrada fue 56.7°C en Furnace Creek, California (2020).",
+  "🧊 La temperatura más baja registrada fue -89.2°C en Vostok, Antártida (1983).",
   "🌪️ Los tornados pueden alcanzar velocidades de más de 400 km/h.",
-  "🌧️ El lugar más lluvioso del mundo es Mawsynram, India.",
-  "🔥 La temperatura más alta registrada fue 56.7°C en Furnace Creek, California.",
-  "🧊 La temperatura más baja registrada fue -89.2°C en Vostok, Antártida.",
+  "💨 El viento más fuerte registrado fue 408 km/h en el Monte Washington (1934).",
+  
+  // Rain & Water
+  "🌧️ El lugar más lluvioso del mundo es Mawsynram, India (11,871 mm/año).",
+  "🌧️ El lugar más seco es el Desierto de Atacama, Chile (0.1 mm/año).",
+  "💧 Una tormenta promedio descarga 6 millones de litros de agua.",
+  
+  // Clouds & Sky
+  "☁️ El cumulonimbo puede alcanzar más de 12 km de altura (troposfera).",
+  "🌈 Los arcoíris son círculos completos, pero solo vemos la mitad.",
+  "🌅 El cielo es azul porque la atmósfera dispersa la luz azul.",
+  "🌙 La Luna afecta las mareas y puede influir en el clima.",
+  
+  // Snow & Ice
+  "❄️ Los copos de nieve nunca son exactamente iguales.",
+  "🏔️ La nieve más profunda registrada: 11.5 metros en Mount Fuji.",
+  "❄️ Nieva más frecuentemente en altitudes elevadas por la temperatura.",
+  
+  // Storms & Lightning
   "⚡ Cada segundo caen aproximadamente 100 rayos en la Tierra.",
-  "🌈 Los arcoíris son círculos completos, pero normalmente solo vemos la mitad.",
-  "🌬️ El viento más fuerte registrado fue 408 km/h en el Monte Washington.",
-  "☁️ El cumulonimbo puede alcanzar más de 12 km de altura."
+  "⛈️ El rayo puede alcanzar 30,000°C (5 veces más caliente que el Sol).",
+  "🌀 Los hurricanes liberan energía equivalente a 10,000 bombas atómicas.",
+  
+  // Fun facts
+  "🌡️ El cambio climático ha aumentado las olas de calor un 400%.",
+  "🌍 2023 fue el año más caluroso registrado hasta ahora.",
+  "☀️ El Sol representa el 99.86% de toda la masa del sistema solar.",
+  "🌤️ Las nubes pueden pesar más de 500,000 kilogramos.",
+  "🕐 Un día en Venus dura más que un año en Venus.",
+  "📡 Los meteorólogos usan globos sonda para medir el clima."
 ];
 
 function showRandomFact() {
@@ -754,7 +779,7 @@ function showRandomFact() {
 setInterval(showRandomFact, 30000);
 
 // ============================================
-// PDF REPORT
+// PDF REPORT - PROFESSIONAL
 // ============================================
 
 async function generatePDFReport() {
@@ -766,128 +791,218 @@ async function generatePDFReport() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const w = doc.internal.pageSize.getWidth();
+  const pageWidth = w;
   let y = 20;
 
-  // Header - Matrix Green gradient
-  doc.setFillColor(0, 100, 0);
-  doc.rect(0, 0, w, 45, 'F');
-  doc.setFillColor(0, 255, 65);
-  doc.rect(0, 40, w, 8, 'F');
-
+  // Colors
+  const cyan = [6, 182, 212];
+  const purple = [168, 85, 247];
+  const dark = [30, 30, 30];
+  const gray = [100, 100, 100];
+  
+  // Header with gradient effect
+  doc.setFillColor(...cyan);
+  doc.rect(0, 0, w, 35, 'F');
+  doc.setFillColor(...purple);
+  doc.rect(0, 30, w, 8, 'F');
+  
+  // Logo
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(28);
+  doc.setFontSize(24);
   doc.setFont('helvetica', 'bold');
-  doc.text('ZEUS METEO', w / 2, 22, { align: 'center' });
-  doc.setFontSize(12);
-  doc.text('Informe Meteorológico Profesional', w / 2, 32, { align: 'center' });
-
-  y = 60;
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(20);
-  doc.text(currentReport.location || 'Ubicación', 20, y);
-
-  y += 8;
-  doc.setFontSize(11);
-  doc.setTextColor(100, 100, 100);
-  doc.text(new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), 20, y);
-  doc.text('🕐 ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }), 120, y);
-
-  y += 15;
-  doc.setDrawColor(0, 180, 0);
-  doc.setLineWidth(0.5);
-  doc.line(20, y, w - 20, y);
-
-  // Current conditions box
-  y += 15;
-  doc.setFillColor(240, 255, 240);
-  doc.roundedRect(15, y, w - 30, 50, 3, 3, 'F');
-  y += 12;
-  
-  doc.setFontSize(14);
-  doc.setTextColor(0, 100, 0);
-  doc.text('CONDICIONES ACTUALES', 25, y);
-  y += 10;
-  
-  doc.setFontSize(22);
-  doc.setTextColor(0, 0, 0);
-  const temp = Math.round(currentReport.temperature);
-  doc.text(temp + '°C', 25, y + 10);
-  
-  doc.setFontSize(12);
-  doc.setTextColor(80, 80, 80);
-  doc.text(currentReport.description || 'N/A', 60, y + 10);
-  
-  y += 25;
+  doc.text('⚡ ZEUS METEO', 20, 22);
   doc.setFontSize(10);
-  const humidity = currentReport.humidity || 50;
-  const wind = Math.round(currentReport.windSpeed || 10);
-  const pressure = currentReport.pressure || 1013;
+  doc.setFont('helvetica', 'normal');
+  doc.text('Informe Meteorológico Profesional', pageWidth - 20, 22, { align: 'right' });
+
+  // Location & Date
+  y = 55;
+  doc.setTextColor(...dark);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text(currentReport.location || 'Ubicación', 20, y);
   
-  doc.text('💧 Humedad: ' + humidity + '%', 25, y);
-  doc.text('💨 Viento: ' + wind + ' km/h', 90, y);
-  doc.text('⏱️ Presión: ' + pressure + ' hPa', 150, y);
+  y += 10;
+  doc.setTextColor(...gray);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  doc.text(dateStr + ' • ' + timeStr, 20, y);
+
+  // Divider
+  y += 10;
+  doc.setDrawColor(...cyan);
+  doc.setLineWidth(0.5);
+  doc.line(20, y, pageWidth - 20, y);
+
+  // Main Weather Card
+  y += 20;
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(15, y, w - 30, 70, 3, 3, 'F');
+  
+  // Weather Icon
+  const icon = getWeatherIcon(currentReport.description);
+  doc.setFontSize(40);
+  doc.text(icon, 25, y + 25);
+  
+  // Temperature
+  const temp = Math.round(currentReport.temperature);
+  doc.setTextColor(...dark);
+  doc.setFontSize(48);
+  doc.setFont('helvetica', 'bold');
+  doc.text(temp + '°C', 60, y + 35);
+  
+  // Description
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'normal');
+  doc.text(currentReport.description || 'Despejado', 60, y + 48);
+  
+  // Feels like
+  doc.setTextColor(...gray);
+  doc.setFontSize(10);
+  doc.text('Sensación: ' + (currentReport.feelsLike || temp) + '°C', 60, y + 58);
+
+  // Weather Details Grid
+  y += 85;
+  const details = [
+    { label: '💧 Humedad', value: (currentReport.humidity || 50) + '%' },
+    { label: '💨 Viento', value: Math.round(currentReport.windSpeed || 10) + ' km/h' },
+    { label: '⏱️ Presión', value: (currentReport.pressure || 1013) + ' hPa' },
+    { label: '👁️ Visibilidad', value: (currentReport.visibility || 10) + ' km' },
+    { label: '☁️ Nubes', value: (currentReport.clouds || 30) + '%' },
+    { label: '🌡️ Punto de Rocío', value: Math.round(temp - ((100 - (currentReport.humidity || 50)) / 5)) + '°C' }
+  ];
+  
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(15, y, w - 30, 35, 3, 3, 'F');
+  
+  details.forEach((detail, i) => {
+    const x = 20 + (i * 32);
+    doc.setTextColor(...gray);
+    doc.setFontSize(8);
+    doc.text(detail.label, x, y + 10);
+    doc.setTextColor(...dark);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(detail.value, x, y + 22);
+    doc.setFont('helvetica', 'normal');
+  });
 
   // 5-Day Forecast
-  y += 35;
+  y += 50;
+  doc.setFillColor(...cyan);
+  doc.roundedRect(15, y, w - 30, 12, 2, 2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PRONÓSTICO 5 DÍAS', 20, y + 8);
+  
+  y += 18;
   if (currentDailyForecast.length > 0) {
-    doc.setFillColor(0, 100, 0);
-    doc.roundedRect(15, y, w - 30, 12, 2, 2, 'F');
-    y += 9;
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.text('PRONÓSTICO 5 DÍAS', 20, y);
-    
-    y += 15;
     const forecastDays = currentDailyForecast.slice(0, 5);
     
     forecastDays.forEach((day, i) => {
       const x = 20 + (i * 38);
-      doc.setFillColor(245, 255, 245);
-      doc.roundedRect(x, y, 35, 35, 2, 2, 'F');
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(x, y, 35, 45, 2, 2, 'F');
       
-      doc.setTextColor(0, 80, 0);
+      // Day name
+      doc.setTextColor(...gray);
       doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
       doc.text(day.day.substring(0, 6), x + 17, y + 8, { align: 'center' });
       
-      doc.setFontSize(14);
-      doc.text(day.icon || '☁️', x + 17, y + 20, { align: 'center' });
+      // Icon
+      doc.setFontSize(18);
+      doc.text(day.icon || '☁️', x + 17, y + 22, { align: 'center' });
       
-      doc.setFontSize(10);
+      // High/Low
+      doc.setFontSize(11);
       doc.setTextColor(0, 0, 0);
-      doc.text(Math.round(day.high) + '°', x + 25, y + 30, { align: 'center' });
-      doc.setTextColor(100, 100, 100);
-      doc.text(Math.round(day.low) + '°', x + 10, y + 30, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.text(Math.round(day.high) + '°', x + 25, y + 36, { align: 'center' });
+      doc.setTextColor(...gray);
+      doc.setFont('helvetica', 'normal');
+      doc.text(Math.round(day.low) + '°', x + 10, y + 36, { align: 'center' });
     });
-    y += 45;
+    y += 55;
   }
 
-  // Additional info
+  // Recommendations Section
   y += 10;
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text('☀️ Amanecer: ' + (document.getElementById('sunrise-time')?.textContent || '--:--'), 20, y);
-  doc.text('🌙 Atardecer: ' + (document.getElementById('sunset-time')?.textContent || '--:--'), 80, y);
+  doc.setFillColor(...purple);
+  doc.roundedRect(15, y, w - 30, 12, 2, 2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('📋 RECOMENDACIONES', 20, y + 8);
   
-  y += 8;
-  doc.text('📍 Lat: ' + (currentReport.lat || '--') + ' | Lon: ' + (currentReport.lng || '--'), 20, y);
-  doc.text('🏢 Fuente: ' + (currentReport.source || 'Open-Meteo'), 20, y + 8);
+  y += 18;
+  const recs = getRecommendations(temp, currentReport.humidity || 50, currentReport.windSpeed || 10, currentReport.description);
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(15, y, w - 30, 25, 2, 2, 'F');
+  
+  doc.setTextColor(...dark);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  let recText = recs.join(' • ');
+  doc.text(recText, 20, y + 10, { maxWidth: w - 40 });
+  
+  // Sun times & Moon
+  y += 35;
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(15, y, (w/2) - 20, 30, 2, 2, 'F');
+  doc.roundedRect((w/2) + 5, y, (w/2) - 20, 30, 2, 2, 'F');
+  
+  doc.setTextColor(...gray);
+  doc.setFontSize(9);
+  doc.text('☀️ Amanecer', 20, y + 8);
+  doc.setTextColor(...dark);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(document.getElementById('sunrise-time')?.textContent || '--:--', 20, y + 20);
+  
+  doc.setTextColor(...gray);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('🌙 Atardecer', (w/2) + 10, y + 8);
+  doc.setTextColor(...dark);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(document.getElementById('sunset-time')?.textContent || '--:--', (w/2) + 10, y + 20);
 
   // Footer
-  const pageCount = doc.internal.getNumberOfPages();
-  const h = doc.internal.pageSize.getHeight();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFillColor(0, 100, 0);
-    doc.rect(0, h - 15, w, 15, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(8);
-    doc.text('Zeus Meteo - Informe generado el ' + new Date().toLocaleDateString(), 20, h - 7);
-    doc.text('Página ' + i + ' de ' + pageCount, w / 2, h - 7, { align: 'center' });
-  }
+  y += 45;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(20, y, pageWidth - 20, y);
+  
+  y += 10;
+  doc.setTextColor(...gray);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('🏢 Fuente: ' + (currentReport.source || 'Open-Meteo') + ' | 📍 Lat: ' + (currentReport.lat || '--') + ', Lon: ' + (currentReport.lng || '--'), 20, y);
+  doc.text('Generated by Zeus Meteo | ' + now.toLocaleDateString(), pageWidth - 20, y, { align: 'right' });
 
   const fileName = 'Zeus_Meteo_' + (currentReport.location || 'reporte').replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf';
   doc.save(fileName);
   showNotification('📄 PDF descargado', 'success');
+}
+
+function getRecommendations(temp, humidity, wind, description) {
+  const recs = [];
+  if (temp >= 30) recs.push('🥵 Calor extremo - Hidratarse frecuentemente');
+  else if (temp >= 25) recs.push('☀️ Clima cálido - Protector solar recomendado');
+  else if (temp >= 18) recs.push('🌤️ Clima agradable');
+  else if (temp >= 10) recs.push('🧥 Llevar abrigo');
+  else recs.push('❄️ Frío - Abrígate bien');
+  
+  if (humidity >= 80) recs.push('💧 Alta humedad');
+  if (wind >= 30) recs.push('💨 Viento fuerte');
+  if ((description || '').toLowerCase().includes('lluvia')) recs.push('🌧️ Llevar paraguas');
+  
+  return recs;
 }
 
 // ============================================
