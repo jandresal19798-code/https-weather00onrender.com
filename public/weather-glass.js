@@ -59,39 +59,37 @@ function getWeatherImage(desc) {
   const hour = new Date().getHours();
   const isNight = hour < 6 || hour > 20;
   
-  const baseUrl = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg';
+  const baseUrl = 'https://cdn.jsdelivr.net/npm/open-weather-icons@0.0.7/src/svg';
   
   if (d.includes('thunder') || d.includes('tormenta')) {
-    return `${baseUrl}/thunderstorms-day-rain.svg`;
+    return `${baseUrl}/11d.svg`;
   }
   if (d.includes('rain') || d.includes('lluvia')) {
-    if (d.includes('light') || d.includes('ligera')) return `${baseUrl}/rain.svg`;
-    if (d.includes('heavy') || d.includes('fuerte')) return `${baseUrl}/rain.svg`;
-    return `${baseUrl}/rain.svg`;
+    return `${baseUrl}/10d.svg`;
   }
   if (d.includes('drizzle') || d.includes('llovizna')) {
-    return `${baseUrl}/drizzle.svg`;
+    return `${baseUrl}/09d.svg`;
   }
   if (d.includes('snow') || d.includes('nieve')) {
-    return `${baseUrl}/snow.svg`;
+    return `${baseUrl}/13d.svg`;
   }
-  if (d.includes('fog') || d.includes('niebla') || d.includes('mist')) {
-    return isNight ? `${baseUrl}/fog-night.svg` : `${baseUrl}/fog.svg`;
+  if (d.includes('fog') || d.includes('niebla') || d.includes('mist') || d.includes('neblina')) {
+    return `${baseUrl}/50d.svg`;
   }
-  if (d.includes('nublado') || d.includes('overcast') || d.includes('cloudy')) {
-    return `${baseUrl}/cloudy.svg`;
+  if (d.includes('nublado') || d.includes('overcast')) {
+    return `${baseUrl}/04d.svg`;
   }
   if (d.includes('partly') || d.includes('parcialmente')) {
-    return isNight ? `${baseUrl}/partly-cloudy-night.svg` : `${baseUrl}/partly-cloudy-day.svg`;
+    return isNight ? `${baseUrl}/02n.svg` : `${baseUrl}/02d.svg`;
+  }
+  if (d.includes('cloud') || d.includes('cloudy')) {
+    return `${baseUrl}/03d.svg`;
   }
   if (d.includes('clear') || d.includes('despejado') || d.includes('soleado')) {
-    return isNight ? `${baseUrl}/clear-night.svg` : `${baseUrl}/clear-day.svg`;
-  }
-  if (d.includes('wind') || d.includes('viento')) {
-    return `${baseUrl}/wind.svg`;
+    return isNight ? `${baseUrl}/01n.svg` : `${baseUrl}/01d.svg`;
   }
   
-  return isNight ? `${baseUrl}/clear-night.svg` : `${baseUrl}/clear-day.svg`;
+  return isNight ? `${baseUrl}/01n.svg` : `${baseUrl}/01d.svg`;
 }
 
 function formatTime(date) {
