@@ -13,7 +13,7 @@
 
   <title>Zeus Meteo - Tu Clima en Tiempo Real</title>
 
-  <link rel="stylesheet" href="weather-glass.css?v=20">
+  <link rel="stylesheet" href="weather-glass.css?v=21">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -296,14 +296,36 @@
       </div>
 
       <!-- Weather Facts -->
-      <div class="glass-card rec-card" style="grid-column: span 2;">
+      <div class="glass-card fact-card" style="grid-column: span 2;">
         <div class="card-header">
           <i class="fas fa-lightbulb"></i>
-          <span>Curiosidades</span>
+          <span>Curiosidades del Clima</span>
         </div>
         <div class="fact-content" id="weather-fact">
           <p>🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.</p>
         </div>
+        <button class="fact-refresh-btn" onclick="showRandomFact()">
+          <i class="fas fa-sync-alt"></i> Otra curiosidad
+        </button>
+      </div>
+
+      <!-- Weather News -->
+      <div class="glass-card news-section" style="grid-column: span 2;">
+        <div class="card-header">
+          <i class="fas fa-newspaper"></i>
+          <span>Noticias Meteorológicas</span>
+        </div>
+        <div id="weather-news">
+          <div class="news-card">
+            <div class="news-icon">🔥</div>
+            <div class="news-content">
+              <div class="news-title">Cargando noticias...</div>
+            </div>
+          </div>
+        </div>
+        <button class="fact-refresh-btn" onclick="showRandomNews()">
+          <i class="fas fa-sync-alt"></i> Otra noticia
+        </button>
       </div>
 
       <!-- Links -->
@@ -344,6 +366,6 @@
     </div>
   </div>
 
-  <script src="weather-glass.js?v=20"></script>
+  <script src="weather-glass.js?v=21"></script>
 </body>
 </html>

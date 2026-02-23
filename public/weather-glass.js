@@ -736,36 +736,157 @@ const weatherFacts = [
   "🧊 La temperatura más baja registrada fue -89.2°C en Vostok, Antártida (1983).",
   "🌪️ Los tornados pueden alcanzar velocidades de más de 400 km/h.",
   "💨 El viento más fuerte registrado fue 408 km/h en el Monte Washington (1934).",
+  "⚡ El rayo más ancho medido tenía 678 metros de ancho (Argentina, 2018).",
+  "🥶 La mayor caída de temperatura fue 27°C en solo 2 minutos en South Dakota.",
+  "🌡️ La mayor oscilación térmica en un día fue de 57°C en Montana (1972).",
   
   // Rain & Water
   "🌧️ El lugar más lluvioso del mundo es Mawsynram, India (11,871 mm/año).",
-  "🌧️ El lugar más seco es el Desierto de Atacama, Chile (0.1 mm/año).",
+  "🏜️ El lugar más seco es el Desierto de Atacama, Chile (0.1 mm/año).",
   "💧 Una tormenta promedio descarga 6 millones de litros de agua.",
+  "🌊 La lluvia más intensa: 305mm en solo 42 minutos en Missouri (1947).",
+  "☔ Una gota de lluvia cae a aproximadamente 9 km/h.",
+  "🏔️ La nieve más profunda registrada: 11.5 metros en Mount Fuji.",
+  "🌨️ El granizo más grande pesó 1kg y cayó en Bangladesh (1986).",
   
   // Clouds & Sky
-  "☁️ El cumulonimbo puede alcanzar más de 12 km de altura (troposfera).",
+  "☁️ El cumulonimbo puede alcanzar más de 12 km de altura.",
   "🌈 Los arcoíris son círculos completos, pero solo vemos la mitad.",
-  "🌅 El cielo es azul porque la atmósfera dispersa la luz azul.",
+  "🌅 El cielo es azul porque la atmósfera dispersa la luz azul (efecto Rayleigh).",
   "🌙 La Luna afecta las mareas y puede influir en el clima.",
+  "🌤️ Las nubes pueden pesar más de 500,000 kilogramos.",
+  "🌫️ La niebla más larga duró 76 días consecutivos en California.",
+  "☁️ Existen más de 100 tipos de nubes diferentes.",
+  "✨ Las estrellas fugaces son partículas de polvo cósmico que arden en la atmósfera.",
   
   // Snow & Ice
   "❄️ Los copos de nieve nunca son exactamente iguales.",
-  "🏔️ La nieve más profunda registrada: 11.5 metros en Mount Fuji.",
-  "❄️ Nieva más frecuentemente en altitudes elevadas por la temperatura.",
+  "🧊 Los glaciares contienen el 69% del agua dulce del planeta.",
+  "⛄ La nieve puede aislar tanto que los iglús mantienen 16°C dentro.",
+  "🇦🇶 La Antártida es el lugar más ventoso, frío y seco de la Tierra.",
+  "🎿 En Japón, la nieve puede llegar a 15 metros de altura.",
   
   // Storms & Lightning
   "⚡ Cada segundo caen aproximadamente 100 rayos en la Tierra.",
   "⛈️ El rayo puede alcanzar 30,000°C (5 veces más caliente que el Sol).",
-  "🌀 Los hurricanes liberan energía equivalente a 10,000 bombas atómicas.",
+  "🌀 Los huracanes liberan energía equivalente a 10,000 bombas atómicas.",
+  "🌊 Los tsunamis pueden viajar a 800 km/h en aguas profundas.",
+  "🌪️ Un tornado puede levantar una casa entera del suelo.",
+  "⚡ Los rayos matan más personas que los tornados y huracanes combinados.",
+  "🌀 El ojo de un huracán puede tener 30km de diámetro y calma total.",
   
-  // Fun facts
+  // Climate Change
   "🌡️ El cambio climático ha aumentado las olas de calor un 400%.",
   "🌍 2023 fue el año más caluroso registrado hasta ahora.",
+  "🔥 Los incendios forestales han aumentado un 300% desde 1970.",
+  "🏔️ Los glaciares pierden 335 mil millones de toneladas de hielo al año.",
+  "🌊 El nivel del mar sube 3.3mm cada año.",
+  "🧊 El Ártico pierde 13% de su hielo cada década.",
+  
+  // Sun & Space
   "☀️ El Sol representa el 99.86% de toda la masa del sistema solar.",
-  "🌤️ Las nubes pueden pesar más de 500,000 kilogramos.",
-  "🕐 Un día en Venus dura más que un año en Venus.",
-  "📡 Los meteorólogos usan globos sonda para medir el clima."
+  "🌡️ La superficie del Sol tiene 5,500°C.",
+  "🌅 Un día en Venus dura más que un año en Venus (243 vs 225 días terrestres).",
+  "🌙 La temperatura en la Luna varía de -173°C a 127°C.",
+  "🪐 Júpiter tiene la tormenta más grande del sistema solar (Gran Mancha Roja).",
+  
+  // Interesting Phenomena
+  "🌟 Las auroras boreales ocurren cuando partículas solares chocan con la atmósfera.",
+  "🔥 Los fuegos fatuos son gases inflamables que brillan sobre pantanos.",
+  "🌫️ El mar de nubes en Canarias atrae a miles de turistas cada año.",
+  "🌈 Los arcoíris dobles tienen los colores invertidos en el segundo arco.",
+  "⚡ El Sprite es un rayo que va hacia arriba, hacia el espacio.",
+  
+  // Records & Fun Facts
+  "📡 Los meteorólogos usan globos sonda para medir el clima hasta 30km de altura.",
+  "🛰️ Hay más de 160 satélites meteorológicos orbitando la Tierra.",
+  "🇨🇦 Canadá tiene el tornado más mortal de la historia (Regina, 1912).",
+  "🇺🇾 Uruguay tiene uno de los mejores sistemas de alerta de tormentas de Sudamérica.",
+  "🇪🇸 España tiene el primer observatorio meteorológico del mundo (Madrid, 1785).",
+  
+  // Animal Weather
+  "🐜 Las hormigas construyen montículos más altos antes de una tormenta.",
+  "🐦 Las aves vuelan más bajo cuando se acerca mal tiempo.",
+  "🐸 Los grillos cantan más rápido cuando hace más calor.",
+  "🐻 Los osos hibernan debido a la falta de alimento, no por el frío.",
+  "🦟 Los mosquitos son más activos cuando la presión atmosférica baja."
 ];
+
+const weatherNews = [
+  {
+    title: "2024: Otro año récord de calor global",
+    description: "Los científicos confirman que 2024 superó los récords de temperatura, consolidando una década de calentamiento sin precedentes.",
+    icon: "🔥",
+    date: "Reciente"
+  },
+  {
+    title: "Auroras boreales visibles en latitudes inusuales",
+    description: "Tormentas solares intensas permitieron ver auroras hasta en México y el sur de Europa durante 2024.",
+    icon: "🌌",
+    date: "2024"
+  },
+  {
+    title: "Huracanes más intensos en el Atlántico",
+    description: "La temporada 2024 registró huracanes de categoría 5 con vientos superiores a 280 km/h.",
+    icon: "🌀",
+    date: "2024"
+  },
+  {
+    title: "Sequía extrema en el Amazonas",
+    description: "El río Amazonas alcanzó niveles históricos bajos, afectando ecosistemas y comunidades.",
+    icon: "🏜️",
+    date: "2024"
+  },
+  {
+    title: "Nuevos récords de temperatura en Europa",
+    description: "España, Italia y Grecia registraron temperaturas superiores a 45°C durante el verano.",
+    icon: "🌡️",
+    date: "2024"
+  },
+  {
+    title: "El Niño más intenso en 7 años",
+    description: "El fenómeno de El Niño 2023-2024 fue uno de los más fuertes registrados, afectando el clima global.",
+    icon: "🌊",
+    date: "2024"
+  },
+  {
+    title: "Inversión térmica extrema en EE.UU.",
+    description: "Chicago experimentó una diferencia de 30°C entre la temperatura real y la sensación térmica.",
+    icon: "🥶",
+    date: "2024"
+  },
+  {
+    title: "Tornados en lugares inusuales",
+    description: "Se registraron tornados en regiones donde antes eran extremadamente raros, como partes de Sudamérica.",
+    icon: "🌪️",
+    date: "2024"
+  }
+];
+
+function showRandomFact() {
+  const factEl = document.getElementById('weather-fact');
+  if (factEl) {
+    const randomFact = weatherFacts[Math.floor(Math.random() * weatherFacts.length)];
+    factEl.innerHTML = `<p>${randomFact}</p>`;
+  }
+}
+
+function showRandomNews() {
+  const newsEl = document.getElementById('weather-news');
+  if (newsEl) {
+    const randomNews = weatherNews[Math.floor(Math.random() * weatherNews.length)];
+    newsEl.innerHTML = `
+      <div class="news-card">
+        <div class="news-icon">${randomNews.icon}</div>
+        <div class="news-content">
+          <div class="news-title">${randomNews.title}</div>
+          <div class="news-description">${randomNews.description}</div>
+          <div class="news-date">${randomNews.date}</div>
+        </div>
+      </div>
+    `;
+  }
+}
 
 function showRandomFact() {
   const factEl = document.getElementById('weather-fact');
@@ -777,6 +898,15 @@ function showRandomFact() {
 
 // Show a new fact every 30 seconds
 setInterval(showRandomFact, 30000);
+
+// Show a new news item every 45 seconds
+setInterval(showRandomNews, 45000);
+
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+  showRandomFact();
+  showRandomNews();
+});
 
 // ============================================
 // PDF REPORT - PROFESSIONAL (NO EMOJIS)
