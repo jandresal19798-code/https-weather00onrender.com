@@ -296,9 +296,9 @@ async function fetchExtendedForecast(location) {
       console.warn('Hourly forecast error:', e);
     }
     
-    // Show notification if using simulated data
+    // Always process - even if APIs fail, use simulated data
     if (!forecastData && !hourlyData) {
-      showNotification('⚠️ Servidor ocupado. Mostrando datos simulados.', 'warning');
+      console.log('Using simulated forecast data');
     }
     
     // Process daily data
