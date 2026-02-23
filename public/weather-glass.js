@@ -337,6 +337,19 @@ async function fetchExtendedForecast(location) {
     
     const dailyData = [];
     const baseTemp = currentReport?.temperature || 20;
+    const baseDesc = (currentReport?.description || '').toLowerCase();
+    
+    // Define varied icons for simulated forecast
+    const variedIcons = [];
+    if (baseDesc.includes('lluvia') || baseDesc.includes('rain')) {
+      variedIcons.push('🌧️', '🌦️', '☁️', '🌧️', '⛅', '🌧️', '🌦️');
+    } else if (baseDesc.includes('nublado') || baseDesc.includes('cloud')) {
+      variedIcons.push('☁️', '⛅', '🌤️', '☁️', '🌥️', '⛅', '☁️');
+    } else if (baseDesc.includes('clear') || baseDesc.includes('soleado')) {
+      variedIcons.push('☀️', '🌤️', '⛅', '☀️', '🌤️', '☀️', '⛅');
+    } else {
+      variedIcons.push('🌤️', '⛅', '☁️', '🌤️', '☀️', '⛅', '🌤️');
+    }
     
     if (forecastData && forecastData.length > 0) {
       for (let i = 0; i < 7; i++) {
@@ -355,9 +368,9 @@ async function fetchExtendedForecast(location) {
         dailyData.push({
           day: days[i],
           temp: baseTemp + (Math.random() * 6 - 3),
-          icon: getWeatherIcon(currentReport?.description),
-          high: baseTemp + 3,
-          low: baseTemp - 3,
+          icon: variedIcons[i] || '🌤️',
+          high: baseTemp + 3 - i * 0.5,
+          low: baseTemp - 3 - i * 0.3,
           precip: Math.random() * 30
         });
       }
@@ -370,16 +383,66 @@ async function fetchExtendedForecast(location) {
     if (hourlyData && hourlyData.length > 0) {
       displayHourlyForecast(hourlyData.slice(0, 24));
     } else {
-      // Generate simulated hourly data
+      // Generate simulated hourly data with varied conditions
       const simulatedHourly = [];
       const now = new Date();
+      const baseDesc = (currentReport?.description || '').toLowerCase();
+      
+      // Define possible weather conditions based on current weather
+      const weatherVariations = [];
+      if (baseDesc.includes('lluvia') || baseDesc.includes('rain')) {
+        weatherVariations.push('🌧️', '🌦️', '☁️', '🌧️', '⛅', '🌦️');
+      } else if (baseDesc.includes('nublado') || baseDesc.includes('cloud') || baseDesc.includes('overcast')) {
+        weatherVariations.push('☁️', '⛅', '🌥️', '☁️', '🌤️', '⛅');
+      } else if (baseDesc.includes('clear') || baseDesc.includes('soleado') || baseDesc.includes('despejado')) {
+        weatherVariations.push('☀️', '🌤️', '⛅', '☀️', '🌅', '🌇');
+      } else {
+        weatherVariations.push('🌤️', '⛅', '☁️', '🌤️', '☀️', '🌥️');
+      }
+      
       for (let i = 0; i < 24; i++) {
         const hour = new Date(now.getTime() + i * 3600000);
+        const hourNum = hour.getHours();
+        
+        // Vary temperature based on time of day
+        let tempVariation = Math.sin((hourNum - 6) * Math.PI / 12) * 5;
+        
+        // Choose icon based on time of day
+        let icon;
+        if (hourNum >= 6 && hourNum < 8) {
+          // Early morning - sunrise
+          icon = '🌅';
+        } else if (hourNum >= 8 && hourNum < 12) {
+          // Morning
+          icon = weatherVariations[i % weatherVariations.length];
+        } else if (hourNum >= 12 && hourNum < 14) {
+          // Midday
+          icon = '☀️';
+        } else if (hourNum >= 14 && hourNum < 18) {
+          // Afternoon
+          icon = weatherVariations[(i + 2) % weatherVariations.length];
+        } else if (hourNum >= 18 && hourNum < 20) {
+          // Evening - sunset
+          icon = '🌇';
+        } else if (hourNum >= 20 && hourNum < 23) {
+          // Night
+          icon = '🌙';
+        } else {
+          // Late night
+          icon = '🌑';
+        }
+        
+        // Random precipitation (higher chance if it's rainy weather)
+        let precip = Math.random() * 20;
+        if (baseDesc.includes('lluvia') || baseDesc.includes('rain')) {
+          precip = 30 + Math.random() * 50;
+        }
+        
         simulatedHourly.push({
           time: hour,
-          temp: baseTemp + Math.sin((i - 6) * Math.PI / 12) * 5,
-          icon: getWeatherIcon(currentReport?.description),
-          precip: Math.random() * 20
+          temp: baseTemp + tempVariation + (Math.random() * 2 - 1),
+          icon: icon,
+          precip: precip
         });
       }
       displayHourlyForecast(simulatedHourly);
@@ -779,11 +842,26 @@ function displayHourlyForecast(hours) {
   container.innerHTML = hours.map((h, i) => {
     const time = new Date(h.time);
     const hourStr = i === 0 ? 'Ahora' : formatTime(time);
+    const hourNum = time.getHours();
+    
+    // Determine if it's night time (before 6am or after 8pm)
+    const isNight = hourNum < 6 || hourNum >= 20;
+    const isMorning = hourNum >= 6 && hourNum < 12;
+    const isAfternoon = hourNum >= 12 && hourNum < 18;
+    
+    // Add time-of-day class
+    let timeClass = '';
+    if (isNight) timeClass = 'night-time';
+    else if (isMorning) timeClass = 'morning-time';
+    else if (isAfternoon) timeClass = 'afternoon-time';
+    else timeClass = 'evening-time';
+    
     return `
-      <div class="hourly-card">
+      <div class="hourly-card ${timeClass}">
         <div class="hour">${hourStr}</div>
         <div class="hour-icon">${h.icon}</div>
         <div class="hour-temp">${convertTemp(h.temp)}°</div>
+        ${h.precip > 10 ? `<div class="hour-precip"><span class="precip-icon">💧</span>${Math.round(h.precip)}%</div>` : ''}
       </div>
     `;
   }).join('');
