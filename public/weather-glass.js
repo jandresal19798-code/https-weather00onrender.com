@@ -1043,7 +1043,20 @@ async function sendChatMessage() {
 
 function toggleChatbot() {
   const container = document.getElementById('chatbot-container');
-  if (container) container.classList.toggle('active');
+  if (!container) return;
+  
+  const isVisible = container.style.display === 'flex' || container.classList.contains('active');
+  
+  if (isVisible) {
+    container.style.display = 'none';
+    container.classList.remove('active');
+  } else {
+    container.style.display = 'flex';
+    container.classList.add('active');
+    // Focus input when opening
+    const input = document.getElementById('chatbot-input');
+    if (input) setTimeout(() => input.focus(), 100);
+  }
 }
 
 // ============================================

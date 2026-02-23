@@ -481,6 +481,8 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { message, history, context } = req.body;
     
+    console.log('Chat request received:', { message: message?.substring(0, 50) });
+    
     if (!message) {
       return res.status(400).json({ error: 'Mensaje requerido' });
     }
@@ -493,22 +495,24 @@ app.post('/api/chat', async (req, res) => {
 
     // Check for GROQ_API_KEY
     const apiKey = process.env.GROQ_API_KEY;
-    console.log('Chat request - GROQ_API_KEY configured:', !!apiKey);
+    console.log('GROQ_API_KEY exists:', !!apiKey, 'length:', apiKey?.length);
     
     if (apiKey && apiKey !== 'tu_api_key_aqui' && apiKey.length > 10) {
+      console.log('Attempting Groq API call...');
       try {
         const axios = (await import('axios')).default;
         const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-          model: 'llama-3.1-70b-versatile',
+          model: 'llama3-70b-8192',
           messages: [
             {
               role: 'system',
-              content: `Eres Zeus IA, un asistente meteorologico experto de Zeus Meteo.
-              Ubicacion actual: ${location}
+              content: `Eres Zeus, un asistente meteorologico experto y amigable de Zeus Meteo.
+              Ubicacion actual del usuario: ${location}
               Clima actual: ${weather}
-              Responde de forma concisa, amigable y en espanol.`
+              Responde de forma concisa, util y en espanol. Usa emojis ocasionalmente.
+              Puedes ayudar con: clima, temperatura, lluvia, viento, humedad, presion, recomendaciones de ropa, etc.`
             },
-            ...(history || []).slice(-6).map(msg => ({
+            ...(history || []).slice(-4).map(msg => ({
               role: msg.role === 'user' ? 'user' : 'assistant',
               content: msg.content
             })),
@@ -517,20 +521,25 @@ app.post('/api/chat', async (req, res) => {
           temperature: 0.7,
           max_tokens: 300
         }, {
-          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          timeout: 20000
+          headers: { 
+            'Authorization': `Bearer ${apiKey}`, 
+            'Content-Type': 'application/json' 
+          },
+          timeout: 30000
         });
 
-        console.log('Groq response received');
-        return res.json({ response: response.data.choices[0].message.content });
+        const reply = response.data.choices[0].message.content;
+        console.log('Groq response OK, length:', reply.length);
+        return res.json({ response: reply });
       } catch (groqError) {
-        console.error('Groq API error:', groqError.response?.data || groqError.message);
+        console.error('Groq API error:', groqError.response?.status, groqError.response?.data || groqError.message);
         // Fall through to fallback
       }
+    } else {
+      console.log('No valid GROQ_API_KEY, using fallback');
     }
 
     // Fallback: Smart response without API
-    console.log('Using fallback response');
     const fallbackResponse = generateSmartResponse(message, location, weather);
     return res.json({ response: fallbackResponse });
     
