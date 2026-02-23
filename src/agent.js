@@ -185,22 +185,44 @@ class WeatherAgent {
   ensemblePrediction(data) {
     if (data.length === 0) return { avg: 20, min: 15, max: 25 };
 
-    const weights = data.map(d => this.getSourceWeight(d.source));
+    // First, identify and remove outliers
+    const temps = data.map(d => d.temperature);
+    const mean = temps.reduce((a, b) => a + b, 0) / temps.length;
+    const stdDev = Math.sqrt(temps.reduce((sum, t) => sum + Math.pow(t - mean, 2), 0) / temps.length);
+    
+    // Filter out temperatures that deviate more than 1.5 standard deviations
+    const filteredData = data.filter(d => {
+      const deviation = Math.abs(d.temperature - mean);
+      const isOutlier = deviation > 1.5 * stdDev;
+      if (isOutlier) {
+        console.log(`⚠️ OUTLIER DETECTED: ${d.source} reported ${d.temperature}°C (mean: ${mean.toFixed(1)}°C, deviation: ${deviation.toFixed(1)}°C)`);
+      }
+      return !isOutlier;
+    });
+    
+    // Use filtered data, or original if filtering removed all data
+    const dataToUse = filteredData.length > 0 ? filteredData : data;
+    
+    console.log(`📊 Using ${dataToUse.length}/${data.length} sources for ensemble prediction`);
+    
+    const weights = dataToUse.map(d => this.getSourceWeight(d.source));
     const totalWeight = weights.reduce((a, b) => a + b, 0);
 
-    const avgTemp = data.reduce((sum, d, i) => sum + d.temperature * weights[i], 0) / totalWeight;
-    const avgHumidity = data.reduce((sum, d, i) => sum + (d.humidity || 50) * weights[i], 0) / totalWeight;
-    const avgWind = data.reduce((sum, d, i) => sum + (d.windSpeed || 0) * weights[i], 0) / totalWeight;
-    const avgPressure = data.reduce((sum, d, i) => sum + (d.pressure || 1013) * weights[i], 0) / totalWeight;
+    const avgTemp = dataToUse.reduce((sum, d, i) => sum + d.temperature * weights[i], 0) / totalWeight;
+    const avgHumidity = dataToUse.reduce((sum, d, i) => sum + (d.humidity || 50) * weights[i], 0) / totalWeight;
+    const avgWind = dataToUse.reduce((sum, d, i) => sum + (d.windSpeed || 0) * weights[i], 0) / totalWeight;
+    const avgPressure = dataToUse.reduce((sum, d, i) => sum + (d.pressure || 1013) * weights[i], 0) / totalWeight;
+
+    console.log(`🌡️ Final ensemble temperature: ${avgTemp.toFixed(1)}°C (from ${dataToUse.map(d => `${d.source}:${d.temperature}°C`).join(', ')})`);
 
     return {
       avg: avgTemp,
-      min: Math.min(...data.map(d => d.temperature)) - 2,
-      max: Math.max(...data.map(d => d.temperature)) + 2,
+      min: Math.min(...dataToUse.map(d => d.temperature)) - 2,
+      max: Math.max(...dataToUse.map(d => d.temperature)) + 2,
       humidity: avgHumidity,
       wind: avgWind,
       pressure: avgPressure,
-      descriptions: [...new Set(data.map(d => d.description))].slice(0, 3)
+      descriptions: [...new Set(dataToUse.map(d => d.description))].slice(0, 3)
     };
   }
 
