@@ -13,7 +13,7 @@
 
   <title>Zeus Meteo - Tu Clima en Tiempo Real</title>
 
-  <link rel="stylesheet" href="weather-glass.css?v=21">
+  <link rel="stylesheet" href="weather-glass.css?v=22">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -301,8 +301,14 @@
           <i class="fas fa-lightbulb"></i>
           <span>Curiosidades del Clima</span>
         </div>
-        <div class="fact-content" id="weather-fact">
-          <p>🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.</p>
+        <div class="fact-card-content">
+          <div class="fact-image">
+            <img src="https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=400&h=300&fit=crop" alt="Weather" loading="lazy">
+            <div class="fact-overlay"></div>
+          </div>
+          <div class="fact-text" id="weather-fact">
+            <p>🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.</p>
+          </div>
         </div>
         <button class="fact-refresh-btn" onclick="showRandomFact()">
           <i class="fas fa-sync-alt"></i> Otra curiosidad
@@ -316,10 +322,15 @@
           <span>Noticias Meteorológicas</span>
         </div>
         <div id="weather-news">
-          <div class="news-card">
-            <div class="news-icon">🔥</div>
-            <div class="news-content">
-              <div class="news-title">Cargando noticias...</div>
+          <div class="news-card-enhanced">
+            <div class="news-image">
+              <img src="https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=250&fit=crop" alt="Weather News" loading="lazy">
+              <div class="news-image-overlay"></div>
+            </div>
+            <div class="news-body">
+              <div class="news-category">🔥 Tendencia</div>
+              <div class="news-title">2024: Otro año récord de calor global</div>
+              <div class="news-description">Los científicos confirman que 2024 superó los récords de temperatura.</div>
             </div>
           </div>
         </div>
@@ -366,6 +377,6 @@
     </div>
   </div>
 
-  <script src="weather-glass.js?v=21"></script>
+  <script src="weather-glass.js?v=22"></script>
 </body>
 </html>

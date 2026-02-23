@@ -843,57 +843,89 @@ const weatherNews = [
     title: "2024: Otro año récord de calor global",
     description: "Los científicos confirman que 2024 superó los récords de temperatura, consolidando una década de calentamiento sin precedentes.",
     icon: "🔥",
-    date: "Reciente"
+    category: "Tendencia",
+    image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=250&fit=crop",
+    date: "2024"
   },
   {
     title: "Auroras boreales visibles en latitudes inusuales",
     description: "Tormentas solares intensas permitieron ver auroras hasta en México y el sur de Europa durante 2024.",
     icon: "🌌",
+    category: "Fenómeno",
+    image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=250&fit=crop",
     date: "2024"
   },
   {
     title: "Huracanes más intensos en el Atlántico",
     description: "La temporada 2024 registró huracanes de categoría 5 con vientos superiores a 280 km/h.",
     icon: "🌀",
+    category: "Alerta",
+    image: "https://images.unsplash.com/photo-1527482937786-6f399a60b5f0?w=400&h=250&fit=crop",
     date: "2024"
   },
   {
     title: "Sequía extrema en el Amazonas",
     description: "El río Amazonas alcanzó niveles históricos bajos, afectando ecosistemas y comunidades.",
     icon: "🏜️",
+    category: "Clima",
+    image: "https://images.unsplash.com/photo-1547499681-28dece7dba00?w=400&h=250&fit=crop",
     date: "2024"
   },
   {
     title: "Nuevos récords de temperatura en Europa",
     description: "España, Italia y Grecia registraron temperaturas superiores a 45°C durante el verano.",
     icon: "🌡️",
+    category: "Récord",
+    image: "https://images.unsplash.com/photo-1504386106331-3e4e71712b38?w=400&h=250&fit=crop",
     date: "2024"
   },
   {
     title: "El Niño más intenso en 7 años",
     description: "El fenómeno de El Niño 2023-2024 fue uno de los más fuertes registrados, afectando el clima global.",
     icon: "🌊",
+    category: "Fenómeno",
+    image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=250&fit=crop",
     date: "2024"
   },
   {
     title: "Inversión térmica extrema en EE.UU.",
     description: "Chicago experimentó una diferencia de 30°C entre la temperatura real y la sensación térmica.",
     icon: "🥶",
+    category: "Récord",
+    image: "https://images.unsplash.com/photo-1517685352747-480de10a031b?w=400&h=250&fit=crop",
     date: "2024"
   },
   {
     title: "Tornados en lugares inusuales",
     description: "Se registraron tornados en regiones donde antes eran extremadamente raros, como partes de Sudamérica.",
     icon: "🌪️",
+    category: "Alerta",
+    image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=250&fit=crop",
     date: "2024"
   }
 ];
 
+const factImages = [
+  "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=300&fit=crop"
+];
+
+let currentFactImageIndex = 0;
+
 function showRandomFact() {
   const factEl = document.getElementById('weather-fact');
+  const factCard = document.querySelector('.fact-card-content .fact-image img');
   if (factEl) {
     const randomFact = weatherFacts[Math.floor(Math.random() * weatherFacts.length)];
     factEl.innerHTML = `<p>${randomFact}</p>`;
+  }
+  if (factCard) {
+    currentFactImageIndex = (currentFactImageIndex + 1) % factImages.length;
+    factCard.src = factImages[currentFactImageIndex];
   }
 }
 
@@ -901,24 +933,31 @@ function showRandomNews() {
   const newsEl = document.getElementById('weather-news');
   if (newsEl) {
     const randomNews = weatherNews[Math.floor(Math.random() * weatherNews.length)];
+    const categoryColors = {
+      'Tendencia': '#f97316',
+      'Fenómeno': '#a855f7',
+      'Alerta': '#ef4444',
+      'Clima': '#06b6d4',
+      'Récord': '#eab308'
+    };
+    const categoryColor = categoryColors[randomNews.category] || '#06b6d4';
+    
     newsEl.innerHTML = `
-      <div class="news-card">
-        <div class="news-icon">${randomNews.icon}</div>
-        <div class="news-content">
+      <div class="news-card-enhanced">
+        <div class="news-image">
+          <img src="${randomNews.image}" alt="${randomNews.title}" loading="lazy">
+          <div class="news-image-overlay"></div>
+          <div class="news-category-badge" style="background: ${categoryColor}">${randomNews.icon} ${randomNews.category}</div>
+        </div>
+        <div class="news-body">
           <div class="news-title">${randomNews.title}</div>
           <div class="news-description">${randomNews.description}</div>
-          <div class="news-date">${randomNews.date}</div>
+          <div class="news-meta">
+            <span class="news-date">${randomNews.date}</span>
+          </div>
         </div>
       </div>
     `;
-  }
-}
-
-function showRandomFact() {
-  const factEl = document.getElementById('weather-fact');
-  if (factEl) {
-    const randomFact = weatherFacts[Math.floor(Math.random() * weatherFacts.length)];
-    factEl.innerHTML = `<p>${randomFact}</p>`;
   }
 }
 
