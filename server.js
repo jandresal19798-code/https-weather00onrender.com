@@ -239,7 +239,7 @@ app.get('/api/forecast', async (req, res) => {
       source: 'Open-Meteo'
     };
 
-    setCache(cacheKey, response);
+    setCached(cacheKey, response);
     res.json(response);
   } catch (error) {
     console.error('Forecast error:', error);
