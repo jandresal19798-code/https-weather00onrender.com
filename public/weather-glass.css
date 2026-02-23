@@ -1020,12 +1020,80 @@ body::before {
 }
 
 .rec-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
   margin-top: 1rem;
 }
 
+.rec-item-enhanced {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.rec-item-enhanced:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: var(--rec-color, rgba(6, 182, 212, 0.4));
+}
+
+.rec-item-enhanced:hover .rec-image img {
+  transform: scale(1.1);
+}
+
+.rec-item-enhanced .rec-image {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
+}
+
+.rec-item-enhanced .rec-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.rec-item-enhanced .rec-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+}
+
+.rec-item-enhanced .rec-icon-large {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.rec-item-enhanced .rec-content {
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.rec-item-enhanced .rec-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.rec-item-enhanced .rec-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+/* Legacy rec-item styles (fallback) */
 .rec-item {
   display: flex;
   align-items: center;
@@ -1205,6 +1273,10 @@ body::before {
   .rec-card[style*="grid-column: span 4"] {
     grid-column: span 3;
   }
+  
+  .rec-items {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -1251,6 +1323,10 @@ body::before {
   .recent-cities,
   .rec-card[style*="grid-column: span 4"] {
     grid-column: span 2;
+  }
+  
+  .rec-items {
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .fact-card-content {
@@ -1345,6 +1421,15 @@ body::before {
   
   .news-image {
     height: 120px;
+  }
+  
+  .rec-items {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .rec-item-enhanced .rec-image {
+    height: 70px;
   }
   
   .links-list {
@@ -1544,7 +1629,24 @@ body::before {
   }
   
   .rec-items {
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
+  }
+  
+  .rec-item-enhanced .rec-image {
+    height: 60px;
+  }
+  
+  .rec-item-enhanced .rec-icon-large {
+    font-size: 1.5rem;
+  }
+  
+  .rec-item-enhanced .rec-title {
+    font-size: 0.75rem;
+  }
+  
+  .rec-item-enhanced .rec-text {
+    font-size: 0.65rem;
   }
   
   .rec-item {

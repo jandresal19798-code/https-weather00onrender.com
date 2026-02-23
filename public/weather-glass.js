@@ -544,45 +544,211 @@ function updateMoonPhase() {
 }
 
 function updateRecommendations(temp, humidity, wind, description) {
-  const recs = [];
-  const icons = [];
+  const recommendations = [];
+  const desc = (description || '').toLowerCase();
   
-  if (temp >= 30) {
-    recs.push(' protector solar');
-    icons.push('☀️');
-  }
-  if (temp <= 10) {
-    recs.push(' abrigo');
-    icons.push('🧥');
-  }
-  if (humidity >= 80) {
-    recs.push(' paraguas');
-    icons.push('☔');
-  }
-  if (description?.toLowerCase().includes('lluvia')) {
-    recs.push(' impermeable');
-    icons.push('🧥');
-  }
-  if (wind >= 30) {
-    recs.push(' viento fuerte');
-    icons.push('💨');
-  }
-  if (temp >= 20 && temp <= 28 && humidity < 60) {
-    recs.push(' ideal para外出');
-    icons.push('🚶');
+  // Temperature-based recommendations
+  if (temp >= 35) {
+    recommendations.push({
+      icon: '🔥',
+      title: 'Calor Extremo',
+      text: 'Evita el sol, mantente hidratado',
+      image: 'https://images.unsplash.com/photo-1504386106331-3e4e71712b38?w=200&h=150&fit=crop',
+      color: '#ef4444'
+    });
+  } else if (temp >= 30) {
+    recommendations.push({
+      icon: '☀️',
+      title: 'Protector Solar',
+      text: 'Usa SPF 50+ y gorra',
+      image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200&h=150&fit=crop',
+      color: '#f97316'
+    });
+  } else if (temp >= 25) {
+    recommendations.push({
+      icon: '😎',
+      title: 'Día Cálido',
+      text: 'Ropa ligera y gafas de sol',
+      image: 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=200&h=150&fit=crop',
+      color: '#eab308'
+    });
+  } else if (temp >= 15) {
+    recommendations.push({
+      icon: '🌤️',
+      title: 'Clima Agradable',
+      text: 'Perfecto para actividades al aire libre',
+      image: 'https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?w=200&h=150&fit=crop',
+      color: '#22c55e'
+    });
+  } else if (temp >= 5) {
+    recommendations.push({
+      icon: '🧥',
+      title: 'Abrígate',
+      text: 'Lleva una chaqueta o suéter',
+      image: 'https://images.unsplash.com/photo-1517685352747-480de10a031b?w=200&h=150&fit=crop',
+      color: '#06b6d4'
+    });
+  } else {
+    recommendations.push({
+      icon: '❄️',
+      title: 'Frío Intenso',
+      text: 'Vístete en capas, usa guantes',
+      image: 'https://images.unsplash.com/photo-1478265409131-1f65c88f965c?w=200&h=150&fit=crop',
+      color: '#a855f7'
+    });
   }
   
-  if (recs.length === 0) {
-    recs.push(' condiciones ideales');
-    icons.push('✅');
+  // Weather condition recommendations
+  if (desc.includes('lluvia') || desc.includes('rain') || desc.includes('drizzle')) {
+    recommendations.push({
+      icon: '☔',
+      title: 'Paraguas',
+      text: 'Probabilidad de lluvia alta',
+      image: 'https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=200&h=150&fit=crop',
+      color: '#3b82f6'
+    });
   }
+  
+  if (desc.includes('tormenta') || desc.includes('thunder') || desc.includes('storm')) {
+    recommendations.push({
+      icon: '⛈️',
+      title: 'Tormenta',
+      text: 'Permanece bajo techo',
+      image: 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=200&h=150&fit=crop',
+      color: '#6366f1'
+    });
+  }
+  
+  if (desc.includes('nieve') || desc.includes('snow')) {
+    recommendations.push({
+      icon: '❄️',
+      title: 'Nieve',
+      text: 'Calzado antideslizante',
+      image: 'https://images.unsplash.com/photo-1478265409131-1f65c88f965c?w=200&h=150&fit=crop',
+      color: '#e0f2fe'
+    });
+  }
+  
+  if (desc.includes('niebla') || desc.includes('fog') || desc.includes('mist')) {
+    recommendations.push({
+      icon: '🌫️',
+      title: 'Niebla',
+      text: 'Conduce con precaución',
+      image: 'https://images.unsplash.com/photo-1485236745370-61ac71a7b44f?w=200&h=150&fit=crop',
+      color: '#94a3b8'
+    });
+  }
+  
+  // Humidity recommendations
+  if (humidity >= 85) {
+    recommendations.push({
+      icon: '💧',
+      title: 'Alta Humedad',
+      text: 'Sensación de bochorno',
+      image: 'https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=200&h=150&fit=crop',
+      color: '#06b6d4'
+    });
+  } else if (humidity <= 30) {
+    recommendations.push({
+      icon: '🏜️',
+      title: 'Aire Seco',
+      text: 'Usa crema hidratante',
+      image: 'https://images.unsplash.com/photo-1547499681-28dece7dba00?w=200&h=150&fit=crop',
+      color: '#d97706'
+    });
+  }
+  
+  // Wind recommendations
+  if (wind >= 50) {
+    recommendations.push({
+      icon: '🌪️',
+      title: 'Viento Muy Fuerte',
+      text: 'Evita actividades al aire libre',
+      image: 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=200&h=150&fit=crop',
+      color: '#ef4444'
+    });
+  } else if (wind >= 30) {
+    recommendations.push({
+      icon: '💨',
+      title: 'Viento Fuerte',
+      text: 'Cuidado con objetos sueltos',
+      image: 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=200&h=150&fit=crop',
+      color: '#0ea5e9'
+    });
+  }
+  
+  // UV recommendation (simulated based on hour)
+  const hour = new Date().getHours();
+  if (hour >= 10 && hour <= 16 && temp >= 20) {
+    recommendations.push({
+      icon: '🧴',
+      title: 'Protector Solar',
+      text: 'Reaplica cada 2 horas',
+      image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=200&h=150&fit=crop',
+      color: '#fbbf24'
+    });
+  }
+  
+  // Activity recommendations
+  if (temp >= 18 && temp <= 28 && humidity < 70 && wind < 20 && !desc.includes('lluvia')) {
+    recommendations.push({
+      icon: '🏃',
+      title: 'Ideal para Ejercicio',
+      text: 'Condiciones perfectas',
+      image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=200&h=150&fit=crop',
+      color: '#22c55e'
+    });
+  }
+  
+  if (temp >= 20 && temp <= 26 && humidity < 60 && !desc.includes('lluvia')) {
+    recommendations.push({
+      icon: '🚴',
+      title: 'Perfecto para Bicicleta',
+      text: 'Clima ideal para rodar',
+      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=150&fit=crop',
+      color: '#10b981'
+    });
+  }
+  
+  // Night recommendations
+  if (hour >= 20 || hour < 6) {
+    if (temp >= 15) {
+      recommendations.push({
+        icon: '🌙',
+        title: 'Noche Agradable',
+        text: 'Ideal para pasear',
+        image: 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=200&h=150&fit=crop',
+        color: '#8b5cf6'
+      });
+    } else {
+      recommendations.push({
+        icon: '🧣',
+        title: 'Noche Fría',
+        text: 'Lleva bufanda y guantes',
+        image: 'https://images.unsplash.com/photo-1517685352747-480de10a031b?w=200&h=150&fit=crop',
+        color: '#6366f1'
+      });
+    }
+  }
+  
+  // Limit to 6 recommendations and remove duplicates
+  const uniqueRecs = recommendations.filter((rec, index, self) =>
+    index === self.findIndex(r => r.title === rec.title)
+  ).slice(0, 6);
   
   const container = document.getElementById('recommendations-list');
   if (container) {
-    container.innerHTML = recs.slice(0, 4).map((rec, i) => `
-      <div class="rec-item">
-        <span class="rec-icon">${icons[i]}</span>
-        <span>Lleva${rec}</span>
+    container.innerHTML = uniqueRecs.map(rec => `
+      <div class="rec-item-enhanced" style="--rec-color: ${rec.color}">
+        <div class="rec-image">
+          <img src="${rec.image}" alt="${rec.title}" loading="lazy">
+          <div class="rec-image-overlay"></div>
+          <span class="rec-icon-large">${rec.icon}</span>
+        </div>
+        <div class="rec-content">
+          <div class="rec-title">${rec.title}</div>
+          <div class="rec-text">${rec.text}</div>
+        </div>
       </div>
     `).join('');
   }
@@ -844,7 +1010,7 @@ const weatherNews = [
     description: "Los científicos confirman que 2024 superó los récords de temperatura, consolidando una década de calentamiento sin precedentes.",
     icon: "🔥",
     category: "Tendencia",
-    image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=600&h=400&fit=crop",
     date: "2024"
   },
   {
@@ -852,7 +1018,7 @@ const weatherNews = [
     description: "Tormentas solares intensas permitieron ver auroras hasta en México y el sur de Europa durante 2024.",
     icon: "🌌",
     category: "Fenómeno",
-    image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600&h=400&fit=crop",
     date: "2024"
   },
   {
@@ -860,23 +1026,23 @@ const weatherNews = [
     description: "La temporada 2024 registró huracanes de categoría 5 con vientos superiores a 280 km/h.",
     icon: "🌀",
     category: "Alerta",
-    image: "https://images.unsplash.com/photo-1527482937786-6f399a60b5f0?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=600&h=400&fit=crop",
     date: "2024"
   },
   {
     title: "Sequía extrema en el Amazonas",
-    description: "El río Amazonas alcanzó niveles históricos bajos, afectando ecosistemas y comunidades.",
+    description: "El río Amazonas alcanzó niveles históricos bajos, afectando ecosistemas y comunidades enteras.",
     icon: "🏜️",
     category: "Clima",
-    image: "https://images.unsplash.com/photo-1547499681-28dece7dba00?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1547499681-28dece7dba00?w=600&h=400&fit=crop",
     date: "2024"
   },
   {
     title: "Nuevos récords de temperatura en Europa",
-    description: "España, Italia y Grecia registraron temperaturas superiores a 45°C durante el verano.",
+    description: "España, Italia y Grecia registraron temperaturas superiores a 45°C durante el verano boreal.",
     icon: "🌡️",
     category: "Récord",
-    image: "https://images.unsplash.com/photo-1504386106331-3e4e71712b38?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1504386106331-3e4e71712b38?w=600&h=400&fit=crop",
     date: "2024"
   },
   {
@@ -884,7 +1050,7 @@ const weatherNews = [
     description: "El fenómeno de El Niño 2023-2024 fue uno de los más fuertes registrados, afectando el clima global.",
     icon: "🌊",
     category: "Fenómeno",
-    image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=600&h=400&fit=crop",
     date: "2024"
   },
   {
@@ -892,7 +1058,7 @@ const weatherNews = [
     description: "Chicago experimentó una diferencia de 30°C entre la temperatura real y la sensación térmica.",
     icon: "🥶",
     category: "Récord",
-    image: "https://images.unsplash.com/photo-1517685352747-480de10a031b?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1517685352747-480de10a031b?w=600&h=400&fit=crop",
     date: "2024"
   },
   {
@@ -900,7 +1066,39 @@ const weatherNews = [
     description: "Se registraron tornados en regiones donde antes eran extremadamente raros, como partes de Sudamérica.",
     icon: "🌪️",
     category: "Alerta",
-    image: "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=250&fit=crop",
+    image: "https://images.unsplash.com/photo-1527482937786-6f399a60b5f0?w=600&h=400&fit=crop",
+    date: "2024"
+  },
+  {
+    title: "Tormentas solares afectan comunicaciones",
+    description: "Una serie de eyecciones de masa coronal causaron interrupciones en satélites y redes eléctricas.",
+    icon: "☀️",
+    category: "Espacio",
+    image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600&h=400&fit=crop",
+    date: "2024"
+  },
+  {
+    title: "Nevadas históricas en los Alpes",
+    description: "Estaciones de esquí europeas registraron acumulaciones de nieve no vistas en décadas.",
+    icon: "❄️",
+    category: "Récord",
+    image: "https://images.unsplash.com/photo-1478265409131-1f65c88f965c?w=600&h=400&fit=crop",
+    date: "2024"
+  },
+  {
+    title: "Aumento del nivel del mar se acelera",
+    description: "Nuevos datos satelitales muestran que el nivel del mar sube más rápido de lo predicho.",
+    icon: "🌊",
+    category: "Tendencia",
+    image: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=600&h=400&fit=crop",
+    date: "2024"
+  },
+  {
+    title: "Incendios forestales sin precedentes",
+    description: "Canadá, Grecia y Australia enfrentaron temporadas de incendios récord debido a condiciones extremas.",
+    icon: "🔥",
+    category: "Alerta",
+    image: "https://images.unsplash.com/photo-1542856204-00101eb6def4?w=600&h=400&fit=crop",
     date: "2024"
   }
 ];
@@ -911,7 +1109,13 @@ const factImages = [
   "https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=400&h=300&fit=crop",
   "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop",
   "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=400&h=300&fit=crop",
-  "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=300&fit=crop"
+  "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1517685352747-480de10a031b?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1478265409131-1f65c88f965c?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1485236745370-61ac71a7b44f?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=400&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=300&fit=crop"
 ];
 
 let currentFactImageIndex = 0;

@@ -13,7 +13,7 @@
 
   <title>Zeus Meteo - Tu Clima en Tiempo Real</title>
 
-  <link rel="stylesheet" href="weather-glass.css?v=23">
+  <link rel="stylesheet" href="weather-glass.css?v=24">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -270,12 +270,23 @@
       </div>
 
       <!-- Recommendations -->
-      <div class="glass-card rec-card" style="grid-column: span 2;">
+      <div class="glass-card rec-card" style="grid-column: span 4;">
         <div class="card-header">
-          <i class="fas fa-shirt"></i>
-          <span>Recomendaciones</span>
+          <i class="fas fa-lightbulb"></i>
+          <span>Recomendaciones del Día</span>
         </div>
         <div class="rec-items" id="recommendations-list">
+          <div class="rec-item-enhanced">
+            <div class="rec-image">
+              <img src="https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=200&h=150&fit=crop" alt="Clima" loading="lazy">
+              <div class="rec-image-overlay"></div>
+              <span class="rec-icon-large">🌤️</span>
+            </div>
+            <div class="rec-content">
+              <div class="rec-title">Cargando...</div>
+              <div class="rec-text">Analizando condiciones</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -377,6 +388,6 @@
     </div>
   </div>
 
-  <script src="weather-glass.js?v=23"></script>
+  <script src="weather-glass.js?v=24"></script>
 </body>
 </html>
