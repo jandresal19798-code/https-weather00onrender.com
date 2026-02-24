@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="rainCloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#64748b"/>
+      <stop offset="100%" style="stop-color:#475569"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path d="M48 32c4.4 0 8-3.6 8-8s-3.6-8-8-8c-0.5 0-1 0-1.5 0.1C45.3 10 40.1 6 34 6c-7.7 0-14 6.3-14 14 0 0.3 0 0.7 0 1-4.4 0.5-8 4.3-8 8.9 0 5 4 9 9 9h27z" fill="url(#rainCloudGrad)">
+      <animateTransform attributeName="transform" type="translate" values="0,0;1,0;0,0" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <g stroke="#60a5fa" stroke-width="2" stroke-linecap="round">
+      <line x1="22" y1="42" x2="22" y2="50">
+        <animate attributeName="y1" values="42;56;42" dur="0.8s" repeatCount="indefinite"/>
+        <animate attributeName="y2" values="50;64;50" dur="0.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0;1" dur="0.8s" repeatCount="indefinite"/>
+      </line>
+      <line x1="32" y1="44" x2="32" y2="52">
+        <animate attributeName="y1" values="44;58;44" dur="0.9s" repeatCount="indefinite" begin="0.2s"/>
+        <animate attributeName="y2" values="52;66;52" dur="0.9s" repeatCount="indefinite" begin="0.2s"/>
+        <animate attributeName="opacity" values="1;0;1" dur="0.9s" repeatCount="indefinite" begin="0.2s"/>
+      </line>
+      <line x1="42" y1="42" x2="42" y2="50">
+        <animate attributeName="y1" values="42;56;42" dur="0.85s" repeatCount="indefinite" begin="0.4s"/>
+        <animate attributeName="y2" values="50;64;50" dur="0.85s" repeatCount="indefinite" begin="0.4s"/>
+        <animate attributeName="opacity" values="1;0;1" dur="0.85s" repeatCount="indefinite" begin="0.4s"/>
+      </line>
+    </g>
+  </g>
+</svg>

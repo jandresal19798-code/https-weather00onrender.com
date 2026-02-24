@@ -59,37 +59,37 @@ function getWeatherImage(desc) {
   const hour = new Date().getHours();
   const isNight = hour < 6 || hour > 20;
   
-  const baseUrl = 'https://cdn.jsdelivr.net/npm/open-weather-icons@0.0.7/src/svg';
+  const baseUrl = '/icons';
   
   if (d.includes('thunder') || d.includes('tormenta')) {
-    return `${baseUrl}/11d.svg`;
+    return `${baseUrl}/storm.svg`;
   }
   if (d.includes('rain') || d.includes('lluvia')) {
-    return `${baseUrl}/10d.svg`;
+    return `${baseUrl}/rain.svg`;
   }
   if (d.includes('drizzle') || d.includes('llovizna')) {
-    return `${baseUrl}/09d.svg`;
+    return `${baseUrl}/rain.svg`;
   }
   if (d.includes('snow') || d.includes('nieve')) {
-    return `${baseUrl}/13d.svg`;
+    return `${baseUrl}/snow.svg`;
   }
   if (d.includes('fog') || d.includes('niebla') || d.includes('mist') || d.includes('neblina')) {
-    return `${baseUrl}/50d.svg`;
+    return `${baseUrl}/fog.svg`;
   }
   if (d.includes('nublado') || d.includes('overcast')) {
-    return `${baseUrl}/04d.svg`;
+    return `${baseUrl}/cloudy.svg`;
   }
   if (d.includes('partly') || d.includes('parcialmente')) {
-    return isNight ? `${baseUrl}/02n.svg` : `${baseUrl}/02d.svg`;
+    return isNight ? `${baseUrl}/partly-cloudy-night.svg` : `${baseUrl}/partly-cloudy-day.svg`;
   }
   if (d.includes('cloud') || d.includes('cloudy')) {
-    return `${baseUrl}/03d.svg`;
+    return `${baseUrl}/cloudy.svg`;
   }
   if (d.includes('clear') || d.includes('despejado') || d.includes('soleado')) {
-    return isNight ? `${baseUrl}/01n.svg` : `${baseUrl}/01d.svg`;
+    return isNight ? `${baseUrl}/clear-night.svg` : `${baseUrl}/clear-day.svg`;
   }
   
-  return isNight ? `${baseUrl}/01n.svg` : `${baseUrl}/01d.svg`;
+  return isNight ? `${baseUrl}/clear-night.svg` : `${baseUrl}/clear-day.svg`;
 }
 
 function formatTime(date) {

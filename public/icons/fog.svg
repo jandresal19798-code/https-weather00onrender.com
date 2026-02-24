@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <g>
+    <g stroke="#94a3b8" stroke-width="4" stroke-linecap="round" fill="none">
+      <line x1="10" y1="20" x2="54" y2="20">
+        <animate attributeName="x1" values="10;14;10" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="54;50;54" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+      </line>
+      <line x1="8" y1="30" x2="48" y2="30">
+        <animate attributeName="x1" values="8;12;8" dur="3.5s" repeatCount="indefinite" begin="0.5s"/>
+        <animate attributeName="x2" values="48;44;48" dur="3.5s" repeatCount="indefinite" begin="0.5s"/>
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="3.5s" repeatCount="indefinite" begin="0.5s"/>
+      </line>
+      <line x1="14" y1="40" x2="56" y2="40">
+        <animate attributeName="x1" values="14;10;14" dur="4s" repeatCount="indefinite" begin="1s"/>
+        <animate attributeName="x2" values="56;52;56" dur="4s" repeatCount="indefinite" begin="1s"/>
+        <animate attributeName="opacity" values="0.6;0.9;0.6" dur="4s" repeatCount="indefinite" begin="1s"/>
+      </line>
+      <line x1="10" y1="50" x2="44" y2="50">
+        <animate attributeName="x1" values="10;6;10" dur="3.2s" repeatCount="indefinite" begin="1.5s"/>
+        <animate attributeName="x2" values="44;48;44" dur="3.2s" repeatCount="indefinite" begin="1.5s"/>
+        <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3.2s" repeatCount="indefinite" begin="1.5s"/>
+      </line>
+    </g>
+  </g>
+</svg>
