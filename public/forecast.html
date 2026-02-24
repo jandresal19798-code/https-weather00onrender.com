@@ -13,8 +13,8 @@
 
   <title>Zeus Meteo - Tu Clima en Tiempo Real</title>
 
-  <link rel="stylesheet" href="weather-glass.css?v=26">
-  <link rel="stylesheet" href="mobile-fix.css?v=1">
+  <link rel="stylesheet" href="weather-glass.css?v=28">
+  <link rel="stylesheet" href="mobile-fix.css?v=3">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -152,7 +152,7 @@
       <div class="glass-card weather-card uv-card">
         <div class="card-header">
           <i class="fas fa-sun"></i>
-          <span>Índice UV</span>
+          <span>UV</span>
         </div>
         <div class="card-value" id="uv-value">--</div>
         <div class="uv-level">
@@ -164,7 +164,7 @@
       <div class="glass-card weather-card">
         <div class="card-header">
           <i class="fas fa-gauge-high"></i>
-          <span>Presión</span>
+          <span>Presion</span>
         </div>
         <div class="card-value" id="pressure-value">--<small class="card-unit">hPa</small></div>
       </div>
@@ -202,15 +202,6 @@
         </div>
       </div>
 
-      <!-- Dew Point -->
-      <div class="glass-card weather-card">
-        <div class="card-header">
-          <i class="fas fa-temperature-low"></i>
-          <span>Punto de Rocío</span>
-        </div>
-        <div class="card-value" id="dew-value">--<small class="card-unit">°</small></div>
-      </div>
-
       <!-- Moon -->
       <div class="glass-card weather-card moon-card">
         <div class="card-header">
@@ -219,14 +210,13 @@
         </div>
         <div class="moon-icon" id="moon-icon">🌕</div>
         <div class="moon-phase" id="moon-phase">Luna Llena</div>
-        <div class="moon-illumination" id="moon-illumination">100% iluminada</div>
       </div>
 
       <!-- AQI -->
       <div class="glass-card weather-card aqi-card">
         <div class="card-header">
-          <i class="fas fa-wind"></i>
-          <span>Calidad del Aire</span>
+          <i class="fas fa-smog"></i>
+          <span>Aire</span>
         </div>
         <div class="aqi-value" id="aqi-value">--</div>
         <div class="aqi-status" id="aqi-status">--</div>
@@ -240,41 +230,39 @@
       </div>
 
       <!-- Weather Map - Windy -->
-      <div class="glass-card map-card" style="grid-column: span 2; grid-row: span 2;">
+      <div class="glass-card map-card">
         <div class="map-tabs">
-          <button class="map-tab active" onclick="switchMapLayer('wind')">💨 Viento</button>
-          <button class="map-tab" onclick="switchMapLayer('rain')">🌧️ Lluvia</button>
-          <button class="map-tab" onclick="switchMapLayer('temp')">🌡️ Temp</button>
-          <button class="map-tab" onclick="switchMapLayer('clouds')">☁️ Nubes</button>
+          <button class="map-tab active" onclick="switchMapLayer('wind')">Viento</button>
+          <button class="map-tab" onclick="switchMapLayer('rain')">Lluvia</button>
+          <button class="map-tab" onclick="switchMapLayer('temp')">Temp</button>
+          <button class="map-tab" onclick="switchMapLayer('clouds')">Nubes</button>
         </div>
         <iframe id="weather-map-iframe" 
           src="https://embed.windy.com/embed2.html?lat=-34.9&lon=-56.15&zoom=6&level=surface&overlay=wind&menu=&message=true&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=-34.9&detailLon=-56.15&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange="
-          title="Mapa meteorológico Windy">
+          title="Mapa meteorologico Windy">
         </iframe>
       </div>
+
+      <!-- Hourly Forecast -->
+      <div class="hourly-scroll glass-card" id="hourly-forecast"></div>
+
+      <!-- 7-Day Forecast -->
+      <div class="forecast-scroll glass-card" id="daily-forecast"></div>
 
       <!-- Chart -->
       <div class="glass-card chart-card">
         <div class="card-header">
           <i class="fas fa-chart-line"></i>
-          <span>Tendencia de Temperatura</span>
+          <span>Tendencia Temperatura</span>
         </div>
         <div class="chart-container" id="temperature-chart"></div>
-      </div>
-
-      <!-- Hourly -->
-      <div class="hourly-scroll glass-card" id="hourly-forecast">
-      </div>
-
-      <!-- 7-Day -->
-      <div class="forecast-scroll glass-card" id="daily-forecast">
       </div>
 
       <!-- Recommendations -->
       <div class="glass-card rec-card">
         <div class="card-header">
           <i class="fas fa-lightbulb"></i>
-          <span>Recomendaciones del Día</span>
+          <span>Recomendaciones</span>
         </div>
         <div class="rec-items" id="recommendations-list">
           <div class="rec-item-enhanced">
@@ -299,19 +287,19 @@
         </div>
         <div class="actions-buttons">
           <button class="search-btn-primary" onclick="generatePDFReport()">
-            <i class="fas fa-file-pdf"></i> Descargar PDF
+            <i class="fas fa-file-pdf"></i> PDF
           </button>
           <button class="city-pill chat-btn" onclick="toggleChatbot()">
-            <i class="fas fa-robot"></i> Chat con Zeus
+            <i class="fas fa-robot"></i> Chat
           </button>
         </div>
       </div>
 
       <!-- Weather Facts -->
-      <div class="glass-card fact-card" style="grid-column: span 2;">
+      <div class="glass-card fact-card">
         <div class="card-header">
           <i class="fas fa-lightbulb"></i>
-          <span>Curiosidades del Clima</span>
+          <span>Curiosidades</span>
         </div>
         <div class="fact-card-content">
           <div class="fact-image">
@@ -319,7 +307,7 @@
             <div class="fact-overlay"></div>
           </div>
           <div class="fact-text" id="weather-fact">
-            <p>🌍 El rayo más largo duró 7.74 segundos y ocurrió en Brasil en 2020.</p>
+            <p>El rayo mas largo duro 7.74 segundos y ocurrio en Brasil en 2020.</p>
           </div>
         </div>
         <button class="fact-refresh-btn" onclick="showRandomFact()">
@@ -328,10 +316,10 @@
       </div>
 
       <!-- Weather News -->
-      <div class="glass-card news-section" style="grid-column: span 2;">
+      <div class="glass-card news-section">
         <div class="card-header">
           <i class="fas fa-newspaper"></i>
-          <span>Noticias Meteorológicas</span>
+          <span>Noticias</span>
         </div>
         <div id="weather-news">
           <div class="news-card-enhanced">
@@ -340,9 +328,9 @@
               <div class="news-image-overlay"></div>
             </div>
             <div class="news-body">
-              <div class="news-category">🔥 Tendencia</div>
-              <div class="news-title">2024: Otro año récord de calor global</div>
-              <div class="news-description">Los científicos confirman que 2024 superó los récords de temperatura.</div>
+              <div class="news-category">Tendencia</div>
+              <div class="news-title">2024: Otro ano record de calor global</div>
+              <div class="news-description">Los cientificos confirman que 2024 supero los records de temperatura.</div>
             </div>
           </div>
         </div>
@@ -352,17 +340,16 @@
       </div>
 
       <!-- Links -->
-      <div class="glass-card rec-card" style="grid-column: span 4;">
+      <div class="glass-card rec-card links-card">
         <div class="card-header">
           <i class="fas fa-link"></i>
-          <span>Enlaces Meteorología</span>
+          <span>Enlaces</span>
         </div>
         <div class="links-list">
-          <a href="https://www.inumet.gub.uy" target="_blank" class="weather-link">🇺🇾 INUMET</a>
-          <a href="https://www.smn.gob.ar" target="_blank" class="weather-link">🇦🇷 SMN</a>
-          <a href="https://openweathermap.org" target="_blank" class="weather-link">🌐 OpenWeather</a>
-          <a href="https://www.ventusky.com" target="_blank" class="weather-link">🗺️ Ventusky</a>
-          <a href="https://www.windy.com" target="_blank" class="weather-link">🌪️ Windy</a>
+          <a href="https://www.inumet.gub.uy" target="_blank" class="weather-link">INUMET</a>
+          <a href="https://www.smn.gob.ar" target="_blank" class="weather-link">SMN</a>
+          <a href="https://openweathermap.org" target="_blank" class="weather-link">OpenWeather</a>
+          <a href="https://www.windy.com" target="_blank" class="weather-link">Windy</a>
         </div>
       </div>
 

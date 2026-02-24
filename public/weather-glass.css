@@ -375,7 +375,7 @@ body::before {
 .main-content {
   display: none;
   grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: minmax(150px, auto);
+  grid-auto-rows: minmax(120px, auto);
   gap: 1rem;
   max-width: 100%;
   overflow-wrap: break-word;
@@ -389,10 +389,55 @@ body::before {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 350px;
+  min-height: 300px;
   background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(168, 85, 247, 0.08) 50%, rgba(6, 182, 212, 0.05) 100%);
   position: relative;
   overflow: hidden;
+}
+
+/* Map Card */
+.map-card {
+  grid-column: span 2;
+  grid-row: span 2;
+  min-height: 300px;
+}
+
+.map-card iframe {
+  width: 100%;
+  height: 250px;
+  border: none;
+  border-radius: 8px;
+}
+
+/* Forecast scrolls */
+.hourly-scroll,
+.forecast-scroll {
+  grid-column: span 2;
+}
+
+/* Chart card */
+.chart-card {
+  grid-column: span 2;
+}
+
+/* Rec card */
+.rec-card {
+  grid-column: span 2;
+}
+
+/* Fact card */
+.fact-card {
+  grid-column: span 2;
+}
+
+/* News section */
+.news-section {
+  grid-column: span 2;
+}
+
+/* Links card */
+.links-card {
+  grid-column: span 4;
 }
 
 .hero-card::before {
