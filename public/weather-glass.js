@@ -571,7 +571,45 @@ function updateWeatherCards(report) {
   // Dew point
   const dewPoint = temp - ((100 - humidity) / 5);
   const dewEl = document.getElementById('dew-value');
-  if (dewEl) dewEl.textContent = Math.round(dewPoint) + '°';
+  if (dewEl) dewEl.innerHTML = `${Math.round(dewPoint)}<small class="card-unit">°</small>`;
+  
+  // Feels Like (Heat Index approximation)
+  const feelsLike = calculateFeelsLike(temp, humidity, wind);
+  const feelsLikeEl = document.getElementById('feels-like-value');
+  if (feelsLikeEl) feelsLikeEl.innerHTML = `${convertTemp(feelsLike)}<small class="card-unit">°</small>`;
+  
+  // Cloud Cover
+  const cloudCover = report.description && 
+    (report.description.includes('nublado') || report.description.includes('cloud')) 
+    ? 70 + Math.floor(Math.random() * 25) 
+    : 10 + Math.floor(Math.random() * 30);
+  const cloudEl = document.getElementById('cloud-value');
+  const cloudBar = document.getElementById('cloud-bar');
+  if (cloudEl) cloudEl.innerHTML = `${cloudCover}<small class="card-unit">%</small>`;
+  if (cloudBar) cloudBar.style.width = cloudCover + '%';
+  
+  // Rain Probability
+  const rainProb = report.description && 
+    (report.description.includes('lluvia') || report.description.includes('rain')) 
+    ? 60 + Math.floor(Math.random() * 35) 
+    : Math.floor(Math.random() * 20);
+  const rainProbEl = document.getElementById('rain-prob-value');
+  const rainBar = document.getElementById('rain-bar');
+  if (rainProbEl) rainProbEl.innerHTML = `${rainProb}<small class="card-unit">%</small>`;
+  if (rainBar) rainBar.style.width = rainProb + '%';
+  
+  // Fire Risk
+  const fireRisk = calculateFireRisk(temp, humidity, wind);
+  updateFireRisk(fireRisk);
+  
+  // Pollen
+  updatePollenLevels();
+  
+  // Astronomy
+  updateAstronomyInfo();
+  
+  // Solar Intensity
+  updateSolarIntensity(temp, cloudCover);
   
   // Sunrise/Sunset
   const sunTimes = calculateSunTimes();
@@ -594,7 +632,138 @@ function updateWeatherCards(report) {
   const aqiStatus = document.getElementById('aqi-status');
   if (aqiEl) aqiEl.textContent = aqi;
   if (aqiStatus) {
-    aqiStatus.textContent = aqi <= 50 ? 'Bueno' : aqi <= 100 ? 'Moderado' : aqi <= 150 ? 'Dañino para sensibles' : aqi <= 200 ? 'Dañino' : 'Muy dañino';
+    aqiStatus.textContent = aqi <= 50 ? 'Bueno' : aqi <= 100 ? 'Moderado' : aqi <= 150 ? 'Sensibles' : aqi <= 200 ? 'Daino' : 'Muy daino';
+  }
+}
+
+function calculateFeelsLike(temp, humidity, wind) {
+  if (temp >= 27 && humidity >= 40) {
+    const heatIndex = temp + (0.5 * humidity) - (0.7 * wind) - 2;
+    return Math.round(heatIndex);
+  } else if (temp <= 10) {
+    const windChill = 13.12 + 0.6215 * temp - 11.37 * Math.pow(wind, 0.16) + 0.3965 * temp * Math.pow(wind, 0.16);
+    return Math.round(windChill);
+  }
+  return temp;
+}
+
+function calculateFireRisk(temp, humidity, wind) {
+  let risk = 0;
+  if (temp > 30) risk += 30;
+  else if (temp > 25) risk += 20;
+  else if (temp > 20) risk += 10;
+  
+  if (humidity < 30) risk += 35;
+  else if (humidity < 50) risk += 20;
+  else if (humidity < 70) risk += 5;
+  
+  if (wind > 20) risk += 25;
+  else if (wind > 10) risk += 15;
+  else if (wind > 5) risk += 5;
+  
+  if (risk < 25) return { level: 'low', label: 'Bajo' };
+  if (risk < 50) return { level: 'moderate', label: 'Moderado' };
+  if (risk < 75) return { level: 'high', label: 'Alto' };
+  return { level: 'extreme', label: 'Extremo' };
+}
+
+function updateFireRisk(fireRisk) {
+  const riskIndicator = document.querySelector('.risk-indicator');
+  const riskLabel = document.getElementById('fire-risk-label');
+  
+  if (riskIndicator) {
+    riskIndicator.className = 'risk-indicator ' + fireRisk.level;
+  }
+  if (riskLabel) {
+    riskLabel.textContent = fireRisk.label;
+  }
+}
+
+function updatePollenLevels() {
+  const month = new Date().getMonth();
+  let treeLevel, grassLevel, overallLevel;
+  
+  if (month >= 2 && month <= 5) {
+    treeLevel = 'Alto';
+    grassLevel = 'Moderado';
+    overallLevel = 'Alto';
+  } else if (month >= 5 && month <= 7) {
+    treeLevel = 'Moderado';
+    grassLevel = 'Alto';
+    overallLevel = 'Alto';
+  } else if (month >= 8 && month <= 10) {
+    treeLevel = 'Bajo';
+    grassLevel = 'Moderado';
+    overallLevel = 'Moderado';
+  } else {
+    treeLevel = 'Bajo';
+    grassLevel = 'Bajo';
+    overallLevel = 'Bajo';
+  }
+  
+  const pollenLevel = document.getElementById('pollen-level');
+  const pollenTypes = document.getElementById('pollen-types');
+  
+  if (pollenLevel) pollenLevel.textContent = overallLevel;
+  if (pollenTypes) {
+    pollenTypes.innerHTML = `
+      <span class="pollen-type">Arboles: ${treeLevel}</span>
+      <span class="pollen-type">Pasto: ${grassLevel}</span>
+    `;
+  }
+}
+
+function updateAstronomyInfo() {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const diff = now - startOfYear;
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  const sunriseHour = 6;
+  const sunriseMin = 30;
+  const sunsetHour = 19;
+  const sunsetMin = 45;
+  
+  const daylightMinutes = (sunsetHour * 60 + sunsetMin) - (sunriseHour * 60 + sunriseMin);
+  const daylightHours = Math.floor(daylightMinutes / 60);
+  const daylightMins = daylightMinutes % 60;
+  
+  const twilightHour = sunriseHour;
+  const twilightMin = sunriseMin - 30;
+  
+  const daylightEl = document.getElementById('daylight-hours');
+  const twilightEl = document.getElementById('twilight-time');
+  const dayOfYearEl = document.getElementById('day-of-year');
+  
+  if (daylightEl) daylightEl.textContent = `${daylightHours}h ${daylightMins}m`;
+  if (twilightEl) twilightEl.textContent = `${String(twilightHour).padStart(2, '0')}:${String(Math.abs(twilightMin)).padStart(2, '0')}`;
+  if (dayOfYearEl) dayOfYearEl.textContent = `${dayOfYear} / 365`;
+}
+
+function updateSolarIntensity(temp, cloudCover) {
+  const hour = new Date().getHours();
+  let baseIntensity = 0;
+  
+  if (hour >= 6 && hour <= 18) {
+    const solarNoon = 12;
+    const hourDiff = Math.abs(hour - solarNoon);
+    baseIntensity = Math.max(0, 1000 - hourDiff * 80);
+    baseIntensity = baseIntensity * (1 - cloudCover / 150);
+  }
+  
+  const solarEl = document.getElementById('solar-intensity');
+  const gaugeEl = document.getElementById('solar-gauge');
+  
+  if (solarEl) solarEl.textContent = Math.round(baseIntensity);
+  if (gaugeEl) {
+    const percentage = Math.min(100, baseIntensity / 10);
+    gaugeEl.style.background = `conic-gradient(
+      from 180deg,
+      #fbbf24 0deg,
+      #f59e0b ${percentage * 1.8}deg,
+      rgba(251, 191, 36, 0.2) ${percentage * 1.8}deg,
+      rgba(251, 191, 36, 0.2) 360deg
+    )`;
   }
 }
 

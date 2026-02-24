@@ -13,8 +13,8 @@
 
   <title>Zeus Meteo - Tu Clima en Tiempo Real</title>
 
-  <link rel="stylesheet" href="weather-glass.css?v=28">
-  <link rel="stylesheet" href="mobile-fix.css?v=3">
+  <link rel="stylesheet" href="weather-glass.css?v=29">
+  <link rel="stylesheet" href="mobile-fix.css?v=4">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -226,6 +226,109 @@
           <div class="aqi-unhealthy-sensitive"></div>
           <div class="aqi-unhealthy"></div>
           <div class="aqi-very-unhealthy"></div>
+        </div>
+      </div>
+
+      <!-- Dew Point -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-temperature-low"></i>
+          <span>P. Rocio</span>
+        </div>
+        <div class="card-value" id="dew-value">--<small class="card-unit">°</small></div>
+      </div>
+
+      <!-- Feels Like -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-thermometer-half"></i>
+          <span>S. Termica</span>
+        </div>
+        <div class="card-value" id="feels-like-value">--<small class="card-unit">°</small></div>
+      </div>
+
+      <!-- Cloud Cover -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-cloud"></i>
+          <span>Nubosidad</span>
+        </div>
+        <div class="card-value" id="cloud-value">--<small class="card-unit">%</small></div>
+        <div class="progress-bar">
+          <div class="progress-fill clouds" id="cloud-bar" style="width: 50%;"></div>
+        </div>
+      </div>
+
+      <!-- Rain Probability -->
+      <div class="glass-card weather-card">
+        <div class="card-header">
+          <i class="fas fa-cloud-rain"></i>
+          <span>Lluvia</span>
+        </div>
+        <div class="card-value" id="rain-prob-value">--<small class="card-unit">%</small></div>
+        <div class="progress-bar">
+          <div class="progress-fill rain" id="rain-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Fire Risk -->
+      <div class="glass-card weather-card fire-card">
+        <div class="card-header">
+          <i class="fas fa-fire"></i>
+          <span>R. Incendio</span>
+        </div>
+        <div class="fire-risk-level" id="fire-risk-level">
+          <span class="risk-indicator low"></span>
+          <span class="risk-label" id="fire-risk-label">--</span>
+        </div>
+      </div>
+
+      <!-- Pollen -->
+      <div class="glass-card weather-card pollen-card">
+        <div class="card-header">
+          <i class="fas fa-seedling"></i>
+          <span>Polen</span>
+        </div>
+        <div class="pollen-level" id="pollen-level">--</div>
+        <div class="pollen-types" id="pollen-types">
+          <span class="pollen-type">Arboles: --</span>
+          <span class="pollen-type">Pasto: --</span>
+        </div>
+      </div>
+
+      <!-- Astronomy Card -->
+      <div class="glass-card weather-card astronomy-card">
+        <div class="card-header">
+          <i class="fas fa-star"></i>
+          <span>Astronomia</span>
+        </div>
+        <div class="astronomy-info">
+          <div class="astro-row">
+            <span class="astro-label">Horas de luz</span>
+            <span class="astro-value" id="daylight-hours">--h --m</span>
+          </div>
+          <div class="astro-row">
+            <span class="astro-label">Crepusculo</span>
+            <span class="astro-value" id="twilight-time">--:--</span>
+          </div>
+          <div class="astro-row">
+            <span class="astro-label">Dia del año</span>
+            <span class="astro-value" id="day-of-year">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solar Intensity -->
+      <div class="glass-card weather-card solar-card">
+        <div class="card-header">
+          <i class="fas fa-sun"></i>
+          <span>Int. Solar</span>
+        </div>
+        <div class="solar-gauge">
+          <div class="gauge-circle" id="solar-gauge">
+            <div class="gauge-value" id="solar-intensity">--</div>
+            <div class="gauge-unit">W/m²</div>
+          </div>
         </div>
       </div>
 

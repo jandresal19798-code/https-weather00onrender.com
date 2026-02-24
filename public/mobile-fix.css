@@ -247,6 +247,61 @@
     height: 4px !important;
   }
   
+  /* Fire Risk */
+  .fire-card .fire-risk-level {
+    gap: 0.5rem !important;
+  }
+  
+  .risk-indicator {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .risk-label {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Pollen */
+  .pollen-card .pollen-level {
+    font-size: 1.1rem !important;
+  }
+  
+  .pollen-type {
+    font-size: 0.6rem !important;
+  }
+  
+  /* Astronomy */
+  .astronomy-card .astronomy-info {
+    gap: 0.35rem !important;
+  }
+  
+  .astro-label {
+    font-size: 0.6rem !important;
+  }
+  
+  .astro-value {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Solar Intensity */
+  .gauge-circle {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .gauge-circle::before {
+    width: 45px !important;
+    height: 45px !important;
+  }
+  
+  .gauge-value {
+    font-size: 1rem !important;
+  }
+  
+  .gauge-unit {
+    font-size: 0.45rem !important;
+  }
+  
   /* Map Card - Full width */
   .map-card {
     grid-column: 1 / -1 !important;
